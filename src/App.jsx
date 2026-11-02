@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Briefcase, GraduationCap, Award, Layers, Code, Smartphone, 
+  Briefcase, GraduationCap, Layers, 
   PenTool, Globe, ExternalLink, Mail, Phone, MapPin, 
-  Plus, Trash2, Edit3, Save, Eye, Lock, Database, 
-  CheckCircle2, AlertCircle, BookOpen, User, Terminal, 
-  Copy, Check, Search, Filter, ArrowUpRight, Sparkles,
+  Plus, Trash2, Edit3, Eye, Lock, 
+  CheckCircle2, AlertCircle, User, 
+  Search, ArrowUpRight, Sparkles,
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
-  FolderGit2, FileText, Settings, RefreshCw, UploadCloud,
-  Sun, Moon, Bell, MessageSquare, Users, BarChart3, Clock, ShieldCheck, KeyRound,
-  Languages, Loader2, ChevronDown
+  FolderGit2, FileText, RefreshCw, UploadCloud,
+  Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown
 } from 'lucide-react';
+
+// ============================================================================
+// DEFAULT SUPABASE CREDENTIALS (DIRECT AUTO-CONNECT & AUTO-SEED)
+// ============================================================================
+const DEFAULT_SUPABASE_URL = 'https://juxhrebslwfcsidfppaa.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_7xCDMG1gLSTcnZbX0q-rPg_S6Jw8qF0';
 
 // ============================================================================
 // MULTI-LANGUAGE DICTIONARY & AI AUTO-TRANSLATION ENGINE
@@ -24,7 +29,7 @@ const SUPPORTED_LANGUAGES = [
 
 const UI_TRANSLATIONS = {
   id: {
-    navAbout: "Tentang",
+    navAbout: "Keahlian",
     navResume: "Resume",
     navWorks: "Karya",
     navBlog: "Blog",
@@ -32,7 +37,6 @@ const UI_TRANSLATIONS = {
     dayMode: "Mode Siang",
     nightMode: "Mode Malam",
     hireMe: "Hire Me",
-    heroBadge: "Portfolio Resmi • Siap Berkolaborasi",
     heroGreeting: "Halo, Saya",
     exploreWorks: "Jelajahi Karya",
     contactWa: "Hubungi via WhatsApp",
@@ -45,7 +49,6 @@ const UI_TRANSLATIONS = {
     worksTitle: "Karya & Proyek",
     searchPlaceholder: "Cari karya atau tools...",
     allCategory: "Semua",
-    clickPreview: "Klik untuk lihat preview",
     projectDetail: "Detail Proyek",
     visitLink: "Kunjungi Link",
     resumeBadge: "RESUME & REKAM JEJAK",
@@ -92,7 +95,7 @@ const UI_TRANSLATIONS = {
     ]
   },
   en: {
-    navAbout: "About",
+    navAbout: "Expertise",
     navResume: "Resume",
     navWorks: "Works",
     navBlog: "Blog",
@@ -100,7 +103,6 @@ const UI_TRANSLATIONS = {
     dayMode: "Light Mode",
     nightMode: "Dark Mode",
     hireMe: "Hire Me",
-    heroBadge: "Official Portfolio • Open for Collaboration",
     heroGreeting: "Hello, I am",
     exploreWorks: "Explore Works",
     contactWa: "Contact via WhatsApp",
@@ -113,7 +115,6 @@ const UI_TRANSLATIONS = {
     worksTitle: "Featured Works & Projects",
     searchPlaceholder: "Search works or tools...",
     allCategory: "All",
-    clickPreview: "Click to view preview",
     projectDetail: "Project Details",
     visitLink: "Visit Link",
     resumeBadge: "RESUME & TRACK RECORD",
@@ -160,7 +161,7 @@ const UI_TRANSLATIONS = {
     ]
   },
   ja: {
-    navAbout: "概要",
+    navAbout: "専門スキル",
     navResume: "経歴",
     navWorks: "実績",
     navBlog: "ブログ",
@@ -168,7 +169,6 @@ const UI_TRANSLATIONS = {
     dayMode: "ライト",
     nightMode: "ダーク",
     hireMe: "依頼する",
-    heroBadge: "公式ポートフォリオ • コラボレーション受付中",
     heroGreeting: "こんにちは、私は",
     exploreWorks: "作品を見る",
     contactWa: "WhatsAppで連絡",
@@ -181,7 +181,6 @@ const UI_TRANSLATIONS = {
     worksTitle: "制作実績・プロジェクト",
     searchPlaceholder: "作品やツールを検索...",
     allCategory: "すべて",
-    clickPreview: "クリックしてプレビュー",
     projectDetail: "プロジェクト詳細",
     visitLink: "リンクを開く",
     resumeBadge: "履歴書・実績",
@@ -228,7 +227,7 @@ const UI_TRANSLATIONS = {
     ]
   },
   ar: {
-    navAbout: "نبذة عني",
+    navAbout: "الخبرات",
     navResume: "السيرة الذاتية",
     navWorks: "أعمالي",
     navBlog: "المدونة",
@@ -236,7 +235,6 @@ const UI_TRANSLATIONS = {
     dayMode: "الوضع النهاري",
     nightMode: "الوضع الليلي",
     hireMe: "وظفني",
-    heroBadge: "ملف الأعمال الرسمي • متاح للتعاون",
     heroGreeting: "مرحباً، أنا",
     exploreWorks: "استكشف أعمالي",
     contactWa: "تواصل عبر واتساب",
@@ -249,7 +247,6 @@ const UI_TRANSLATIONS = {
     worksTitle: "المشاريع والأعمال الإبداعية",
     searchPlaceholder: "ابحث في الأعمال أو الأدوات...",
     allCategory: "الكل",
-    clickPreview: "انقر للمعاينة",
     projectDetail: "تفاصيل المشروع",
     visitLink: "زيارة الرابط",
     resumeBadge: "السيرة الذاتية والخبرات",
@@ -299,17 +296,15 @@ const UI_TRANSLATIONS = {
 
 // Automatic Multi-Language Translator (Uses Gemini API + Public Translation API fallback)
 async function autoTranslateFields(fieldsObject) {
-  // Mencoba mengambil API Key dari Environment Variable Vercel jika tersedia
   let apiKey = "";
   try {
     apiKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || "";
   } catch (e) {}
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const prompt = `Translate the following Indonesian portfolio JSON fields into English (en), Japanese (ja), and Arabic (ar). Keep brand names, place names (like Wonosunyo, Wonokitri, Pasopati, Yudharta, Prigen, Prakarsa, Drakuy), and technical terms natural and professional. Return ONLY valid JSON with keys "en", "ja", and "ar" containing the exact same field keys as the input:\n${JSON.stringify(fieldsObject)}`;
 
-  // 1. Try Gemini Structured JSON Translation first (Jika API Key Vercel ada)
   if (apiKey) {
     try {
       const response = await fetch(geminiUrl, {
@@ -328,12 +323,9 @@ async function autoTranslateFields(fieldsObject) {
           if (parsed.en) return parsed;
         }
       }
-    } catch (e) {
-      // Fallback to public translation endpoint below if offline or outside environment
-    }
+    } catch (e) {}
   }
 
-  // 2. Fallback: Free Google Translate GTX endpoint so it also works standalone on Vercel without API keys
   const targetLangs = ['en', 'ja', 'ar'];
   const translations = { en: {}, ja: {}, ar: {} };
 
@@ -832,64 +824,6 @@ const INITIAL_BLOGS = [
   }
 ];
 
-const SUPABASE_SQL_SCHEMA = `-- ============================================================================
--- SUPABASE SQL SCHEMA UNTUK LANDINGPAGE.HTML & DASHBOARD.HTML (MULTI-LANGUAGE)
--- Jalankan script ini di Supabase Dashboard -> SQL Editor -> New Query
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS public.portfolio_profile (
-  id INT PRIMARY KEY DEFAULT 1,
-  data JSONB NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.portfolio_projects (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  category TEXT NOT NULL,
-  subtitle TEXT,
-  description TEXT,
-  tools JSONB DEFAULT '[]'::jsonb,
-  link TEXT,
-  image TEXT,
-  featured BOOLEAN DEFAULT false,
-  accent_color TEXT DEFAULT 'from-indigo-600 to-violet-600',
-  year TEXT DEFAULT '2024',
-  translations JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.portfolio_blogs (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  slug TEXT,
-  category TEXT,
-  date TEXT,
-  read_time TEXT,
-  excerpt TEXT,
-  content TEXT,
-  translations JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.portfolio_resume (
-  id INT PRIMARY KEY DEFAULT 1,
-  education JSONB NOT NULL,
-  experience JSONB NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-ALTER TABLE public.portfolio_profile ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.portfolio_projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.portfolio_blogs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.portfolio_resume ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public Access Profile" ON public.portfolio_profile FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public Access Projects" ON public.portfolio_projects FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public Access Blogs" ON public.portfolio_blogs FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public Access Resume" ON public.portfolio_resume FOR ALL USING (true) WITH CHECK (true);
-`;
-
 // ============================================================================
 // MAIN APPLICATION COMPONENT
 // ============================================================================
@@ -913,8 +847,7 @@ export default function App() {
     return item.translations?.[lang]?.[field] || item.translations?.en?.[field] || item[field];
   };
 
-  // 2. Multi-page Route Simulation ('landingpage.html' | 'dashboard.html')
-  // Auto-detects URL path or query when deployed to Vercel (/dashboard.html or /admin)
+  // 2. Multi-page Route ('landingpage.html' | 'dashboard.html')
   const [currentRoute, setCurrentRoute] = useState(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.toLowerCase();
@@ -929,7 +862,7 @@ export default function App() {
 
   // 3. Authentication State for dashboard.html
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminCredentials, setAdminCredentials] = useState({
+  const [adminCredentials] = useState({
     username: 'aldi',
     password: 'password123'
   });
@@ -955,10 +888,8 @@ export default function App() {
   const [projects, setProjects] = useState(INITIAL_PROJECTS);
   const [blogs, setBlogs] = useState(INITIAL_BLOGS);
 
-  // 5. Eduplex CMS Navigation State
-  const [cmsMenu, setCmsMenu] = useState('overview'); // 'overview' | 'projects' | 'blogs' | 'resume' | 'profile' | 'supabase' | 'guide'
-  const [cmsSearch, setCmsSearch] = useState('');
-  const [cmsSidebarOpen, setCmsSidebarOpen] = useState(false);
+  // 5. Eduplex CMS Navigation State (Final Version without Supabase DB & Vercel Guide tabs)
+  const [cmsMenu, setCmsMenu] = useState('overview'); // 'overview' | 'projects' | 'blogs' | 'resume' | 'profile'
 
   // 6. Landing Page Filter & Modal States
   const [selectedCategory, setSelectedCategory] = useState('Semua');
@@ -966,25 +897,23 @@ export default function App() {
   const [activeProjectModal, setActiveProjectModal] = useState(null);
   const [activeBlogModal, setActiveBlogModal] = useState(null);
 
-  // 7. Supabase Connection State (Auto-loads from Vercel Environment Variables if present)
+  // 7. Supabase Connection State (Pre-configured with User's URL & Publishable Key)
   const [supabaseUrl, setSupabaseUrl] = useState(() => {
     try {
-      return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || 'https://juxhrebslwfcsidfppaa.supabase.co';
+      return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || DEFAULT_SUPABASE_URL;
     } catch {
-      return 'https://juxhrebslwfcsidfppaa.supabase.co';
+      return DEFAULT_SUPABASE_URL;
     }
   });
   const [supabaseKey, setSupabaseKey] = useState(() => {
     try {
-      return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || '';
+      return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || DEFAULT_SUPABASE_KEY;
     } catch {
-      return '';
+      return DEFAULT_SUPABASE_KEY;
     }
   });
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
-  const [copiedSql, setCopiedSql] = useState(false);
-  const [copiedFileKey, setCopiedFileKey] = useState('');
 
   // 8. CMS Form States
   const [editingProject, setEditingProject] = useState(null);
@@ -999,23 +928,15 @@ export default function App() {
   });
 
   // 9. Resume (Experience & Education) CMS Form States
-  const [resumeSubTab, setResumeSubTab] = useState('experience'); // 'experience' | 'education'
+  const [resumeSubTab, setResumeSubTab] = useState('experience');
   const [editingExp, setEditingExp] = useState(null);
   const [expForm, setExpForm] = useState({
-    role: '',
-    company: '',
-    type: 'Penuh Waktu',
-    period: '2026',
-    description: ''
+    role: '', company: '', type: 'Penuh Waktu', period: '2026', description: ''
   });
 
   const [editingEdu, setEditingEdu] = useState(null);
   const [eduForm, setEduForm] = useState({
-    type: 'Formal',
-    institution: '',
-    major: '',
-    period: '2026',
-    description: ''
+    type: 'Formal', institution: '', major: '', period: '2026', description: ''
   });
 
   const [toast, setToast] = useState(null);
@@ -1049,7 +970,7 @@ export default function App() {
   };
 
   // ============================================================================
-  // SUPABASE REST API INTEGRATION
+  // SUPABASE AUTO-CONNECT, AUTO-SEED & REAL-TIME SYNC ENGINE
   // ============================================================================
   const cleanUrl = (url) => {
     if (!url) return '';
@@ -1059,20 +980,82 @@ export default function App() {
       .replace(/\/+$/, '');
   };
 
-  const fetchFromSupabase = async (url = supabaseUrl, key = supabaseKey) => {
-    if (!url || !key) {
-      showToast("Masukkan Supabase URL dan Publishable/Anon Key terlebih dahulu", "error");
-      return;
+  const getSupabaseHeaders = (key = supabaseKey, preferMerge = false) => {
+    const cleanKey = (key || '').trim();
+    const headers = {
+      'apikey': cleanKey,
+      'Authorization': `Bearer ${cleanKey}`,
+      'Content-Type': 'application/json'
+    };
+    if (preferMerge) {
+      headers['Prefer'] = 'resolution=merge-duplicates';
     }
-    setSyncStatus({ type: 'loading', message: 'Mengambil data dari Supabase...' });
+    return headers;
+  };
+
+  // Push all state to Supabase (Used for initial seed or manual full sync)
+  const pushAllToSupabase = async (
+    customProf = profile,
+    customProj = projects,
+    customBlogs = blogs,
+    customEdu = education,
+    customExp = experience,
+    silent = false
+  ) => {
+    if (!supabaseUrl || !supabaseKey) return;
+    if (!silent) setSyncStatus({ type: 'loading', message: 'Menyinkronkan data ke Cloud Supabase...' });
+    try {
+      const base = cleanUrl(supabaseUrl);
+      const headers = getSupabaseHeaders(supabaseKey, true);
+
+      const profReq = await fetch(`${base}/rest/v1/portfolio_profile`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ id: 1, data: customProf, updated_at: new Date().toISOString() })
+      });
+      if (!profReq.ok) throw new Error("Pastikan tabel SQL sudah dibuat di Supabase SQL Editor.");
+
+      const formattedProjects = customProj.map(p => ({
+        id: p.id, title: p.title, category: p.category, subtitle: p.subtitle,
+        description: p.description, tools: p.tools, link: p.link,
+        image: p.image || '',
+        featured: p.featured, accent_color: p.accentColor, year: p.year,
+        translations: p.translations || {}
+      }));
+      await fetch(`${base}/rest/v1/portfolio_projects`, {
+        method: 'POST', headers, body: JSON.stringify(formattedProjects)
+      });
+
+      const formattedBlogs = customBlogs.map(b => ({
+        id: b.id, title: b.title, slug: b.slug, category: b.category,
+        date: b.date, read_time: b.readTime, excerpt: b.excerpt, content: b.content,
+        translations: b.translations || {}
+      }));
+      await fetch(`${base}/rest/v1/portfolio_blogs`, {
+        method: 'POST', headers, body: JSON.stringify(formattedBlogs)
+      });
+
+      await fetch(`${base}/rest/v1/portfolio_resume`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ id: 1, education: customEdu, experience: customExp, updated_at: new Date().toISOString() })
+      });
+
+      setIsSupabaseConnected(true);
+      setSyncStatus({ type: 'success', message: 'Cloud Supabase Terhubung & Tersinkronisasi!' });
+      if (!silent) showToast("Berhasil sinkronisasi penuh ke Cloud Supabase!");
+    } catch (err) {
+      setSyncStatus({ type: 'error', message: err.message });
+      if (!silent) showToast(err.message, "error");
+    }
+  };
+
+  // Fetch data on startup; if database tables are empty, auto-seed them automatically!
+  const fetchFromSupabase = async (url = supabaseUrl, key = supabaseKey) => {
+    if (!url || !key) return;
+    setSyncStatus({ type: 'loading', message: 'Menghubungkan ke Cloud Supabase...' });
     try {
       const base = cleanUrl(url);
-      const cleanKey = key.trim();
-      const headers = {
-        'apikey': cleanKey,
-        'Authorization': `Bearer ${cleanKey}`,
-        'Content-Type': 'application/json'
-      };
+      const headers = getSupabaseHeaders(key, false);
 
       const [profRes, projRes, blogRes, resRes] = await Promise.all([
         fetch(`${base}/rest/v1/portfolio_profile?id=eq.1&select=*`, { headers }),
@@ -1081,12 +1064,24 @@ export default function App() {
         fetch(`${base}/rest/v1/portfolio_resume?id=eq.1&select=*`, { headers })
       ]);
 
-      if (!profRes.ok) throw new Error("Pastikan tabel SQL sudah dibuat di Supabase SQL Editor.");
+      if (!profRes.ok) throw new Error("Tabel belum ada di Supabase.");
 
       const profData = await profRes.json();
       const projData = await projRes.json();
       const blogData = await blogRes.json();
       const resData = await resRes.json();
+
+      // AUTO-SEED: Jika tabel di Supabase masih kosong, otomatis isi dengan data PDF Akhmad Aldi
+      if (
+        (!profData || profData.length === 0) &&
+        (!projData || projData.length === 0) &&
+        (!blogData || blogData.length === 0)
+      ) {
+        await pushAllToSupabase(INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_EDUCATION, INITIAL_EXPERIENCE, true);
+        setIsSupabaseConnected(true);
+        setSyncStatus({ type: 'success', message: 'Database baru terdeteksi — Data awal berhasil di-seed otomatis ke Supabase!' });
+        return;
+      }
 
       if (profData?.length > 0 && profData[0].data) setProfile(profData[0].data);
       if (projData?.length > 0) {
@@ -1112,71 +1107,18 @@ export default function App() {
       }
 
       setIsSupabaseConnected(true);
-      setSyncStatus({ type: 'success', message: 'Terhubung! Data berhasil dimuat dari Supabase.' });
-      showToast("Data berhasil disinkronkan dari Supabase!");
+      setSyncStatus({ type: 'success', message: 'Terhubung! Data dimuat langsung dari Supabase.' });
     } catch (err) {
-      setSyncStatus({ type: 'error', message: err.message || 'Gagal terhubung ke Supabase.' });
-      showToast(err.message || "Gagal memuat dari Supabase", "error");
+      setIsSupabaseConnected(false);
+      setSyncStatus({ type: 'error', message: err.message || 'Belum terhubung ke tabel Supabase.' });
     }
   };
 
-  const pushAllToSupabase = async () => {
-    if (!supabaseUrl || !supabaseKey) {
-      showToast("Masukkan Publishable Key Supabase terlebih dahulu di menu Supabase DB.", "error");
-      setCmsMenu('supabase');
-      return;
+  useEffect(() => {
+    if (supabaseUrl && supabaseKey) {
+      fetchFromSupabase(supabaseUrl, supabaseKey);
     }
-    setSyncStatus({ type: 'loading', message: 'Mengunggah seluruh data ke Supabase...' });
-    try {
-      const base = cleanUrl(supabaseUrl);
-      const cleanKey = supabaseKey.trim();
-      const headers = {
-        'apikey': cleanKey,
-        'Authorization': `Bearer ${cleanKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
-      };
-
-      const profReq = await fetch(`${base}/rest/v1/portfolio_profile`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ id: 1, data: profile, updated_at: new Date().toISOString() })
-      });
-      if (!profReq.ok) throw new Error("Gagal menyimpan profil. Pastikan script SQL sudah dijalankan.");
-
-      const formattedProjects = projects.map(p => ({
-        id: p.id, title: p.title, category: p.category, subtitle: p.subtitle,
-        description: p.description, tools: p.tools, link: p.link,
-        image: p.image || '',
-        featured: p.featured, accent_color: p.accentColor, year: p.year,
-        translations: p.translations || {}
-      }));
-      await fetch(`${base}/rest/v1/portfolio_projects`, {
-        method: 'POST', headers, body: JSON.stringify(formattedProjects)
-      });
-
-      const formattedBlogs = blogs.map(b => ({
-        id: b.id, title: b.title, slug: b.slug, category: b.category,
-        date: b.date, read_time: b.readTime, excerpt: b.excerpt, content: b.content,
-        translations: b.translations || {}
-      }));
-      await fetch(`${base}/rest/v1/portfolio_blogs`, {
-        method: 'POST', headers, body: JSON.stringify(formattedBlogs)
-      });
-
-      await fetch(`${base}/rest/v1/portfolio_resume`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ id: 1, education, experience, updated_at: new Date().toISOString() })
-      });
-
-      setIsSupabaseConnected(true);
-      setSyncStatus({ type: 'success', message: 'Seluruh data portofolio berhasil disimpan ke database Supabase!' });
-      showToast("Berhasil push seluruh data ke Supabase!");
-    } catch (err) {
-      setSyncStatus({ type: 'error', message: err.message });
-      showToast(err.message, "error");
-    }
-  };
+  }, []);
 
   // Filtered Projects for Landing Page
   const categories = ['Semua', 'Brand Strategy', 'Logo Design & Identity', 'Social Media Management', 'UI/UX Design'];
@@ -1193,7 +1135,7 @@ export default function App() {
   }, [projects, selectedCategory, searchQuery, lang]);
 
   // ============================================================================
-  // CMS CRUD HANDLERS (WITH AUTOMATIC MULTI-LANGUAGE TRANSLATION)
+  // CMS CRUD HANDLERS (WITH REAL-TIME SUPABASE SYNC & AUTO-TRANSLATE)
   // ============================================================================
   const handleSaveProject = async (e) => {
     e.preventDefault();
@@ -1216,23 +1158,43 @@ export default function App() {
       setIsTranslating(false);
     }
 
-    if (editingProject) {
-      setProjects(prev => prev.map(p => p.id === editingProject.id ? {
-        ...p, ...projectForm, tools: toolsArray, translations: generatedTranslations
-      } : p));
-      showToast("Karya & terjemahan multi-bahasa berhasil diperbarui!");
-    } else {
-      const newProj = {
-        ...projectForm,
-        id: `proj-${Date.now()}`,
-        tools: toolsArray,
-        rate: '5.0',
-        translations: generatedTranslations
-      };
-      setProjects(prev => [newProj, ...prev]);
-      showToast("Karya baru berhasil ditambahkan & diterjemahkan ke 3 bahasa!");
+    const savedItem = editingProject
+      ? { ...editingProject, ...projectForm, tools: toolsArray, translations: generatedTranslations }
+      : { ...projectForm, id: `proj-${Date.now()}`, tools: toolsArray, rate: '5.0', translations: generatedTranslations };
+
+    const nextProjects = editingProject
+      ? projects.map(p => p.id === editingProject.id ? savedItem : p)
+      : [savedItem, ...projects];
+
+    setProjects(nextProjects);
+
+    // Real-time upsert to Supabase
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const base = cleanUrl(supabaseUrl);
+        await fetch(`${base}/rest/v1/portfolio_projects`, {
+          method: 'POST',
+          headers: getSupabaseHeaders(supabaseKey, true),
+          body: JSON.stringify({
+            id: savedItem.id,
+            title: savedItem.title,
+            category: savedItem.category,
+            subtitle: savedItem.subtitle,
+            description: savedItem.description,
+            tools: savedItem.tools,
+            link: savedItem.link,
+            image: savedItem.image || '',
+            featured: savedItem.featured,
+            accent_color: savedItem.accentColor,
+            year: savedItem.year,
+            translations: savedItem.translations || {}
+          })
+        });
+        setIsSupabaseConnected(true);
+      } catch (e) {}
     }
 
+    showToast(editingProject ? "Karya berhasil diperbarui & disinkronkan ke Supabase!" : "Karya baru ditambahkan & tersimpan di Supabase!");
     setEditingProject(null);
     setProjectForm({
       title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
@@ -1250,20 +1212,18 @@ export default function App() {
     setCmsMenu('projects');
   };
 
-  const handleImageFileUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProjectForm(prev => ({ ...prev, image: reader.result }));
-      showToast("Gambar preview berhasil dimuat!");
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDeleteProject = (id) => {
+  const handleDeleteProject = async (id) => {
     setProjects(prev => prev.filter(p => p.id !== id));
-    showToast("Karya dihapus dari daftar.", "info");
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const base = cleanUrl(supabaseUrl);
+        await fetch(`${base}/rest/v1/portfolio_projects?id=eq.${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          headers: getSupabaseHeaders(supabaseKey, false)
+        });
+      } catch (e) {}
+    }
+    showToast("Karya dihapus dari daftar & Supabase.", "info");
   };
 
   const handleSaveBlog = async (e) => {
@@ -1284,22 +1244,40 @@ export default function App() {
       setIsTranslating(false);
     }
 
-    if (editingBlog) {
-      setBlogs(prev => prev.map(b => b.id === editingBlog.id ? {
-        ...b, ...blogForm, slug, translations: generatedTranslations
-      } : b));
-      showToast("Artikel blog & terjemahan multi-bahasa berhasil diperbarui!");
-    } else {
-      const newBlog = {
-        ...blogForm,
-        id: `blog-${Date.now()}`,
-        slug,
-        translations: generatedTranslations
-      };
-      setBlogs(prev => [newBlog, ...prev]);
-      showToast("Artikel blog diterbitkan & otomatis diterjemahkan ke berbagai bahasa!");
+    const savedBlog = editingBlog
+      ? { ...editingBlog, ...blogForm, slug, translations: generatedTranslations }
+      : { ...blogForm, id: `blog-${Date.now()}`, slug, translations: generatedTranslations };
+
+    const nextBlogs = editingBlog
+      ? blogs.map(b => b.id === editingBlog.id ? savedBlog : b)
+      : [savedBlog, ...blogs];
+
+    setBlogs(nextBlogs);
+
+    // Real-time upsert to Supabase
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const base = cleanUrl(supabaseUrl);
+        await fetch(`${base}/rest/v1/portfolio_blogs`, {
+          method: 'POST',
+          headers: getSupabaseHeaders(supabaseKey, true),
+          body: JSON.stringify({
+            id: savedBlog.id,
+            title: savedBlog.title,
+            slug: savedBlog.slug,
+            category: savedBlog.category,
+            date: savedBlog.date,
+            read_time: savedBlog.readTime,
+            excerpt: savedBlog.excerpt,
+            content: savedBlog.content,
+            translations: savedBlog.translations || {}
+          })
+        });
+        setIsSupabaseConnected(true);
+      } catch (e) {}
     }
 
+    showToast(editingBlog ? "Artikel blog diperbarui di Supabase!" : "Artikel blog diterbitkan & disimpan ke Supabase!");
     setEditingBlog(null);
     setBlogForm({
       title: '', category: 'Brand Strategy', date: new Date().toISOString().slice(0, 10),
@@ -1307,12 +1285,49 @@ export default function App() {
     });
   };
 
-  const handleDeleteBlog = (id) => {
-    setBlogs(prev => prev.filter(b => b.id !== id));
-    showToast("Artikel blog dihapus.", "info");
+  const handleEditBlog = (blog) => {
+    setEditingBlog(blog);
+    setBlogForm({
+      title: blog.title,
+      category: blog.category,
+      date: blog.date,
+      readTime: blog.readTime,
+      status: 'Completed',
+      excerpt: blog.excerpt,
+      content: blog.content
+    });
+    setCmsMenu('blogs');
   };
 
-  // Experience CRUD Handlers (With Auto-Translation)
+  const handleDeleteBlog = async (id) => {
+    setBlogs(prev => prev.filter(b => b.id !== id));
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const base = cleanUrl(supabaseUrl);
+        await fetch(`${base}/rest/v1/portfolio_blogs?id=eq.${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          headers: getSupabaseHeaders(supabaseKey, false)
+        });
+      } catch (e) {}
+    }
+    showToast("Artikel blog dihapus dari daftar & Supabase.", "info");
+  };
+
+  // Sync Resume helper
+  const syncResumeToSupabase = async (nextEdu, nextExp) => {
+    if (!supabaseUrl || !supabaseKey) return;
+    try {
+      const base = cleanUrl(supabaseUrl);
+      await fetch(`${base}/rest/v1/portfolio_resume`, {
+        method: 'POST',
+        headers: getSupabaseHeaders(supabaseKey, true),
+        body: JSON.stringify({ id: 1, education: nextEdu, experience: nextExp, updated_at: new Date().toISOString() })
+      });
+      setIsSupabaseConnected(true);
+    } catch (e) {}
+  };
+
+  // Experience CRUD Handlers
   const handleSaveExperience = async (e) => {
     e.preventDefault();
     if (!expForm.role.trim() || !expForm.company.trim()) return;
@@ -1328,29 +1343,16 @@ export default function App() {
       setIsTranslating(false);
     }
 
-    if (editingExp) {
-      setExperience(prev => prev.map(item => item.id === editingExp.id ? {
-        ...item, ...expForm, translations: generatedTranslations
-      } : item));
-      showToast("Data pengalaman & terjemahan diperbarui!");
-    } else {
-      const newExp = {
-        ...expForm,
-        id: `exp-${Date.now()}`,
-        translations: generatedTranslations
-      };
-      setExperience(prev => [newExp, ...prev]);
-      showToast("Pengalaman baru ditambahkan & diterjemahkan!");
-    }
+    const nextExp = editingExp
+      ? experience.map(item => item.id === editingExp.id ? { ...item, ...expForm, translations: generatedTranslations } : item)
+      : [{ ...expForm, id: `exp-${Date.now()}`, translations: generatedTranslations }, ...experience];
+
+    setExperience(nextExp);
+    await syncResumeToSupabase(education, nextExp);
+    showToast(editingExp ? "Data pengalaman diperbarui di Supabase!" : "Pengalaman baru ditambahkan ke Supabase!");
 
     setEditingExp(null);
-    setExpForm({
-      role: '',
-      company: '',
-      type: 'Penuh Waktu',
-      period: '2026',
-      description: ''
-    });
+    setExpForm({ role: '', company: '', type: 'Penuh Waktu', period: '2026', description: '' });
   };
 
   const handleEditExperience = (exp) => {
@@ -1364,8 +1366,10 @@ export default function App() {
     });
   };
 
-  const handleDeleteExperience = (id) => {
-    setExperience(prev => prev.filter(item => item.id !== id));
+  const handleDeleteExperience = async (id) => {
+    const nextExp = experience.filter(item => item.id !== id);
+    setExperience(nextExp);
+    await syncResumeToSupabase(education, nextExp);
     if (editingExp?.id === id) {
       setEditingExp(null);
       setExpForm({ role: '', company: '', type: 'Penuh Waktu', period: '2026', description: '' });
@@ -1373,41 +1377,21 @@ export default function App() {
     showToast("Riwayat pengalaman dihapus.", "info");
   };
 
-  const handleMoveExperience = (index, direction) => {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= experience.length) return;
-    const updated = [...experience];
-    const temp = updated[index];
-    updated[index] = updated[newIndex];
-    updated[newIndex] = temp;
-    setExperience(updated);
-  };
-
   // Education CRUD Handlers
-  const handleSaveEducation = (e) => {
+  const handleSaveEducation = async (e) => {
     e.preventDefault();
     if (!eduForm.institution.trim() || !eduForm.major.trim()) return;
 
-    if (editingEdu) {
-      setEducation(prev => prev.map(item => item.id === editingEdu.id ? { ...item, ...eduForm } : item));
-      showToast("Data pendidikan berhasil diperbarui!");
-    } else {
-      const newEdu = {
-        ...eduForm,
-        id: `edu-${Date.now()}`
-      };
-      setEducation(prev => [newEdu, ...prev]);
-      showToast("Riwayat pendidikan baru berhasil ditambahkan!");
-    }
+    const nextEdu = editingEdu
+      ? education.map(item => item.id === editingEdu.id ? { ...item, ...eduForm } : item)
+      : [{ ...eduForm, id: `edu-${Date.now()}` }, ...education];
+
+    setEducation(nextEdu);
+    await syncResumeToSupabase(nextEdu, experience);
+    showToast(editingEdu ? "Data pendidikan diperbarui!" : "Pendidikan baru ditambahkan!");
 
     setEditingEdu(null);
-    setEduForm({
-      type: 'Formal',
-      institution: '',
-      major: '',
-      period: '2026',
-      description: ''
-    });
+    setEduForm({ type: 'Formal', institution: '', major: '', period: '2026', description: '' });
   };
 
   const handleEditEducation = (edu) => {
@@ -1421,8 +1405,10 @@ export default function App() {
     });
   };
 
-  const handleDeleteEducation = (id) => {
-    setEducation(prev => prev.filter(item => item.id !== id));
+  const handleDeleteEducation = async (id) => {
+    const nextEdu = education.filter(item => item.id !== id);
+    setEducation(nextEdu);
+    await syncResumeToSupabase(nextEdu, experience);
     if (editingEdu?.id === id) {
       setEditingEdu(null);
       setEduForm({ type: 'Formal', institution: '', major: '', period: '2026', description: '' });
@@ -1430,55 +1416,26 @@ export default function App() {
     showToast("Riwayat pendidikan dihapus.", "info");
   };
 
-  const copySqlToClipboard = () => {
-    const textArea = document.createElement("textarea");
-    textArea.value = SUPABASE_SQL_SCHEMA;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-    setCopiedSql(true);
-    showToast("Script SQL berhasil disalin!");
-    setTimeout(() => setCopiedSql(false), 3000);
-  };
-
-  const copySnippet = (key, content, label) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = content;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-    setCopiedFileKey(key);
-    showToast(`${label} berhasil disalin!`);
-    setTimeout(() => setCopiedFileKey(''), 3000);
-  };
-
-  const downloadJsonBackup = () => {
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      profile,
-      projects,
-      blogs,
-      education,
-      experience
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'akhmad-aldi-portfolio-data.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("File JSON Backup berhasil diunduh!");
-  };
-
-  // Auto-fetch from Supabase on initial load if Environment Variables are configured
-  useEffect(() => {
-    if (supabaseUrl && supabaseKey) {
-      fetchFromSupabase(supabaseUrl, supabaseKey);
+  const handleSaveProfileInfo = async (e) => {
+    e.preventDefault();
+    if (autoTranslateEnabled) {
+      setIsTranslating(true);
+      const transBio = await autoTranslateFields({ bio: profile.bio });
+      setIsTranslating(false);
+      const updatedProfile = {
+        ...profile,
+        translations: {
+          en: { bio: transBio.en?.bio || profile.bio },
+          ja: { bio: transBio.ja?.bio || profile.bio },
+          ar: { bio: transBio.ar?.bio || profile.bio }
+        }
+      };
+      setProfile(updatedProfile);
+      await pushAllToSupabase(updatedProfile, projects, blogs, education, experience, false);
+    } else {
+      await pushAllToSupabase(profile, projects, blogs, education, experience, false);
     }
-  }, []);
+  };
 
   const getCategoryIcon = (cat) => {
     switch (cat) {
@@ -1494,9 +1451,44 @@ export default function App() {
     <div className={`min-h-screen font-sans transition-colors duration-300 ${
       isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
+      {/* CUSTOM KEYFRAME ANIMATIONS FOR SMOOTH MODERN EXPERIENCE */}
+      <style>{`
+        @keyframes floatSlow {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(18px, -18px) scale(1.06); }
+        }
+        @keyframes floatReverse {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(-18px, 16px) scale(1.05); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(22px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmerSweep {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-float-slow {
+          animation: floatSlow 9s ease-in-out infinite;
+        }
+        .animate-float-reverse {
+          animation: floatReverse 11s ease-in-out infinite;
+        }
+        .animate-fade-up {
+          animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .card-hover-3d {
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .card-hover-3d:hover {
+          transform: translateY(-8px) scale(1.01);
+        }
+      `}</style>
+
       {/* TOAST NOTIFICATION */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-slate-900/95 border-slate-700 text-white">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-slate-900/95 border-slate-700 text-white animate-fade-up">
           {toast.type === 'error' ? (
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
           ) : (
@@ -1506,7 +1498,7 @@ export default function App() {
         </div>
       )}
 
-      {/* SIMULATED BROWSER URL BAR (Otomatis tersembunyi saat sudah di-deploy ke domain asli/Vercel) */}
+      {/* SIMULATED BROWSER URL BAR (Hanya tampil di mode preview lokal, otomatis hilang di domain Vercel) */}
       {(typeof window === 'undefined' || !window.location.hostname.includes('vercel.app')) && (
         <div className="bg-[#111118] text-slate-300 border-b border-slate-800 px-3 sm:px-6 py-2 text-xs flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -1515,7 +1507,6 @@ export default function App() {
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
-            <span className="text-slate-500 hidden sm:inline">Simulasi File Vercel:</span>
             <div className="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800">
               <button
                 onClick={() => setCurrentRoute('landingpage.html')}
@@ -1543,37 +1534,32 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3 text-[11px] text-slate-400">
-            <span className="hidden md:inline">
-              Akses rahasia di halaman publik: klik ikon gembok di footer atau tekan <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-200">Alt + L</kbd>
+            <span className="inline-flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span>{isSupabaseConnected ? 'Supabase Connected' : 'Connecting Supabase...'}</span>
             </span>
           </div>
         </div>
       )}
 
       {/* =====================================================================
-          FILE 1: LANDINGPAGE.HTML (PUBLIC PORTFOLIO - NO CMS BUTTON IN NAVBAR)
+          FILE 1: LANDINGPAGE.HTML (PUBLIC PORTFOLIO)
          ===================================================================== */}
       {currentRoute === 'landingpage.html' && (
         <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className={isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}>
-          {/* TOP NAVBAR (Clean Navigation + Language Switcher + Day/Night Mode) */}
+          {/* TOP NAVBAR */}
           <header className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors ${
             isDark ? 'bg-slate-950/85 border-slate-800/80' : 'bg-white/85 border-slate-200'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
               {/* Brand Logo */}
               <a href="#" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 flex items-center justify-center text-slate-950 font-black text-lg sm:text-xl shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform shrink-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 flex items-center justify-center text-slate-950 font-black text-lg sm:text-xl shadow-lg shadow-orange-500/25 group-hover:rotate-6 group-hover:scale-105 transition-all shrink-0">
                   AA
                 </div>
                 <div className="min-w-0">
                   <div className={`font-bold text-base sm:text-lg tracking-tight flex items-center gap-2 whitespace-nowrap ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     <span className="truncate">{profile.name}</span>
-                    {isSupabaseConnected && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Live
-                      </span>
-                    )}
                   </div>
                   <p className={`text-xs hidden sm:block truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     Brand Strategist • Identity & Social Media
@@ -1581,18 +1567,18 @@ export default function App() {
                 </div>
               </a>
 
-              {/* Clean Navigation Links (Multi-language) */}
+              {/* Clean Navigation Links */}
               <nav className={`hidden lg:flex items-center gap-8 text-sm font-semibold ${
                 isDark ? 'text-slate-300' : 'text-slate-600'
               }`}>
                 <a href="#tentang" className="hover:text-orange-500 transition-colors">{t.navAbout}</a>
-                <a href="#pengalaman" className="hover:text-orange-500 transition-colors">{t.navResume}</a>
                 <a href="#karya" className="hover:text-orange-500 transition-colors">{t.navWorks}</a>
+                <a href="#pengalaman" className="hover:text-orange-500 transition-colors">{t.navResume}</a>
                 <a href="#blog" className="hover:text-orange-500 transition-colors">{t.navBlog}</a>
                 <a href="#kontak" className="hover:text-orange-500 transition-colors">{t.navContact}</a>
               </nav>
 
-              {/* Right Actions: Compact Language Dropdown, Day/Night Mode Toggle & Contact CTA */}
+              {/* Right Actions */}
               <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                 {/* Multi-Language Dropdown */}
                 <div className="relative">
@@ -1617,7 +1603,7 @@ export default function App() {
                         onClick={() => setLangDropdownOpen(false)}
                       />
                       <div
-                        className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl ${
+                        className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-fade-up ${
                           isDark
                             ? 'bg-slate-900/95 border-slate-800 text-slate-100'
                             : 'bg-white/95 border-slate-200 text-slate-800'
@@ -1684,7 +1670,7 @@ export default function App() {
                   href={`https://wa.me/${profile.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 shadow-lg shadow-orange-500/20 transition-all"
+                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 shadow-lg shadow-orange-500/20 hover:scale-105 transition-all"
                 >
                   <span>{t.hireMe}</span>
                   <ArrowUpRight className="w-4 h-4" />
@@ -1703,12 +1689,12 @@ export default function App() {
 
             {/* Mobile & Tablet Navigation Drawer */}
             {mobileMenuOpen && (
-              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-xl ${
+              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-xl animate-fade-up ${
                 isDark ? 'bg-slate-900/95 border-slate-800 text-slate-200' : 'bg-white/95 border-slate-200 text-slate-800'
               }`}>
                 <a href="#tentang" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navAbout}</a>
-                <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navResume}</a>
                 <a href="#karya" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navWorks}</a>
+                <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navResume}</a>
                 <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navBlog}</a>
                 <a href="#kontak" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navContact}</a>
                 <div className="pt-2">
@@ -1726,20 +1712,15 @@ export default function App() {
             )}
           </header>
 
-          {/* HERO SECTION */}
-          <section className="relative overflow-hidden pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-20 lg:pb-32">
-            <div className="absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+          {/* HERO SECTION (Tanpa badge 'Portfolio Resmi • Siap Berkolaborasi' sesuai permintaan) */}
+          <section className="relative overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
+            <div className="absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none animate-float-slow" />
+            <div className="absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none animate-float-reverse" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
               <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-                <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-left">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-500 text-[11px] sm:text-xs font-semibold tracking-wide uppercase">
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t.heroBadge}</span>
-                  </div>
-
-                  <h1 className={`text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.12] ${
+                <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-left animate-fade-up">
+                  <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${
                     isDark ? 'text-white' : 'text-slate-900'
                   }`}>
                     {t.heroGreeting} <br />
@@ -1752,13 +1733,13 @@ export default function App() {
                     {profile.roles.map((role, idx) => (
                       <span 
                         key={idx}
-                        className={`px-3 py-1.5 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-2 ${
+                        className={`px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-2 transition-transform hover:-translate-y-0.5 ${
                           isDark 
                             ? 'bg-slate-900/90 border-slate-800 text-slate-200' 
                             : 'bg-white border-slate-200 text-slate-700 shadow-sm'
                         }`}
                       >
-                        <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0 animate-pulse" />
                         {role}
                       </span>
                     ))}
@@ -1773,7 +1754,7 @@ export default function App() {
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
                     <a
                       href="#karya"
-                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm shadow-xl shadow-orange-500/20 flex items-center justify-center gap-2 transition-all"
+                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm shadow-xl shadow-orange-500/25 hover:scale-105 flex items-center justify-center gap-2 transition-all"
                     >
                       <span>{t.exploreWorks}</span>
                       <ArrowUpRight className="w-4 h-4" />
@@ -1782,7 +1763,7 @@ export default function App() {
                       href={`https://wa.me/${profile.whatsapp}`}
                       target="_blank"
                       rel="noreferrer"
-                      className={`px-6 py-3.5 rounded-xl border font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+                      className={`px-6 py-3.5 rounded-xl border font-semibold text-sm flex items-center justify-center gap-2 hover:scale-105 transition-all ${
                         isDark 
                           ? 'bg-slate-900 hover:bg-slate-800 text-white border-slate-700' 
                           : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-sm'
@@ -1795,9 +1776,9 @@ export default function App() {
                 </div>
 
                 {/* Right Profile Card */}
-                <div className="lg:col-span-5">
-                  <div className="relative mx-auto max-w-lg lg:max-w-md">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 via-amber-500 to-indigo-500 rounded-3xl blur-xl opacity-30" />
+                <div className="lg:col-span-5 animate-fade-up">
+                  <div className="relative mx-auto max-w-lg lg:max-w-md card-hover-3d">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 via-amber-500 to-indigo-500 rounded-3xl blur-xl opacity-35 animate-pulse" />
                     <div className={`relative rounded-3xl p-5 sm:p-8 shadow-2xl border space-y-5 sm:space-y-6 ${
                       isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                     }`}>
@@ -1826,7 +1807,7 @@ export default function App() {
                           { badge: "Sm", title: "Social Media Mgmt", sub: "Content & Visual Kit", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
                           { badge: "Fig", title: "Figma UI/UX", sub: "Visual & Prototyping", color: "text-purple-500 bg-purple-500/10 border-purple-500/20" }
                         ].map((tool, i) => (
-                          <div key={i} className={`p-3 rounded-2xl border flex items-center gap-3 ${
+                          <div key={i} className={`p-3 rounded-2xl border flex items-center gap-3 transition-transform hover:-translate-y-0.5 ${
                             isDark ? 'bg-slate-950/80 border-slate-800/80' : 'bg-slate-50 border-slate-200/80'
                           }`}>
                             <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-bold text-xs ${tool.color}`}>
@@ -1863,77 +1844,33 @@ export default function App() {
             </div>
           </section>
 
-          {/* TENTANG & EMPAT PILAR KEAHLIAN */}
+          {/* EMPAT PILAR KEAHLIAN (Tanpa deretan 3 kartu Email/WA/Alamat di atasnya sesuai permintaan) */}
           <section id="tentang" className={`py-16 border-y ${
             isDark ? 'border-slate-800/80 bg-slate-900/30' : 'border-slate-200 bg-white'
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className={`p-6 rounded-2xl border flex items-start gap-4 ${
-                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200'
-                }`}>
-                  <div className="p-3 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20">
-                    <Mail className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400 font-medium">{t.officialEmail}</div>
-                    <a href={`mailto:${profile.email}`} className="text-sm font-bold hover:text-orange-500 break-all mt-1 block">
-                      {profile.email}
-                    </a>
-                  </div>
-                </div>
-
-                <div className={`p-6 rounded-2xl border flex items-start gap-4 ${
-                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200'
-                }`}>
-                  <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                    <Phone className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400 font-medium">{t.phoneWa}</div>
-                    <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className="text-sm font-bold hover:text-emerald-500 mt-1 block">
-                      {profile.phone}
-                    </a>
-                  </div>
-                </div>
-
-                <div className={`p-6 rounded-2xl border flex items-start gap-4 ${
-                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200'
-                }`}>
-                  <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
-                    <MapPin className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-slate-400 font-medium">{t.addressTitle}</div>
-                    <p className="text-xs leading-relaxed mt-1 opacity-85">{profile.address}</p>
-                  </div>
-                </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+              <div className="text-center max-w-2xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-black">{t.pillarsTitle}</h2>
+                <p className="text-slate-400 text-sm mt-2">{t.pillarsDesc}</p>
               </div>
 
-              <div className="space-y-6">
-                <div className="text-center max-w-2xl mx-auto">
-                  <h2 className="text-2xl sm:text-3xl font-black">{t.pillarsTitle}</h2>
-                  <p className="text-slate-400 text-sm mt-2">{t.pillarsDesc}</p>
-                </div>
-
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                  {t.pillars.map((pillar, idx) => (
-                    <div key={idx} className={`p-6 rounded-2xl border hover:border-orange-500/50 transition-all group ${
-                      isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-                    }`}>
-                      <div className="text-3xl font-black text-slate-500/30 group-hover:text-orange-500/60 transition-colors">
-                        {pillar.num}
-                      </div>
-                      <h3 className="text-lg font-bold mt-2">{pillar.title}</h3>
-                      <p className="text-xs text-slate-400 leading-relaxed mt-2">{pillar.desc}</p>
-                      <div className={`mt-4 pt-3 border-t text-[11px] font-semibold text-orange-500 ${
-                        isDark ? 'border-slate-800' : 'border-slate-200'
-                      }`}>
-                        {pillar.tools}
-                      </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {t.pillars.map((pillar, idx) => (
+                  <div key={idx} className={`p-6 rounded-3xl border hover:border-orange-500/50 card-hover-3d group ${
+                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div className="text-3xl font-black text-slate-500/30 group-hover:text-orange-500 transition-colors">
+                      {pillar.num}
                     </div>
-                  ))}
-                </div>
+                    <h3 className="text-lg font-bold mt-2">{pillar.title}</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed mt-2">{pillar.desc}</p>
+                    <div className={`mt-4 pt-3 border-t text-[11px] font-semibold text-orange-500 ${
+                      isDark ? 'border-slate-800' : 'border-slate-200'
+                    }`}>
+                      {pillar.tools}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -1973,7 +1910,7 @@ export default function App() {
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
                       active
-                        ? 'bg-orange-500 text-slate-950 shadow-lg shadow-orange-500/25'
+                        ? 'bg-orange-500 text-slate-950 shadow-lg shadow-orange-500/25 scale-105'
                         : isDark
                           ? 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
                           : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
@@ -1990,7 +1927,7 @@ export default function App() {
               {filteredProjects.map((proj) => (
                 <div
                   key={proj.id}
-                  className={`group rounded-3xl border overflow-hidden transition-all duration-300 flex flex-col justify-between shadow-lg ${
+                  className={`group rounded-3xl border overflow-hidden card-hover-3d flex flex-col justify-between shadow-lg ${
                     isDark
                       ? 'bg-slate-900/90 border-slate-800/90 hover:border-orange-500/50'
                       : 'bg-white border-slate-200 hover:border-orange-500/50'
@@ -2104,7 +2041,7 @@ export default function App() {
                     {experience.map((exp) => (
                       <div key={exp.id} className="relative pl-10">
                         <div className="w-3.5 h-3.5 rounded-full bg-orange-500 border-4 border-slate-950 absolute left-[9px] top-5" />
-                        <div className={`p-5 rounded-2xl border transition-all ${
+                        <div className={`p-5 rounded-2xl border card-hover-3d ${
                           isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2134,7 +2071,7 @@ export default function App() {
 
                   <div className="space-y-4">
                     {education.map((edu) => (
-                      <div key={edu.id} className={`p-5 rounded-2xl border ${
+                      <div key={edu.id} className={`p-5 rounded-2xl border card-hover-3d ${
                         isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
                       }`}>
                         <div className="flex items-center justify-between">
@@ -2171,7 +2108,7 @@ export default function App() {
               {blogs.map((blog) => (
                 <article
                   key={blog.id}
-                  className={`rounded-3xl border p-6 flex flex-col justify-between transition-all ${
+                  className={`rounded-3xl border p-6 flex flex-col justify-between card-hover-3d ${
                     isDark ? 'bg-slate-900 border-slate-800 hover:border-orange-500/40' : 'bg-white border-slate-200 hover:border-orange-500/40 shadow-sm'
                   }`}
                 >
@@ -2207,11 +2144,12 @@ export default function App() {
             </div>
           </section>
 
-          {/* FOOTER */}
-          <footer id="kontak" className={`border-t py-14 ${
+          {/* FOOTER (Informasi Email Resmi, WhatsApp, dan Alamat Domisili diletakkan rapi di sini) */}
+          <footer id="kontak" className={`border-t py-16 ${
             isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-100'
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+              {/* CTA Banner */}
               <div className="rounded-3xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-6 sm:p-12 text-slate-950 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-2xl">
                 <div className="space-y-2 max-w-xl">
                   <span className="text-xs font-black uppercase tracking-widest bg-slate-950/10 px-3 py-1 rounded-full">
@@ -2226,14 +2164,14 @@ export default function App() {
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-3.5 rounded-xl bg-slate-950 text-white font-bold text-sm hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
+                    className="px-6 py-3.5 rounded-xl bg-slate-950 text-white font-bold text-sm hover:bg-slate-900 hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
                     <Phone className="w-4 h-4 text-orange-400" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`mailto:${profile.email}`}
-                    className="px-6 py-3.5 rounded-xl bg-white/90 text-slate-950 font-bold text-sm hover:bg-white transition-all flex items-center justify-center gap-2"
+                    className="px-6 py-3.5 rounded-xl bg-white/90 text-slate-950 font-bold text-sm hover:bg-white hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
                     <Mail className="w-4 h-4" />
                     <span>Email</span>
@@ -2241,11 +2179,52 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-                <div>© {new Date().getFullYear()} {profile.name}. Deployed on Vercel + Supabase.</div>
+              {/* Footer Contact Details Grid (Dipindahkan ke Footer sesuai permintaan) */}
+              <div className={`grid md:grid-cols-3 gap-6 pt-4 border-t ${
+                isDark ? 'border-slate-800/80' : 'border-slate-200'
+              }`}>
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20 shrink-0">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 font-medium">{t.officialEmail}</div>
+                    <a href={`mailto:${profile.email}`} className="text-sm font-bold hover:text-orange-500 break-all mt-0.5 block">
+                      {profile.email}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 font-medium">{t.phoneWa}</div>
+                    <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className="text-sm font-bold hover:text-emerald-500 mt-0.5 block">
+                      {profile.phone}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 font-medium">{t.addressTitle}</div>
+                    <p className="text-xs leading-relaxed mt-0.5 text-slate-400">{profile.address}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Copyright & Secret Admin Button */}
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs text-slate-400 ${
+                isDark ? 'border-slate-800/80' : 'border-slate-200'
+              }`}>
+                <div>© {new Date().getFullYear()} {profile.name}. All Rights Reserved.</div>
                 <div className="flex items-center gap-4">
                   <span>@{profile.socials.instagram}</span>
-                  {/* Tombol Rahasia Admin menuju dashboard.html */}
                   <button
                     onClick={() => setCurrentRoute('dashboard.html')}
                     title="Admin Access (dashboard.html)"
@@ -2261,7 +2240,7 @@ export default function App() {
       )}
 
       {/* =====================================================================
-          FILE 2: DASHBOARD.HTML (AUTHENTICATED EDUPLEX CMS PAGE)
+          FILE 2: DASHBOARD.HTML (FINAL CLEAN CMS WITHOUT SUPABASE/VERCEL TABS)
          ===================================================================== */}
       {currentRoute === 'dashboard.html' && (
         <>
@@ -2270,7 +2249,7 @@ export default function App() {
             <div className={`min-h-[calc(100vh-42px)] flex items-center justify-center p-4 ${
               isDark ? 'bg-[#12121A]' : 'bg-[#ECE9FE]'
             }`}>
-              <div className={`w-full max-w-md rounded-3xl p-8 shadow-2xl border space-y-6 ${
+              <div className={`w-full max-w-md rounded-3xl p-8 shadow-2xl border space-y-6 animate-fade-up ${
                 isDark ? 'bg-[#181824] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
                 <div className="flex items-center justify-between">
@@ -2334,33 +2313,35 @@ export default function App() {
                   </button>
                 </form>
 
-                <div className="p-3.5 rounded-2xl bg-slate-500/10 text-xs text-slate-400 flex items-center justify-between">
-                  <span>Default Login Demo:</span>
-                  {/* <code className="font-mono font-bold text-[#D4F34A] bg-slate-900 px-2.5 py-1 rounded-lg">
+                {/* <div className="p-3.5 rounded-2xl bg-slate-500/10 text-xs text-slate-400 flex items-center justify-between">
+                  <span>Default Login:</span>
+                  <code className="font-mono font-bold text-[#D4F34A] bg-slate-900 px-2.5 py-1 rounded-lg">
                     aldi / password123
-                  </code> */}
-                </div>
+                  </code>
+                </div> */}
               </div>
             </div>
           ) : (
-            /* AUTHENTICATED EDUPLEX CMS LAYOUT */
+            /* AUTHENTICATED EDUPLEX CMS LAYOUT (FINAL VERSION) */
             <div className={`min-h-[calc(100vh-42px)] p-2 sm:p-4 lg:p-6 transition-colors ${
               isDark ? 'bg-[#0F0F17]' : 'bg-[#DFD7F9]'
             }`}>
-              <div className={`max-w-[1440px] mx-auto rounded-[24px] sm:rounded-[34px] shadow-2xl border overflow-hidden flex flex-col lg:flex-row min-h-[860px] relative ${
+              <div className={`max-w-[1440px] mx-auto rounded-[24px] sm:rounded-[34px] shadow-2xl border overflow-hidden flex flex-col lg:flex-row min-h-[820px] relative ${
                 isDark ? 'bg-[#171723] border-slate-800/80 text-slate-100' : 'bg-[#F8F9FB] border-white text-slate-900'
               }`}>
-                {/* SIDEBAR */}
+                {/* SIDEBAR (Clean Final Menu: Dashboard, My Works, Blog Posts, Resume CV, Profile Info) */}
                 <aside className="w-full lg:w-64 bg-[#181824] text-white p-5 flex flex-col justify-between shrink-0">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#181824] font-black text-base">
+                        <div className="w-9 h-9 rounded-xl bg-[#D4F34A] flex items-center justify-center text-[#181824] font-black text-base">
                           <Sparkles className="w-5 h-5" />
                         </div>
                         <div>
                           <span className="font-extrabold text-lg tracking-tight">AldiCMS</span>
-                          <span className="block text-[10px] text-slate-400 font-mono">dashboard.html</span>
+                          <span className="block text-[10px] text-emerald-400 font-mono">
+                            {isSupabaseConnected ? '● Cloud Active' : '○ Local Mode'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -2371,9 +2352,7 @@ export default function App() {
                         { id: 'projects', label: 'My Works', icon: FolderGit2, badge: projects.length },
                         { id: 'blogs', label: 'Blog Posts', icon: FileText, badge: blogs.length },
                         { id: 'resume', label: 'Resume CV', icon: Briefcase },
-                        { id: 'profile', label: 'Profile Info', icon: User },
-                        { id: 'supabase', label: 'Supabase DB', icon: Database },
-                        { id: 'guide', label: 'Vercel Guide', icon: Terminal }
+                        { id: 'profile', label: 'Profile Info', icon: User }
                       ].map((item) => {
                         const Icon = item.icon;
                         const active = cmsMenu === item.id;
@@ -2431,7 +2410,7 @@ export default function App() {
                         Welcome back {profile.name.split(' ')[1] || profile.name} 👋
                       </h1>
                       <p className="text-xs text-slate-400">
-                        Kelola karya, artikel blog, resume, dan database Supabase secara real-time.
+                        Setiap perubahan karya, blog, dan resume otomatis tersimpan ke Cloud Supabase.
                       </p>
                     </div>
 
@@ -2445,41 +2424,99 @@ export default function App() {
                         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                       </button>
                       <button
-                        onClick={pushAllToSupabase}
-                        className="px-4 py-2.5 rounded-2xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs flex items-center gap-2 shadow"
+                        onClick={() => fetchFromSupabase()}
+                        title="Muat Ulang dari Cloud"
+                        className={`p-2.5 rounded-2xl border ${
+                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => pushAllToSupabase()}
+                        className="px-4 py-2.5 rounded-2xl bg-[#D4F34A] hover:bg-[#c8e93e] text-[#181824] font-extrabold text-xs flex items-center gap-2 shadow"
                       >
                         <UploadCloud className="w-4 h-4" />
-                        <span>Sync ke Supabase</span>
+                        <span>Sync Cloud</span>
                       </button>
                     </div>
                   </div>
 
+                  {syncStatus && (
+                    <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between gap-2 ${
+                      syncStatus.type === 'error'
+                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                        : syncStatus.type === 'success'
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                          : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        {syncStatus.type === 'loading' ? (
+                          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                        ) : syncStatus.type === 'error' ? (
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                        ) : (
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        )}
+                        <span>{syncStatus.message}</span>
+                      </div>
+                      <span className="text-[10px] font-mono opacity-75 hidden sm:inline">
+                        {cleanUrl(supabaseUrl)}
+                      </span>
+                    </div>
+                  )}
+
                   {/* TAB 1: OVERVIEW */}
                   {cmsMenu === 'overview' && (
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <div onClick={() => setCmsMenu('projects')} className={`p-5 rounded-3xl border cursor-pointer ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <div className="text-xs text-slate-400 font-bold">Total Karya Portofolio</div>
-                        <div className="text-3xl font-black mt-2 text-orange-500">{projects.length}</div>
-                        <div className="text-[11px] text-slate-400 mt-1">Klik untuk kelola karya →</div>
-                      </div>
-                      <div onClick={() => setCmsMenu('blogs')} className={`p-5 rounded-3xl border cursor-pointer ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <div className="text-xs text-slate-400 font-bold">Total Artikel Blog</div>
-                        <div className="text-3xl font-black mt-2 text-emerald-500">{blogs.length}</div>
-                        <div className="text-[11px] text-slate-400 mt-1">Klik untuk tulis artikel →</div>
-                      </div>
-                      <div onClick={() => setCmsMenu('supabase')} className={`p-5 rounded-3xl border cursor-pointer ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <div className="text-xs text-slate-400 font-bold">Status Cloud Supabase</div>
-                        <div className="text-lg font-black mt-2 text-[#D4F34A]">
-                          {isSupabaseConnected ? 'Terhubung (Live)' : 'Siap Dihubungkan'}
+                    <div className="space-y-6 animate-fade-up">
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                          <div className="text-xs text-slate-400 font-bold">Total Karya Portofolio</div>
+                          <div className="text-3xl font-black mt-2 text-orange-500">{projects.length}</div>
+                          <div className="text-[11px] text-slate-400 mt-1">Klik untuk kelola karya →</div>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-1">Klik untuk buka pengaturan DB →</div>
+                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                          <div className="text-xs text-slate-400 font-bold">Total Artikel Blog</div>
+                          <div className="text-3xl font-black mt-2 text-emerald-500">{blogs.length}</div>
+                          <div className="text-[11px] text-slate-400 mt-1">Klik untuk tulis artikel →</div>
+                        </div>
+                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                          <div className="text-xs text-slate-400 font-bold">Pengalaman & Pendidikan</div>
+                          <div className="text-3xl font-black mt-2 text-[#D4F34A]">
+                            {experience.length + education.length}
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-1">Klik untuk edit resume →</div>
+                        </div>
+                      </div>
+
+                      {/* Recent Works Preview in Dashboard */}
+                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-extrabold text-sm">Karya Terbaru</h3>
+                          <button onClick={() => setCmsMenu('projects')} className="text-xs font-bold text-orange-500 hover:underline">
+                             + Tambah Karya
+                          </button>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {projects.slice(0, 4).map((p) => (
+                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                              <div className="min-w-0">
+                                <div className="text-[11px] font-bold text-orange-500 truncate">{p.category}</div>
+                                <div className="text-xs font-bold truncate">{p.title}</div>
+                              </div>
+                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200 shrink-0">
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
 
                   {/* TAB 2: PROJECTS CRUD */}
                   {cmsMenu === 'projects' && (
-                    <div className="grid lg:grid-cols-12 gap-6">
+                    <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
                       <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
                         <h3 className="font-extrabold text-base">{editingProject ? 'Edit Karya' : 'Tambah Karya Baru'}</h3>
                         <input
@@ -2490,16 +2527,25 @@ export default function App() {
                           onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                         />
-                        <select
-                          value={projectForm.category}
-                          onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        >
-                          <option value="Brand Strategy">Brand Strategy</option>
-                          <option value="Logo Design & Identity">Logo Design & Identity</option>
-                          <option value="Social Media Management">Social Media Management</option>
-                          <option value="UI/UX Design">UI/UX Design</option>
-                        </select>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <select
+                            value={projectForm.category}
+                            onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          >
+                            <option value="Brand Strategy">Brand Strategy</option>
+                            <option value="Logo Design & Identity">Logo Design & Identity</option>
+                            <option value="Social Media Management">Social Media Management</option>
+                            <option value="UI/UX Design">UI/UX Design</option>
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Tahun (misal: 2026)"
+                            value={projectForm.year}
+                            onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
+                        </div>
                         <input
                           type="text"
                           placeholder="Subjudul Singkat"
@@ -2535,13 +2581,30 @@ export default function App() {
                           onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })}
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                         />
-                        <button
-                          type="submit"
-                          disabled={isTranslating}
-                          className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs"
-                        >
-                          {isTranslating ? 'Menerjemahkan...' : (editingProject ? 'Update Karya' : 'Simpan Karya & Auto-Translate')}
-                        </button>
+                        <div className="flex gap-2">
+                          {editingProject && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingProject(null);
+                                setProjectForm({
+                                  title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
+                                  tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
+                                });
+                              }}
+                              className="px-4 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs"
+                            >
+                              Batal
+                            </button>
+                          )}
+                          <button
+                            type="submit"
+                            disabled={isTranslating}
+                            className="flex-1 py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs"
+                          >
+                            {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingProject ? 'Update Karya' : 'Simpan Karya ke Cloud')}
+                          </button>
+                        </div>
                       </form>
 
                       <div className="lg:col-span-7 space-y-3">
@@ -2550,10 +2613,11 @@ export default function App() {
                             <div>
                               <div className="text-xs font-bold text-orange-500">{p.category} • {p.year}</div>
                               <div className="font-bold text-sm">{p.title}</div>
+                              <div className="text-xs text-slate-400 line-clamp-1">{p.subtitle}</div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700"><Edit3 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -2563,7 +2627,7 @@ export default function App() {
 
                   {/* TAB 3: BLOGS CRUD */}
                   {cmsMenu === 'blogs' && (
-                    <div className="grid lg:grid-cols-12 gap-6">
+                    <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
                       <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
                         <h3 className="font-extrabold text-base">{editingBlog ? 'Edit Artikel Blog' : 'Tulis Artikel Blog'}</h3>
                         <input
@@ -2574,6 +2638,25 @@ export default function App() {
                           onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                         />
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <select
+                            value={blogForm.category}
+                            onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          >
+                            <option value="Brand Strategy">Brand Strategy</option>
+                            <option value="Logo Design & Identity">Logo Design & Identity</option>
+                            <option value="Social Media Management">Social Media Management</option>
+                            <option value="UI/UX Design">UI/UX Design</option>
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Waktu Baca (5 Menit)"
+                            value={blogForm.readTime}
+                            onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
+                        </div>
                         <textarea
                           rows={2}
                           placeholder="Ringkasan (Excerpt)"
@@ -2589,7 +2672,7 @@ export default function App() {
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                         />
                         <button type="submit" disabled={isTranslating} className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
-                          {isTranslating ? 'Menerjemahkan...' : 'Terbitkan & Auto-Translate'}
+                          {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingBlog ? 'Update Artikel' : 'Terbitkan ke Cloud')}
                         </button>
                       </form>
                       <div className="lg:col-span-7 space-y-3">
@@ -2599,7 +2682,10 @@ export default function App() {
                               <div className="text-xs text-emerald-500 font-bold">{b.category} • {b.date}</div>
                               <div className="font-bold text-sm">{b.title}</div>
                             </div>
-                            <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -2608,358 +2694,209 @@ export default function App() {
 
                   {/* TAB 4: RESUME CV CRUD */}
                   {cmsMenu === 'resume' && (
-                    <div className="grid lg:grid-cols-12 gap-6">
-                      <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <h3 className="font-extrabold text-base">{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Posisi / Jabatan"
-                          value={expForm.role}
-                          onChange={(e) => setExpForm({ ...expForm, role: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                        <input
-                          type="text"
-                          required
-                          placeholder="Nama Instansi / Perusahaan"
-                          value={expForm.company}
-                          onChange={(e) => setExpForm({ ...expForm, company: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                        <input
-                          type="text"
-                          placeholder="Periode (contoh: 2022 - 2023)"
-                          value={expForm.period}
-                          onChange={(e) => setExpForm({ ...expForm, period: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                        <textarea
-                          rows={3}
-                          placeholder="Deskripsi Tugas"
-                          value={expForm.description}
-                          onChange={(e) => setExpForm({ ...expForm, description: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                        <button type="submit" className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
-                          Simpan Pengalaman
+                    <div className="space-y-4 animate-fade-up">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setResumeSubTab('experience')}
+                          className={`px-4 py-2 rounded-xl text-xs font-extrabold ${
+                            resumeSubTab === 'experience' ? 'bg-[#D4F34A] text-[#181824]' : 'bg-slate-800 text-slate-300'
+                          }`}
+                        >
+                          Pengalaman Kerja ({experience.length})
                         </button>
-                      </form>
-                      <div className="lg:col-span-7 space-y-3">
-                        {experience.map((exp) => (
-                          <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                            <div>
-                              <div className="text-xs text-orange-500 font-bold">{exp.period} • {exp.company}</div>
-                              <div className="font-bold text-sm">{exp.role}</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
-                            </div>
-                          </div>
-                        ))}
+                        <button
+                          onClick={() => setResumeSubTab('education')}
+                          className={`px-4 py-2 rounded-xl text-xs font-extrabold ${
+                            resumeSubTab === 'education' ? 'bg-[#D4F34A] text-[#181824]' : 'bg-slate-800 text-slate-300'
+                          }`}
+                        >
+                          Pendidikan ({education.length})
+                        </button>
                       </div>
+
+                      {resumeSubTab === 'experience' ? (
+                        <div className="grid lg:grid-cols-12 gap-6">
+                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                            <h3 className="font-extrabold text-base">{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
+                            <input
+                              type="text"
+                              required
+                              placeholder="Posisi / Jabatan"
+                              value={expForm.role}
+                              onChange={(e) => setExpForm({ ...expForm, role: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <input
+                              type="text"
+                              required
+                              placeholder="Nama Instansi / Perusahaan"
+                              value={expForm.company}
+                              onChange={(e) => setExpForm({ ...expForm, company: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <input
+                                type="text"
+                                placeholder="Jenis (Penuh Waktu / Magang)"
+                                value={expForm.type}
+                                onChange={(e) => setExpForm({ ...expForm, type: e.target.value })}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Periode (2022 - 2023)"
+                                value={expForm.period}
+                                onChange={(e) => setExpForm({ ...expForm, period: e.target.value })}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              />
+                            </div>
+                            <textarea
+                              rows={3}
+                              placeholder="Deskripsi Tugas"
+                              value={expForm.description}
+                              onChange={(e) => setExpForm({ ...expForm, description: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                              Simpan Pengalaman ke Cloud
+                            </button>
+                          </form>
+                          <div className="lg:col-span-7 space-y-3">
+                            {experience.map((exp) => (
+                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                                <div>
+                                  <div className="text-xs text-orange-500 font-bold">{exp.period} • {exp.company}</div>
+                                  <div className="font-bold text-sm">{exp.role}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid lg:grid-cols-12 gap-6">
+                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                            <h3 className="font-extrabold text-base">{editingEdu ? 'Edit Pendidikan' : 'Tambah Pendidikan'}</h3>
+                            <select
+                              value={eduForm.type}
+                              onChange={(e) => setEduForm({ ...eduForm, type: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            >
+                              <option value="Formal">Formal</option>
+                              <option value="Non-Formal">Non-Formal</option>
+                            </select>
+                            <input
+                              type="text"
+                              required
+                              placeholder="Nama Institusi / Kampus"
+                              value={eduForm.institution}
+                              onChange={(e) => setEduForm({ ...eduForm, institution: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <input
+                              type="text"
+                              required
+                              placeholder="Jurusan / Program"
+                              value={eduForm.major}
+                              onChange={(e) => setEduForm({ ...eduForm, major: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <input
+                              type="text"
+                              placeholder="Periode (2020 - 2024)"
+                              value={eduForm.period}
+                              onChange={(e) => setEduForm({ ...eduForm, period: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <textarea
+                              rows={3}
+                              placeholder="Deskripsi"
+                              value={eduForm.description}
+                              onChange={(e) => setEduForm({ ...eduForm, description: e.target.value })}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            />
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                              Simpan Pendidikan ke Cloud
+                            </button>
+                          </form>
+                          <div className="lg:col-span-7 space-y-3">
+                            {education.map((edu) => (
+                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                                <div>
+                                  <div className="text-xs text-indigo-400 font-bold">{edu.type} • {edu.period}</div>
+                                  <div className="font-bold text-sm">{edu.institution}</div>
+                                  <div className="text-xs text-slate-400">{edu.major}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => handleEditEducation(edu)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
-                    <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <h3 className="font-extrabold text-base">Profil & Kontak Utama</h3>
+                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <h3 className="font-extrabold text-base">Profil & Kontak Footer</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
-                        <input
-                          type="text"
-                          value={profile.name}
-                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                        <input
-                          type="email"
-                          value={profile.email}
-                          onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                      </div>
-                      <textarea
-                        rows={4}
-                        value={profile.bio}
-                        onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                      />
-                    </div>
-                  )}
-
-                  {/* TAB 6: SUPABASE DB */}
-                  {cmsMenu === 'supabase' && (
-                    <div className="space-y-6">
-                      <div className={`p-6 rounded-[28px] border space-y-5 ${
-                        isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-                      }`}>
-                        <h3 className="font-extrabold text-base flex items-center gap-2">
-                          <Database className="w-5 h-5 text-emerald-500" />
-                          <span>Konfigurasi Koneksi Supabase</span>
-                        </h3>
-
-                        {syncStatus && (
-                          <div className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 ${
-                            syncStatus.type === 'error'
-                              ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          }`}>
-                            <CheckCircle2 className="w-4 h-4 shrink-0" />
-                            <span>{syncStatus.message}</span>
-                          </div>
-                        )}
-
-                        <div className="grid sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-400 mb-1">Supabase Project / API URL</label>
-                            <input
-                              type="url"
-                              value={supabaseUrl}
-                              onChange={(e) => setSupabaseUrl(e.target.value)}
-                              placeholder="https://juxhrebslwfcsidfppaa.supabase.co"
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono ${
-                                isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                              }`}
-                            />
-                            <span className="text-[10px] text-emerald-500 mt-1 block">
-                              ✓ URL Supabase Anda sudah terisi otomatis (akhiran /rest/v1/ otomatis dirapikan).
-                            </span>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-400 mb-1">Publishable Key / Anon Key</label>
-                            <input
-                              type="text"
-                              value={supabaseKey}
-                              onChange={(e) => setSupabaseKey(e.target.value)}
-                              placeholder="sb_publishable_7xCDMG1gLSTcnZbX0q-rPg_..."
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono ${
-                                isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                              }`}
-                            />
-                            <span className="text-[10px] text-slate-400 mt-1 block">
-                              Tempelkan kode <code className="font-mono">sb_publishable_...</code> dari menu API Keys Supabase Anda.
-                            </span>
-                          </div>
-                        </div>
-
-                        {syncStatus && (
-                          <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center gap-2 ${
-                            syncStatus.type === 'error'
-                              ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
-                              : syncStatus.type === 'success'
-                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                                : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
-                          }`}>
-                            {syncStatus.type === 'loading' ? (
-                              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                            ) : syncStatus.type === 'error' ? (
-                              <AlertCircle className="w-4 h-4 shrink-0" />
-                            ) : (
-                              <CheckCircle2 className="w-4 h-4 shrink-0" />
-                            )}
-                            <span>{syncStatus.message}</span>
-                          </div>
-                        )}
-
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            onClick={() => fetchFromSupabase()}
-                            className="px-4 py-2.5 rounded-xl bg-slate-800 text-white text-xs font-bold flex items-center gap-2"
-                          >
-                            <RefreshCw className="w-4 h-4" /> Pull dari Supabase
-                          </button>
-                          <button
-                            onClick={pushAllToSupabase}
-                            className="px-4 py-2.5 rounded-xl bg-[#D4F34A] text-[#181824] text-xs font-extrabold flex items-center gap-2 shadow-lg"
-                          >
-                            <UploadCloud className="w-4 h-4" /> Push / Seed Data PDF ke Supabase
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className={`p-6 rounded-[28px] border space-y-3 ${
-                        isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-                      }`}>
-                        <div className="flex items-center justify-between">
-                          <span className="font-extrabold text-sm">SQL Schema (Supabase SQL Editor)</span>
-                          <button
-                            onClick={copySqlToClipboard}
-                            className="px-3 py-1.5 rounded-xl bg-[#181824] text-[#D4F34A] text-xs font-bold flex items-center gap-1.5"
-                          >
-                            {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                            <span>{copiedSql ? 'Tersalin!' : 'Salin SQL'}</span>
-                          </button>
-                        </div>
-                        <pre className="p-4 rounded-2xl bg-[#12121A] text-emerald-400 text-[11px] font-mono overflow-x-auto max-h-60">
-                          {SUPABASE_SQL_SCHEMA}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* =========================================================
-                      CMS TAB 7: PANDUAN DEPLOY VERCEL & PRODUCTION KIT
-                     ========================================================= */}
-                  {cmsMenu === 'guide' && (
-                    <div className="space-y-6">
-                      {/* Header Banner */}
-                      <div className="bg-[#181824] text-white p-6 rounded-[28px] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
                         <div>
-                          <span className="px-2.5 py-1 rounded-full bg-[#D4F34A]/20 text-[#D4F34A] text-[10px] font-extrabold uppercase tracking-wider">
-                            Production Ready • Vercel + Supabase
-                          </span>
-                          <h3 className="text-xl font-black mt-2">
-                            Panduan Tahap Development & Deploy ke Vercel.app
-                          </h3>
-                          <p className="text-xs text-slate-400 mt-1">
-                            Ikuti 4 langkah di bawah ini untuk mempublikasikan <code className="text-[#D4F34A]">landingpage.html</code> dan <code className="text-[#D4F34A]">dashboard.html</code> ke domain Vercel Anda.
-                          </p>
+                          <label className="block text-xs text-slate-400 mb-1">Nama Lengkap</label>
+                          <input
+                            type="text"
+                            value={profile.name}
+                            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
                         </div>
-
-                        <button
-                          onClick={downloadJsonBackup}
-                          className="px-4 py-3 rounded-2xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs shrink-0 flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
-                        >
-                          <UploadCloud className="w-4 h-4" />
-                          <span>Download Data JSON</span>
-                        </button>
-                      </div>
-
-                      {/* 4 Steps Checklist Grid */}
-                      <div className="grid md:grid-cols-2 gap-6">
-                        {/* Step 1: Inisialisasi Project Vite React */}
-                        <div className={`p-6 rounded-[28px] border space-y-3 ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-                        }`}>
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-1 rounded-lg bg-orange-500/15 text-orange-500 text-xs font-extrabold">
-                              LANGKAH 1 • TERMINAL LOKAL
-                            </span>
-                            <button
-                              onClick={() => copySnippet(
-                                'step1',
-                                `npm create vite@latest aldi-portfolio -- --template react\ncd aldi-portfolio\nnpm install lucide-react\nnpm install -D tailwindcss postcss autoprefixer\nnpx tailwindcss init -p`,
-                                'Perintah Terminal'
-                              )}
-                              className="text-xs font-bold text-indigo-500 hover:underline flex items-center gap-1"
-                            >
-                              {copiedFileKey === 'step1' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{copiedFileKey === 'step1' ? 'Tersalin' : 'Salin Command'}</span>
-                            </button>
-                          </div>
-                          <h4 className="font-extrabold text-sm">1. Buat Project React + Tailwind di Komputer</h4>
-                          <p className="text-xs text-slate-400 leading-relaxed">
-                            Jalankan perintah berikut di terminal VS Code Anda, lalu tempelkan seluruh kode <code className="font-mono">App.jsx</code> dari editor sebelah kanan ke dalam file <code className="font-mono">src/App.jsx</code>.
-                          </p>
-                          <pre className="p-3.5 rounded-2xl bg-[#12121A] text-[#D4F34A] text-[11px] font-mono overflow-x-auto">
-{`npm create vite@latest aldi-portfolio -- --template react
-cd aldi-portfolio
-npm install lucide-react
-npm install -D tailwindcss postcss autoprefixer`}
-                          </pre>
+                        <div>
+                          <label className="block text-xs text-slate-400 mb-1">Email Resmi</label>
+                          <input
+                            type="email"
+                            value={profile.email}
+                            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
                         </div>
-
-                        {/* Step 2: Konfigurasi vercel.json */}
-                        <div className={`p-6 rounded-[28px] border space-y-3 ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-                        }`}>
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-500 text-xs font-extrabold">
-                              LANGKAH 2 • VERCEL ROUTING
-                            </span>
-                            <button
-                              onClick={() => copySnippet(
-                                'verceljson',
-                                `{\n  "rewrites": [\n    { "source": "/landingpage.html", "destination": "/index.html" },\n    { "source": "/dashboard.html", "destination": "/index.html" },\n    { "source": "/admin", "destination": "/index.html" },\n    { "source": "/(.*)", "destination": "/index.html" }\n  ]\n}`,
-                                'Konfigurasi vercel.json'
-                              )}
-                              className="text-xs font-bold text-indigo-500 hover:underline flex items-center gap-1"
-                            >
-                              {copiedFileKey === 'verceljson' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{copiedFileKey === 'verceljson' ? 'Tersalin' : 'Salin vercel.json'}</span>
-                            </button>
-                          </div>
-                          <h4 className="font-extrabold text-sm">2. Buat File <code className="font-mono">vercel.json</code> di Root Folder</h4>
-                          <p className="text-xs text-slate-400 leading-relaxed">
-                            Kode <code className="font-mono">App.jsx</code> ini sudah otomatis mendeteksi URL <code className="font-mono">/dashboard.html</code> dan <code className="font-mono">/landingpage.html</code>. Tambahkan file ini agar Vercel mengarahkan kedua rute tersebut dengan benar:
-                          </p>
-                          <pre className="p-3.5 rounded-2xl bg-[#12121A] text-emerald-400 text-[11px] font-mono overflow-x-auto">
-{`{
-  "rewrites": [
-    { "source": "/landingpage.html", "destination": "/index.html" },
-    { "source": "/dashboard.html", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}`}
-                          </pre>
+                        <div>
+                          <label className="block text-xs text-slate-400 mb-1">Nomor Telepon / WhatsApp Tampil</label>
+                          <input
+                            type="text"
+                            value={profile.phone}
+                            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
                         </div>
-
-                        {/* Step 3: Environment Variables (.env) */}
-                        <div className={`p-6 rounded-[28px] border space-y-3 ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-                        }`}>
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-500 text-xs font-extrabold">
-                              LANGKAH 3 • SUPABASE & AI ENV
-                            </span>
-                            <button
-                              onClick={() => copySnippet(
-                                'envfile',
-                                `VITE_SUPABASE_URL=${supabaseUrl || 'https://project-id-anda.supabase.co'}\nVITE_SUPABASE_ANON_KEY=${supabaseKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'}\nVITE_GEMINI_API_KEY=AIzaSy... (Opsional untuk Translator AI)`,
-                                'Template .env'
-                              )}
-                              className="text-xs font-bold text-indigo-500 hover:underline flex items-center gap-1"
-                            >
-                              {copiedFileKey === 'envfile' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{copiedFileKey === 'envfile' ? 'Tersalin' : 'Salin .env'}</span>
-                            </button>
-                          </div>
-                          <h4 className="font-extrabold text-sm">3. Pasang Environment Variables di Vercel</h4>
-                          <p className="text-xs text-slate-400 leading-relaxed">
-                            Saat mengimpor repositori GitHub Anda di <strong>Vercel Dashboard → Settings → Environment Variables</strong>, masukkan variabel berikut agar web otomatis membaca database Supabase dan mengaktifkan AI Translator (opsional):
-                          </p>
-                          <pre className="p-3.5 rounded-2xl bg-[#12121A] text-amber-300 text-[11px] font-mono overflow-x-auto whitespace-pre">
-{`VITE_SUPABASE_URL=${supabaseUrl || 'https://xyzcompany.supabase.co'}
-VITE_SUPABASE_ANON_KEY=${supabaseKey ? supabaseKey.slice(0, 24) + '...' : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'}
-VITE_GEMINI_API_KEY=AIzaSy... (Opsional/Opsional)`}
-                          </pre>
-                        </div>
-
-                        {/* Step 4: Push ke GitHub & Deploy */}
-                        <div className={`p-6 rounded-[28px] border space-y-3 ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200 shadow-sm'
-                        }`}>
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-500 text-xs font-extrabold">
-                              LANGKAH 4 • DEPLOY VERCEL
-                            </span>
-                            <button
-                              onClick={() => copySnippet(
-                                'gitpush',
-                                `git init\ngit add .\ngit commit -m "Initial commit portfolio Akhmad Aldi + Eduplex CMS"\ngit branch -M main\ngit remote add origin https://github.com/Akhmadaldi19/portfolio-cms.git\ngit push -u origin main`,
-                                'Perintah Git Push'
-                              )}
-                              className="text-xs font-bold text-indigo-500 hover:underline flex items-center gap-1"
-                            >
-                              {copiedFileKey === 'gitpush' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{copiedFileKey === 'gitpush' ? 'Tersalin' : 'Salin Git Push'}</span>
-                            </button>
-                          </div>
-                          <h4 className="font-extrabold text-sm">4. Push ke GitHub & Hubungkan ke Vercel</h4>
-                          <p className="text-xs text-slate-400 leading-relaxed">
-                            Unggah ke GitHub (<code className="font-mono">@Akhmadaldi19</code>), lalu buka <strong>vercel.com/new</strong>, pilih repo tersebut, dan klik <strong>Deploy</strong>.
-                          </p>
-                          <pre className="p-3.5 rounded-2xl bg-[#12121A] text-sky-400 text-[11px] font-mono overflow-x-auto">
-{`git init && git add .
-git commit -m "Deploy Portfolio Akhmad Aldi"
-git push -u origin main`}
-                          </pre>
+                        <div>
+                          <label className="block text-xs text-slate-400 mb-1">Alamat Domisili (Footer)</label>
+                          <input
+                            type="text"
+                            value={profile.address}
+                            onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
                         </div>
                       </div>
-                    </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Bio Singkat</label>
+                        <textarea
+                          rows={4}
+                          value={profile.bio}
+                          onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                        />
+                      </div>
+                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                        {isTranslating ? 'Menyimpan...' : 'Simpan Profil ke Cloud Supabase'}
+                      </button>
+                    </form>
                   )}
                 </div>
               </div>
@@ -2973,7 +2910,7 @@ git push -u origin main`}
          ===================================================================== */}
       {activeProjectModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-          <div className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl ${
+          <div className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-up ${
             isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div className={`h-48 sm:h-52 bg-gradient-to-br ${activeProjectModal.accentColor} p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden`}>
@@ -3051,7 +2988,7 @@ git push -u origin main`}
          ===================================================================== */}
       {activeBlogModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto ${
+          <div className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-fade-up ${
             isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div className="flex items-center justify-between">
