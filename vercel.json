@@ -1,0 +1,8 @@
+{
+       "rewrites": [
+         { "source": "/landingpage.html", "destination": "/index.html" },
+         { "source": "/dashboard.html", "destination": "/index.html" },
+         { "source": "/admin", "destination": "/index.html" },
+         { "source": "/(.*)", "destination": "/index.html" }
+       ]
+     }
