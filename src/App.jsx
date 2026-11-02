@@ -2336,9 +2336,9 @@ export default function App() {
 
                 <div className="p-3.5 rounded-2xl bg-slate-500/10 text-xs text-slate-400 flex items-center justify-between">
                   <span>Default Login Demo:</span>
-                  <code className="font-mono font-bold text-[#D4F34A] bg-slate-900 px-2.5 py-1 rounded-lg">
+                  {/* <code className="font-mono font-bold text-[#D4F34A] bg-slate-900 px-2.5 py-1 rounded-lg">
                     aldi / password123
-                  </code>
+                  </code> */}
                 </div>
               </div>
             </div>
