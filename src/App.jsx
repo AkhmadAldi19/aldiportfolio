@@ -7,7 +7,7 @@ import {
   Search, ArrowUpRight, Sparkles,
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
   FolderGit2, FileText, RefreshCw, UploadCloud,
-  Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown
+  Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown, Image as ImageIcon
 } from 'lucide-react';
 
 // ============================================================================
@@ -350,6 +350,36 @@ async function autoTranslateFields(fieldsObject) {
   );
 
   return translations;
+}
+
+// Smart Client-Side Image Compressor (Converts uploaded file to optimized Data URL for instant DB storage)
+function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    if (!file) return reject(new Error("File tidak ditemukan"));
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/webp', quality);
+        resolve(compressed);
+      };
+      img.onerror = () => reject(new Error("Gagal memuat gambar"));
+      img.src = event.target.result;
+    };
+    reader.onerror = () => reject(new Error("Gagal membaca file"));
+    reader.readAsDataURL(file);
+  });
 }
 
 // ============================================================================
@@ -924,8 +954,9 @@ export default function App() {
 
   const [editingBlog, setEditingBlog] = useState(null);
   const [blogForm, setBlogForm] = useState({
-    title: '', category: 'Brand Strategy', date: '2026-11-02', readTime: '5 Menit', status: 'Completed', excerpt: '', content: ''
+    title: '', category: 'Brand Strategy', date: '2026-11-02', readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
   });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // 9. Resume (Experience & Education) CMS Form States
   const [resumeSubTab, setResumeSubTab] = useState('experience');
@@ -1097,7 +1128,9 @@ export default function App() {
       if (blogData?.length > 0) {
         setBlogs(blogData.map(b => ({
           id: b.id, title: b.title, slug: b.slug, category: b.category,
-          date: b.date, readTime: b.read_time, status: 'Completed', excerpt: b.excerpt, content: b.content,
+          date: b.date, readTime: b.read_time, status: 'Completed',
+          image: b.translations?._coverImage || '',
+          excerpt: b.excerpt, content: b.content,
           translations: b.translations || {}
         })));
       }
@@ -1137,6 +1170,78 @@ export default function App() {
   // ============================================================================
   // CMS CRUD HANDLERS (WITH REAL-TIME SUPABASE SYNC & AUTO-TRANSLATE)
   // ============================================================================
+  const handleProjectImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingImage(true);
+      const compressedDataUrl = await compressImageToDataUrl(file, 1000, 0.82);
+      setProjectForm(prev => ({ ...prev, image: compressedDataUrl }));
+      showToast("Gambar karya berhasil diunggah & dioptimalkan!");
+    } catch (err) {
+      showToast("Gagal mengunggah gambar.", "error");
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleBlogCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingImage(true);
+      const compressedDataUrl = await compressImageToDataUrl(file, 1000, 0.82);
+      setBlogForm(prev => ({ ...prev, image: compressedDataUrl }));
+      showToast("Sampul blog berhasil diunggah!");
+    } catch (err) {
+      showToast("Gagal mengunggah sampul blog.", "error");
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleBlogInlineImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingImage(true);
+      const compressedDataUrl = await compressImageToDataUrl(file, 900, 0.8);
+      const imageBlock = `\n\n![Gambar Artikel](${compressedDataUrl})\n\n`;
+      setBlogForm(prev => ({ ...prev, content: (prev.content || '') + imageBlock }));
+      showToast("Gambar berhasil disisipkan ke dalam isi artikel!");
+    } catch (err) {
+      showToast("Gagal menyisipkan gambar.", "error");
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const renderRichBlogContent = (rawText) => {
+    if (!rawText) return null;
+    const parts = rawText.split(/(!\[[^\]]*\]\([^)]+\))/g);
+    return parts.map((part, idx) => {
+      const match = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (match) {
+        return (
+          <figure key={idx} className="my-5 rounded-2xl overflow-hidden border border-slate-700/40 shadow-lg">
+            <img src={match[2]} alt={match[1] || 'Blog illustration'} className="w-full max-h-[420px] object-cover" />
+            {match[1] && match[1] !== 'Gambar Artikel' && (
+              <figcaption className="text-center text-xs text-slate-400 py-2 bg-slate-950/40">{match[1]}</figcaption>
+            )}
+          </figure>
+        );
+      }
+      return (
+        <span key={idx} className="whitespace-pre-line">
+          {part}
+        </span>
+      );
+    });
+  };
+
   const handleSaveProject = async (e) => {
     e.preventDefault();
     if (!projectForm.title.trim()) return;
@@ -1244,9 +1349,14 @@ export default function App() {
       setIsTranslating(false);
     }
 
+    const translationsWithCover = {
+      ...generatedTranslations,
+      _coverImage: blogForm.image || ''
+    };
+
     const savedBlog = editingBlog
-      ? { ...editingBlog, ...blogForm, slug, translations: generatedTranslations }
-      : { ...blogForm, id: `blog-${Date.now()}`, slug, translations: generatedTranslations };
+      ? { ...editingBlog, ...blogForm, slug, translations: translationsWithCover }
+      : { ...blogForm, id: `blog-${Date.now()}`, slug, translations: translationsWithCover };
 
     const nextBlogs = editingBlog
       ? blogs.map(b => b.id === editingBlog.id ? savedBlog : b)
@@ -1281,7 +1391,7 @@ export default function App() {
     setEditingBlog(null);
     setBlogForm({
       title: '', category: 'Brand Strategy', date: new Date().toISOString().slice(0, 10),
-      readTime: '5 Menit', status: 'Completed', excerpt: '', content: ''
+      readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
     });
   };
 
@@ -1293,6 +1403,7 @@ export default function App() {
       date: blog.date,
       readTime: blog.readTime,
       status: 'Completed',
+      image: blog.image || blog.translations?._coverImage || '',
       excerpt: blog.excerpt,
       content: blog.content
     });
@@ -2108,31 +2219,44 @@ export default function App() {
               {blogs.map((blog) => (
                 <article
                   key={blog.id}
-                  className={`rounded-3xl border p-6 flex flex-col justify-between card-hover-3d ${
+                  onClick={() => setActiveBlogModal(blog)}
+                  className={`rounded-3xl border overflow-hidden flex flex-col justify-between card-hover-3d cursor-pointer group ${
                     isDark ? 'bg-slate-900 border-slate-800 hover:border-orange-500/40' : 'bg-white border-slate-200 hover:border-orange-500/40 shadow-sm'
                   }`}
                 >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 font-semibold border border-orange-500/20">
-                        {blog.category}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {blog.date}
-                      </span>
-                    </div>
+                  <div>
+                    {(blog.image || blog.translations?._coverImage) && (
+                      <div className="h-44 w-full overflow-hidden relative bg-slate-950">
+                        <img
+                          src={blog.image || blog.translations?._coverImage}
+                          alt={getLocalized(blog, 'title')}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6 space-y-4">
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 font-semibold border border-orange-500/20">
+                          {blog.category}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {blog.date}
+                        </span>
+                      </div>
 
-                    <h3 className="text-xl font-bold leading-snug">{getLocalized(blog, 'title')}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">{getLocalized(blog, 'excerpt')}</p>
+                      <h3 className="text-xl font-bold leading-snug group-hover:text-orange-500 transition-colors">{getLocalized(blog, 'title')}</h3>
+                      <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{getLocalized(blog, 'excerpt')}</p>
+                    </div>
                   </div>
 
-                  <div className={`pt-6 mt-6 border-t flex items-center justify-between ${
+                  <div className={`px-6 py-4 border-t flex items-center justify-between ${
                     isDark ? 'border-slate-800' : 'border-slate-100'
                   }`}>
                     <span className="text-[11px] text-slate-400">{t.readTimeLabel} {blog.readTime}</span>
                     <button
-                      onClick={() => setActiveBlogModal(blog)}
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
                       className="text-xs font-bold text-orange-500 hover:text-orange-400 flex items-center gap-1"
                     >
                       <span>{t.readMore}</span>
@@ -2560,13 +2684,43 @@ export default function App() {
                           onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                         />
-                        <input
-                          type="url"
-                          placeholder="URL Gambar Preview (https://...)"
-                          value={projectForm.image}
-                          onChange={(e) => setProjectForm({ ...projectForm, image: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
+
+                        {/* Upload Gambar Karya Langsung */}
+                        <div className="space-y-2">
+                          <label className="block text-[11px] font-bold text-slate-400">
+                            Gambar Preview Karya (Upload dari Perangkat)
+                          </label>
+                          {projectForm.image ? (
+                            <div className="relative rounded-2xl overflow-hidden border border-slate-700 h-36 bg-slate-950 group">
+                              <img src={projectForm.image} alt="Preview Karya" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#D4F34A] text-slate-950 text-xs font-extrabold cursor-pointer">
+                                  Ganti Gambar
+                                  <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => setProjectForm({ ...projectForm, image: '' })}
+                                  className="px-3 py-1.5 rounded-xl bg-rose-500 text-white text-xs font-bold"
+                                >
+                                  Hapus
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <label className={`flex flex-col items-center justify-center h-28 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
+                              isDark ? 'border-slate-700 hover:border-[#D4F34A] bg-slate-900/60' : 'border-slate-300 hover:border-orange-500 bg-slate-50'
+                            }`}>
+                              <UploadCloud className="w-6 h-6 text-[#D4F34A] mb-1" />
+                              <span className="text-xs font-bold">
+                                {isUploadingImage ? 'Mengoptimalkan Gambar...' : 'Klik untuk Upload Gambar Karya'}
+                              </span>
+                              <span className="text-[10px] text-slate-400">PNG, JPG, WEBP (Otomatis dikompres)</span>
+                              <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
+                            </label>
+                          )}
+                        </div>
+
                         <input
                           type="text"
                           placeholder="Tools (pisahkan koma: Adobe Illustrator, Figma)"
@@ -2657,6 +2811,40 @@ export default function App() {
                             className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                           />
                         </div>
+
+                        {/* Upload Gambar Sampul (Cover) Blog */}
+                        <div className="space-y-1.5">
+                          <label className="block text-[11px] font-bold text-slate-400">
+                            Gambar Sampul Blog (Cover)
+                          </label>
+                          {blogForm.image ? (
+                            <div className="relative rounded-2xl overflow-hidden border border-slate-700 h-32 bg-slate-950 group">
+                              <img src={blogForm.image} alt="Cover Blog" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#D4F34A] text-slate-950 text-xs font-extrabold cursor-pointer">
+                                  Ganti Sampul
+                                  <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => setBlogForm({ ...blogForm, image: '' })}
+                                  className="px-3 py-1.5 rounded-xl bg-rose-500 text-white text-xs font-bold"
+                                >
+                                  Hapus
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <label className={`flex flex-col items-center justify-center h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
+                              isDark ? 'border-slate-700 hover:border-[#D4F34A] bg-slate-900/60' : 'border-slate-300 hover:border-orange-500 bg-slate-50'
+                            }`}>
+                              <UploadCloud className="w-5 h-5 text-[#D4F34A] mb-1" />
+                              <span className="text-xs font-bold">Upload Gambar Sampul Blog</span>
+                              <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
+                            </label>
+                          )}
+                        </div>
+
                         <textarea
                           rows={2}
                           placeholder="Ringkasan (Excerpt)"
@@ -2664,23 +2852,62 @@ export default function App() {
                           onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
                         />
-                        <textarea
-                          rows={5}
-                          placeholder="Isi Lengkap Artikel"
-                          value={blogForm.content}
-                          onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
-                        />
-                        <button type="submit" disabled={isTranslating} className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
-                          {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingBlog ? 'Update Artikel' : 'Terbitkan ke Cloud')}
-                        </button>
+
+                        {/* Isi Artikel Blog + Tombol Sisipkan Gambar ke Dalam Isi */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-bold text-slate-400">Isi Lengkap Artikel</label>
+                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#D4F34A]/15 text-[#D4F34A] hover:bg-[#D4F34A]/25 text-[11px] font-bold cursor-pointer transition-colors">
+                              <ImageIcon className="w-3.5 h-3.5" />
+                              <span>+ Sisipkan Gambar di Isi</span>
+                              <input type="file" accept="image/*" onChange={handleBlogInlineImageUpload} className="hidden" />
+                            </label>
+                          </div>
+                          <textarea
+                            rows={6}
+                            placeholder="Tulis isi artikel di sini... Gunakan tombol '+ Sisipkan Gambar di Isi' di kanan atas untuk memasukkan foto ke dalam paragraf."
+                            value={blogForm.content}
+                            onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          {editingBlog && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingBlog(null);
+                                setBlogForm({
+                                  title: '', category: 'Brand Strategy', date: new Date().toISOString().slice(0, 10),
+                                  readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
+                                });
+                              }}
+                              className="px-4 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs"
+                            >
+                              Batal
+                            </button>
+                          )}
+                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                            {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingBlog ? 'Update Artikel' : 'Terbitkan ke Cloud')}
+                          </button>
+                        </div>
                       </form>
                       <div className="lg:col-span-7 space-y-3">
                         {blogs.map((b) => (
                           <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                            <div>
-                              <div className="text-xs text-emerald-500 font-bold">{b.category} • {b.date}</div>
-                              <div className="font-bold text-sm">{b.title}</div>
+                            <div className="flex items-center gap-3 min-w-0">
+                              {(b.image || b.translations?._coverImage) && (
+                                <img
+                                  src={b.image || b.translations?._coverImage}
+                                  alt={b.title}
+                                  className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700"
+                                />
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-xs text-emerald-500 font-bold">{b.category} • {b.date}</div>
+                                <div className="font-bold text-sm truncate">{b.title}</div>
+                              </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
@@ -3014,11 +3241,21 @@ export default function App() {
               <span>{activeBlogModal.readTime}</span>
             </div>
 
-            <p className={`text-sm sm:text-base leading-relaxed whitespace-pre-line ${
+            {(activeBlogModal.image || activeBlogModal.translations?._coverImage) && (
+              <div className="rounded-2xl overflow-hidden border border-slate-800 max-h-80">
+                <img
+                  src={activeBlogModal.image || activeBlogModal.translations?._coverImage}
+                  alt={getLocalized(activeBlogModal, 'title')}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className={`text-sm sm:text-base leading-relaxed ${
               isDark ? 'text-slate-200' : 'text-slate-700'
             }`}>
-              {getLocalized(activeBlogModal, 'content')}
-            </p>
+              {renderRichBlogContent(getLocalized(activeBlogModal, 'content'))}
+            </div>
           </div>
         </div>
       )}
