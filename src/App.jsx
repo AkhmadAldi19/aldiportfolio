@@ -386,8 +386,12 @@ function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
 // INITIAL DATA EXTRACTED FROM AKHMAD ALDI'S PORTFOLIO PDF
 // ============================================================================
 
+// Karakter ilustrasi avatar Akhmad Aldi (Polo putih kerah garis hijau)
+const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/adventurer/svg?seed=AkhmadAldi&skinColor=f2d3b1&hair=short04&hairColor=09090b";
+
 const INITIAL_PROFILE = {
   name: "Akhmad Aldi",
+  avatar: "/avatar.png", // Atau letakkan file gambar di folder public/avatar.png
   roles: [
     "Brand Strategy",
     "Logo Design & Identity",
@@ -1619,10 +1623,15 @@ export default function App() {
             isDark ? 'bg-slate-950/85 border-slate-800/80' : 'bg-white/85 border-slate-200'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
-              {/* Brand Logo */}
+              {/* Brand Logo / Avatar Karakter */}
               <a href="#" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 flex items-center justify-center text-slate-950 font-black text-lg sm:text-xl shadow-lg shadow-orange-500/25 group-hover:rotate-6 group-hover:scale-105 transition-all shrink-0">
-                  AA
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-slate-900 border border-slate-700/80 shadow-lg shadow-orange-500/20 group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0 flex items-center justify-center">
+                  <img
+                    src={profile.avatar || DEFAULT_AVATAR}
+                    alt={profile.name}
+                    onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="min-w-0">
                   <div className={`font-bold text-base sm:text-lg tracking-tight flex items-center gap-2 whitespace-nowrap ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -1850,17 +1859,17 @@ export default function App() {
                       isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                     }`}>
                       <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-800 to-amber-700 p-1 shrink-0 shadow-lg">
-                          <div className="w-full h-full rounded-xl bg-slate-950 flex items-center justify-center text-2xl font-black text-orange-400">
-                            AA
-                          </div>
+                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-slate-950 p-1 shrink-0 border border-slate-700/80 shadow-xl group">
+                          <img
+                            src={profile.avatar || DEFAULT_AVATAR}
+                            alt={profile.name}
+                            onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
                         </div>
                         <div>
-                          <span className="px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full">
-                            Universitas Yudharta Pasuruan
-                          </span>
-                          <h3 className={`text-xl font-bold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.name}</h3>
-                          <p className={`text-xs flex items-center gap-1 mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                          <h3 className="text-xl font-bold mt-0.5 text-white">{profile.name}</h3>
+                          <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                             <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                             Prigen, Pasuruan, Jawa Timur
                           </p>
@@ -2334,8 +2343,13 @@ export default function App() {
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-[#D4F34A] text-slate-950 flex items-center justify-center font-black text-lg shadow">
-                      AA
+                    <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-900 shadow shrink-0">
+                      <img
+                        src={profile.avatar || DEFAULT_AVATAR}
+                        alt="Avatar Karakter"
+                        onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <h2 className="text-lg font-black">CMS Login Portal</h2>
@@ -2366,7 +2380,7 @@ export default function App() {
                       required
                       value={loginInput.username}
                       onChange={(e) => setLoginInput({ ...loginInput, username: e.target.value })}
-                      placeholder="aldi"
+                      placeholder="Masukkan username..."
                       className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none ${
                         isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                       }`}
@@ -2392,13 +2406,6 @@ export default function App() {
                     Masuk ke Dashboard CMS
                   </button>
                 </form>
-
-                <div className="p-3.5 rounded-2xl bg-slate-500/10 text-xs text-slate-400 flex items-center justify-between">
-                  <span>Default Login:</span>
-                  <code className="font-mono font-bold text-[#D4F34A] bg-slate-900 px-2.5 py-1 rounded-lg">
-                    aldi / password123
-                  </code>
-                </div>
               </div>
             </div>
           ) : (
@@ -3028,7 +3035,40 @@ export default function App() {
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
                     <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <h3 className="font-extrabold text-base">Profil & Kontak Footer</h3>
+                      <h3 className="font-extrabold text-base">Profil & Avatar Karakter</h3>
+                      <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-700/60 bg-slate-900/40">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-600 bg-slate-950 shrink-0">
+                          <img
+                            src={profile.avatar || DEFAULT_AVATAR}
+                            alt="Preview Avatar"
+                            onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-xs font-bold block text-slate-200">Foto Avatar Karakter</span>
+                          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D4F34A] text-slate-950 text-xs font-bold cursor-pointer hover:bg-[#c6e63b] transition-colors">
+                            <UploadCloud className="w-3.5 h-3.5" />
+                            <span>Ganti Gambar Avatar</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  const compressed = await compressImageToDataUrl(file, 600, 0.85);
+                                  setProfile(prev => ({ ...prev, avatar: compressed }));
+                                  showToast("Avatar berhasil diperbarui!");
+                                } catch (err) {
+                                  showToast("Gagal mengunggah avatar.", "error");
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs text-slate-400 mb-1">Nama Lengkap</label>
