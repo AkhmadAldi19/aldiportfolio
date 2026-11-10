@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Briefcase, GraduationCap, Layers, 
-  PenTool, Globe, ExternalLink, Mail, Phone, MapPin, 
-  Plus, Trash2, Edit3, Eye, Lock, 
+  PenTool, ExternalLink, Mail, Phone, MapPin, 
+  Trash2, Edit3, Eye, Lock, 
   CheckCircle2, AlertCircle, User, 
   Search, ArrowUpRight, Sparkles,
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
@@ -15,6 +15,20 @@ import {
 // ============================================================================
 const DEFAULT_SUPABASE_URL = 'https://juxhrebslwfcsidfppaa.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_7xCDMG1gLSTcnZbX0q-rPg_S6Jw8qF0';
+
+// ============================================================================
+// BRAND COLOR TOKENS (LIGHT MODE PALETTE: #000000, #233D4D, #FE7F2D, #EAECF0)
+// ============================================================================
+const BRAND_LIGHT = {
+  bg: '#EAECF0',
+  surface: '#FFFFFF',
+  textPrimary: '#000000',
+  textSecondary: '#233D4D',
+  accent: '#FE7F2D',
+  accentHover: '#E86E20',
+  border: '#D0D5DD',
+  borderSubtle: '#E4E7EC'
+};
 
 // ============================================================================
 // MULTI-LANGUAGE DICTIONARY & AI AUTO-TRANSLATION ENGINE
@@ -294,7 +308,7 @@ const UI_TRANSLATIONS = {
   }
 };
 
-// Automatic Multi-Language Translator (Uses Gemini API + Public Translation API fallback)
+// Automatic Multi-Language Translator (Gemini API with Public Google Translate fallback)
 async function autoTranslateFields(fieldsObject) {
   let apiKey = "";
   try {
@@ -302,7 +316,6 @@ async function autoTranslateFields(fieldsObject) {
   } catch (e) {}
 
   const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
   const prompt = `Translate the following Indonesian portfolio JSON fields into English (en), Japanese (ja), and Arabic (ar). Keep brand names, place names (like Wonosunyo, Wonokitri, Pasopati, Yudharta, Prigen, Prakarsa, Drakuy), and technical terms natural and professional. Return ONLY valid JSON with keys "en", "ja", and "ar" containing the exact same field keys as the input:\n${JSON.stringify(fieldsObject)}`;
 
   if (apiKey) {
@@ -352,7 +365,7 @@ async function autoTranslateFields(fieldsObject) {
   return translations;
 }
 
-// Smart Client-Side Image Compressor (Converts uploaded file to optimized Data URL for instant DB storage)
+// Client-Side Image Compressor (Converts uploaded file to lightweight WebP Data URL)
 function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
   return new Promise((resolve, reject) => {
     if (!file) return reject(new Error("File tidak ditemukan"));
@@ -383,31 +396,29 @@ function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
 }
 
 // ============================================================================
-// INITIAL DATA EXTRACTED FROM AKHMAD ALDI'S PORTFOLIO PDF
+// INITIAL DATA
 // ============================================================================
-
-// Karakter ilustrasi avatar Akhmad Aldi (Polo putih kerah garis hijau)
 const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/adventurer/svg?seed=AkhmadAldi&skinColor=f2d3b1&hair=short04&hairColor=09090b";
 
 const INITIAL_PROFILE = {
   name: "Akhmad Aldi",
-  avatar: "/avatar.png", // Atau letakkan file gambar di folder public/avatar.png
+  avatar: "/avatar.png",
   roles: [
     "Brand Strategy",
     "Logo Design & Identity",
     "Social Media Management",
     "UI/UX Designer"
   ],
-  bio: "Hai! Saya adalah desainer kreatif lulusan Universitas Yudharta Pasuruan yang berfokus pada Brand Strategy, Logo Design & Identity, Social Media Management, serta UI/UX Design. Saya mulai mendalami desain grafis sejak bangku SMK (2016–2019), tersertifikasi di UPT BLK Pasuruan (2019), dan berpengalaman merancang sistem identitas visual (Brand Guideline) serta strategi konten media sosial untuk berbagai brand, UMKM, dan desa wisata.",
+  bio: "Hai! Saya adalah desainer kreatif yang berfokus pada Brand Strategy, Logo Design & Identity, Social Media Management, serta UI/UX Design. Saya mulai mendalami desain grafis sejak bangku SMK (2016–2019), tersertifikasi di UPT BLK Pasuruan (2019), dan berpengalaman merancang sistem identitas visual (Brand Guideline) serta strategi konten media sosial untuk berbagai brand, UMKM, dan desa wisata.",
   translations: {
     en: {
-      bio: "Hi! I am a creative designer graduated from Yudharta University Pasuruan focusing on Brand Strategy, Logo Design & Identity, Social Media Management, and UI/UX Design. I started exploring graphic design in vocational high school (2016–2019), earned certification at UPT BLK Pasuruan (2019), and have extensive experience crafting visual identity systems (Brand Guidelines) and social media content strategies for brands, SMEs, and tourism villages."
+      bio: "Hi! I am a creative designer focusing on Brand Strategy, Logo Design & Identity, Social Media Management, and UI/UX Design. I have extensive experience crafting visual identity systems (Brand Guidelines) and social media content strategies for brands, SMEs, and tourism villages."
     },
     ja: {
-      bio: "こんにちは！ユダルタ・パスルアン大学卒業のクリエイティブデザイナーです。ブランド戦略、ロゴデザイン＆アイデンティティ、SNS運用、UI/UXデザインを専門としています。2016年からグラフィックデザインを学び、多くの企業や観光村のブランドガイドラインやSNS戦略を手掛けています。"
+      bio: "こんにちは！ブランド戦略、ロゴデザイン＆アイデンティティ、SNS運用、UI/UXデザインを専門とするクリエイティブデザイナーです。多くの企業や観光村のブランドガイドラインやSNS戦略を手掛けています。"
     },
     ar: {
-      bio: "مرحباً! أنا مصمم إبداعي خريج جامعة يودهارتا باسوروان، متخصص في استراتيجية العلامة التجارية، تصميم الشعارات والهوية البصرية، إدارة وسائل التواصل الاجتماعي، وتصميم UI/UX. أمتلك خبرة واسعة في بناء أدلة الهوية البصرية واستراتيجيات المحتوى الرقمي للشركات والقرى السياحية."
+      bio: "مرحباً! أنا مصمم إبداعي متخصص في استراتيجية العلامة التجارية، تصميم الشعارات والهوية البصرية، إدارة وسائل التواصل الاجتماعي، وتصميم UI/UX."
     }
   },
   email: "aldiakhmad15@gmail.com",
@@ -432,7 +443,7 @@ const INITIAL_EDUCATION = [
     translations: {
       en: {
         major: "Informatics Engineering (Creative Design & Media Focus)",
-        description: "Studied visual communication, brand identity system design, user experience research (UI/UX Design), and digital media management."
+        description: "Studied visual communication, brand identity system design, user experience research, and digital media management."
       }
     }
   },
@@ -563,23 +574,13 @@ const INITIAL_PROJECTS = [
     id: "proj-1",
     title: "Logo Pasopati 2023",
     category: "Logo Design & Identity",
-    subtitle: "Orientasi Mahasiswa Universitas Yudharta Pasuruan",
-    description: "Project logo resmi untuk kegiatan Orientasi Mahasiswa Baru (Pasopati 2023) Universitas Yudharta Pasuruan. Mengusung tema 'Agni Aksa Renjana' yang berarti 'Api Abadi yang Membara' dengan palet warna #F75404, #F98404, #FCBA04 dan font Poppins.",
+    subtitle: "Orientasi Mahasiswa Baru",
+    description: "Project logo resmi untuk kegiatan Orientasi Mahasiswa Baru Pasopati 2023. Mengusung tema 'Agni Aksa Renjana' yang berarti 'Api Abadi yang Membara' dengan palet warna hangat dan tipografi modern.",
     translations: {
       en: {
         title: "Pasopati 2023 Official Logo",
-        subtitle: "Student Orientation of Yudharta University Pasuruan",
-        description: "Official logo identity project for the New Student Orientation (Pasopati 2023) at Yudharta University Pasuruan. Carrying the theme 'Agni Aksa Renjana' meaning 'Eternal Blazing Flame' with warm geometric elephant visuals."
-      },
-      ja: {
-        title: "Pasopati 2023 公式ロゴ",
-        subtitle: "ユダルタ・パスルアン大学 新入生オリエンテーション",
-        description: "ユダルタ・パスルアン大学の新入生オリエンテーション（Pasopati 2023）の公式ロゴプロジェクト。「永遠に燃える炎」を意味するテーマを幾何学的な象のモチーフで表現。"
-      },
-      ar: {
-        title: "شعار باسوباتي 2023 الرسمي",
-        subtitle: "توجيه الطلاب الجدد بجامعة يودهارتا باسوروان",
-        description: "مشروع الشعار الرسمي لتوجيه الطلاب الجدد لعام 2023 بجامعة يودهارتا، يجسد مفهوم الشعلة الأبدية المتقدة بأسلوب هندسي حديث."
+        subtitle: "Student Orientation Project",
+        description: "Official logo identity project for the New Student Orientation (Pasopati 2023). Carrying the theme 'Agni Aksa Renjana' meaning 'Eternal Blazing Flame' with warm geometric visuals."
       }
     },
     tools: ["Adobe Illustrator", "Adobe Photoshop", "Brand Guideline"],
@@ -600,17 +601,7 @@ const INITIAL_PROJECTS = [
       en: {
         title: "Wonosunyo Tourism Village Rebranding",
         subtitle: "Brand Identity Guidelines & Tourism Brand Strategy",
-        description: "Comprehensive brand strategy, logo design, and Brand Identity Guidelines (letterhead, totebag, t-shirt, mug, and supergraphics) to elevate Wonosunyo Tourism Village."
-      },
-      ja: {
-        title: "ウォノスニョ観光村のリブランディング",
-        subtitle: "ブランドアイデンティティガイドライン＆戦略",
-        description: "ウォノスニョ観光村の観光イメージを構築するための包括的なブランド戦略、ロゴ、および公式グッズのガイドライン設計。"
-      },
-      ar: {
-        title: "إعادة بناء الهوية البصرية لقرية وونوسونيو السياحية",
-        subtitle: "دليل الهوية البصرية واستراتيجية العلامة التجارية",
-        description: "تطوير استراتيجية العلامة التجارية والشعار ودليل الهوية الكامل لتعزيز مكانة قرية وونوسونيو كوجهة سياحية."
+        description: "Comprehensive brand strategy, logo design, and Brand Identity Guidelines to elevate Wonosunyo Tourism Village."
       }
     },
     tools: ["Brand Strategy", "Adobe Illustrator", "Adobe Photoshop"],
@@ -631,7 +622,7 @@ const INITIAL_PROJECTS = [
       en: {
         title: "Wonokitri Edelweiss Village Brand Identity",
         subtitle: "Brand & Design Application Guidelines",
-        description: "Brand positioning strategy and visual identity system for Edelweiss Wonokitri Tourism Village, complete with official merchandise and media application rules."
+        description: "Brand positioning strategy and visual identity system for Edelweiss Wonokitri Tourism Village."
       }
     },
     tools: ["Brand Strategy", "Adobe Illustrator", "Adobe Photoshop"],
@@ -652,7 +643,7 @@ const INITIAL_PROJECTS = [
       en: {
         title: "Kampoeng Samiler Logo Identity",
         subtitle: "Visual Identity for Culinary SME Community",
-        description: "Visual identity and packaging design for Kampoeng Samiler using an iconic approach to boost local culinary appeal in modern markets."
+        description: "Visual identity and packaging design for Kampoeng Samiler using an iconic approach to boost local culinary appeal."
       }
     },
     tools: ["Adobe Illustrator", "Packaging Design"],
@@ -668,12 +659,12 @@ const INITIAL_PROJECTS = [
     title: "Identitas & Feeds KKN 17 Tapaan",
     category: "Social Media Management",
     subtitle: "Manajemen Konten & Identitas Visual KKN 17",
-    description: "Perancangan logo resmi sekaligus pengelolaan template feed Instagram, story, dan publikasi dokumentasi kegiatan KKN Reguler 17 di Kelurahan Tapaan.",
+    description: "Perancangan logo resmi sekaligus pengelolaan template feed Instagram, story, dan publikasi dokumentasi kegiatan KKN Reguler 17.",
     translations: {
       en: {
         title: "KKN 17 Tapaan Identity & Instagram Feeds",
         subtitle: "Social Media Content Management & Visual Identity",
-        description: "Official logo creation and cohesive Instagram grid templates, stories, and digital publication management for KKN 17 in Tapaan."
+        description: "Official logo creation and cohesive Instagram grid templates, stories, and digital publication management."
       }
     },
     tools: ["Adobe Illustrator", "Photoshop", "Instagram Grid"],
@@ -689,12 +680,12 @@ const INITIAL_PROJECTS = [
     title: "Kampanye Media Sosial KKNT Wonosunyo",
     category: "Social Media Management",
     subtitle: "Strategi Konten & Publikasi Digital Desa Wisata",
-    description: "Pengelolaan arah visual media sosial, desain konten edukasi pariwisata, dan branding digital untuk tim KKN Tematik MBKM Desa Wonosunyo.",
+    description: "Pengelolaan arah visual media sosial, desain konten edukasi pariwisata, dan branding digital untuk tim KKN Tematik Desa Wonosunyo.",
     translations: {
       en: {
         title: "KKNT Wonosunyo Social Media Campaign",
         subtitle: "Content Strategy & Digital Tourism Publication",
-        description: "Social media visual direction, educational tourism content design, and digital branding for the Wonosunyo Thematic KKN team."
+        description: "Social media visual direction, educational tourism content design, and digital branding."
       }
     },
     tools: ["Social Media Kit", "Adobe Illustrator", "Copywriting"],
@@ -710,12 +701,12 @@ const INITIAL_PROJECTS = [
     title: "PPK Ormawa Himakom Branding & Socials",
     category: "Social Media Management",
     subtitle: "Identitas Visual & Manajemen Publikasi Program",
-    description: "Perancangan logo bunga Edelweiss geometris serta sistem template publikasi media sosial untuk meningkatkan eksposur program PPK Ormawa Himakom di Wonokitri.",
+    description: "Perancangan logo bunga Edelweiss geometris serta sistem template publikasi media sosial untuk meningkatkan eksposur program PPK Ormawa.",
     translations: {
       en: {
         title: "PPK Ormawa Himakom Branding & Socials",
         subtitle: "Visual Identity & Program Publication Management",
-        description: "Geometric Edelweiss logo design and social media publication template system to maximize digital exposure in Wonokitri."
+        description: "Geometric Edelweiss logo design and social media publication template system."
       }
     },
     tools: ["Adobe Illustrator", "Content Planning", "Brand Kit"],
@@ -730,13 +721,13 @@ const INITIAL_PROJECTS = [
     id: "proj-8",
     title: "Logo TPA Anwarul Qulub",
     category: "Logo Design & Identity",
-    subtitle: "Taman Pendidikan Al-Quran Wonosunyo",
-    description: "Perancangan logo bernuansa islami modern untuk Taman Pendidikan Al-Quran (TPA) Anwarul Qulub Dusun Badur, Wonosunyo.",
+    subtitle: "Taman Pendidikan Al-Quran",
+    description: "Perancangan logo bernuansa islami modern untuk Taman Pendidikan Al-Quran (TPA) Anwarul Qulub Dusun Badur.",
     translations: {
       en: {
         title: "TPA Anwarul Qulub Islamic Logo",
-        subtitle: "Quranic Education Center in Wonosunyo",
-        description: "Modern Islamic visual identity design for Anwarul Qulub Quranic Education Center (TPA) in Badur Hamlet, Wonosunyo."
+        subtitle: "Quranic Education Center",
+        description: "Modern Islamic visual identity design for Anwarul Qulub Quranic Education Center."
       }
     },
     tools: ["Adobe Illustrator", "Visual Identity"],
@@ -751,13 +742,13 @@ const INITIAL_PROJECTS = [
     id: "proj-9",
     title: "Prakarsa - Career Platform UI/UX",
     category: "UI/UX Design",
-    subtitle: "Finalis Lomba UI/UX Design Universitas Nusa Mandiri",
-    description: "Perancangan antarmuka dan pengalaman pengguna (UI/UX) aplikasi pencari kerja dan kursus yang berhasil menembus Babak Final tingkat nasional di Universitas Nusa Mandiri.",
+    subtitle: "Finalis Lomba UI/UX Design Nasional",
+    description: "Perancangan antarmuka dan pengalaman pengguna (UI/UX) aplikasi pencari kerja dan kursus yang berhasil menembus Babak Final tingkat nasional.",
     translations: {
       en: {
         title: "Prakarsa - Career Platform UI/UX",
-        subtitle: "National UI/UX Design Finalist at Nusa Mandiri University",
-        description: "User interface and experience (UI/UX) design for a career and skill-building mobile app, selected as a National Finalist."
+        subtitle: "National UI/UX Design Finalist",
+        description: "User interface and experience design for a career and skill-building mobile app."
       }
     },
     tools: ["Figma", "Prototyping", "UX Research"],
@@ -773,12 +764,12 @@ const INITIAL_PROJECTS = [
     title: "Drakuy - Streaming App UI/UX",
     category: "UI/UX Design",
     subtitle: "Eksplorasi Desain Antarmuka & Design System",
-    description: "Project UI/UX Design aplikasi streaming drama Korea dengan fokus pada kemudahan navigasi visual, hierarki tipografi, dan kenyamanan pengguna.",
+    description: "Project UI/UX Design aplikasi streaming drama dengan fokus pada kemudahan navigasi visual, hierarki tipografi, dan kenyamanan pengguna.",
     translations: {
       en: {
         title: "Drakuy - Streaming App UI/UX",
         subtitle: "Interface Exploration & Mobile Design System",
-        description: "UI/UX Design project for a Korean drama streaming platform focusing on intuitive visual navigation, typography hierarchy, and user comfort."
+        description: "UI/UX Design project for a streaming platform focusing on intuitive visual navigation."
       }
     },
     tools: ["Figma", "Wireframing", "Design System"],
@@ -800,23 +791,13 @@ const INITIAL_BLOGS = [
     date: "2023-08-15",
     readTime: "4 Menit",
     status: "Completed",
-    excerpt: "Bagaimana menerjemahkan filosofi 'Api Abadi yang Membara' ke dalam bentuk geometris modern untuk orientasi mahasiswa baru Universitas Yudharta Pasuruan.",
-    content: "Merancang identitas visual untuk acara tahunan kampus membutuhkan keseimbangan antara nilai filosofis tradisional dan estetika modern yang disukai generasi muda. Pada logo Pasopati 2023, tema 'Agni Aksa Renjana' diwujudkan melalui siluet gajah geometris dengan mahkota api tiga warna (#F75404, #F98404, #FCBA04) yang melambangkan semangat, intelektualitas, dan keberanian mahasiswa baru.",
+    excerpt: "Bagaimana menerjemahkan filosofi 'Api Abadi yang Membara' ke dalam bentuk geometris modern untuk orientasi mahasiswa baru.",
+    content: "Merancang identitas visual untuk acara tahunan membutuhkan keseimbangan antara nilai filosofis tradisional dan estetika modern. Pada logo Pasopati 2023, tema 'Agni Aksa Renjana' diwujudkan melalui siluet geometris dengan mahkota api tiga warna yang melambangkan semangat, intelektualitas, dan keberanian.",
     translations: {
       en: {
         title: "Creative Process Behind Pasopati 2023 Logo: Agni Aksa Renjana",
-        excerpt: "How to translate the philosophy of 'Eternal Blazing Flame' into modern geometric forms for Yudharta University's new student orientation.",
-        content: "Designing a visual identity for an annual university event requires a balance between traditional philosophical values and modern aesthetics favored by the younger generation. In the Pasopati 2023 logo, the theme 'Agni Aksa Renjana' is realized through a geometric elephant silhouette crowned with a tri-color flame (#F75404, #F98404, #FCBA04) symbolizing spirit, intellect, and courage."
-      },
-      ja: {
-        title: "Pasopati 2023 ロゴ制作の裏側：Agni Aksa Renjana",
-        excerpt: "「永遠に燃える炎」の哲学を現代的な幾何学フォルムへと昇華させたデザインプロセス。",
-        content: "大学の年次イベントのビジュアルアイデンティティをデザインするには、伝統的な哲学と若い世代が好むモダンな美学のバランスが必要です。Pasopati 2023のロゴでは、3色の炎の冠を戴く幾何学的な象のシルエットを通じて、新入生の情熱と知性を表現しました。"
-      },
-      ar: {
-        title: "العملية الإبداعية وراء شعار باسوباتي 2023: الشعلة الأبدية",
-        excerpt: "كيف تمت ترجمة فلسفة الشعلة المتقدة إلى أشكال هندسية حديثة لتوجيه الطلاب الجدد.",
-        content: "يتطلب تصميم الهوية البصرية لحدث جامعي سنوي توازناً بين القيم الفلسفية التقليدية والجماليات الحديثة التي يفضلها جيل الشباب. في شعار باسوباتي 2023، تم تجسيد هذا المفهوم من خلال تصميم هندسي متناسق يعبر عن الحماس والشجاعة."
+        excerpt: "How to translate the philosophy of 'Eternal Blazing Flame' into modern geometric forms.",
+        content: "Designing a visual identity for an annual event requires a balance between traditional philosophical values and modern aesthetics."
       }
     }
   },
@@ -828,13 +809,13 @@ const INITIAL_BLOGS = [
     date: "2023-11-02",
     readTime: "6 Menit",
     status: "Completed",
-    excerpt: "Studi kasus bagaimana konsistensi warna, tipografi, dan supergraphic mampu meningkatkan daya tarik Desa Wisata Wonosunyo dan Edelweiss Wonokitri.",
-    content: "Banyak destinasi wisata lokal memiliki potensi alam dan budaya yang luar biasa, namun belum memiliki karakter visual yang mudah diingat wisatawan. Melalui penyusunan Brand Guideline (Pedoman Sistem Identitas), setiap titik sentuh—mulai dari papan petunjuk, merchandise kaos & totebag, hingga template konten Instagram—memiliki bahasa visual yang seragam dan profesional.",
+    excerpt: "Studi kasus bagaimana konsistensi warna, tipografi, dan supergraphic mampu meningkatkan daya tarik Desa Wisata.",
+    content: "Banyak destinasi wisata lokal memiliki potensi alam dan budaya yang luar biasa, namun belum memiliki karakter visual yang mudah diingat. Melalui penyusunan Brand Guideline, setiap titik sentuh memiliki bahasa visual yang seragam dan profesional.",
     translations: {
       en: {
         title: "Why Brand Guidelines & Social Media Kits Matter for Tourism Villages",
-        excerpt: "A case study on how consistent color palettes, typography, and supergraphics elevated Wonosunyo and Edelweiss Wonokitri Tourism Villages.",
-        content: "Many local tourism destinations possess extraordinary natural and cultural potential but lack a memorable visual character. By establishing a comprehensive Brand Guideline, every touchpoint—from signage and official merchandise to Instagram templates—speaks a unified, trustworthy visual language."
+        excerpt: "A case study on how consistent color palettes, typography, and supergraphics elevated tourism destinations.",
+        content: "Many local tourism destinations possess extraordinary potential but lack a memorable visual character. By establishing a comprehensive Brand Guideline, every touchpoint speaks a unified language."
       }
     }
   },
@@ -846,42 +827,38 @@ const INITIAL_BLOGS = [
     date: "2024-02-10",
     readTime: "5 Menit",
     status: "Completed",
-    excerpt: "Menggabungkan perencanaan konten (Content Pillar), psikologi warna, dan tata letak carousel untuk membangun identitas brand yang kuat di Instagram.",
-    content: "Manajemen media sosial bukan sekadar mengunggah poster setiap hari. Kunci utamanya terletak pada keselarasan antara Brand Strategy dengan kebutuhan informasi audiens. Dengan membagi konten ke dalam pilar edukasi, promosi, dan interaksi, serta menjaga konsistensi grid visual, sebuah brand dapat meningkatkan kepercayaan sekaligus konversi secara organik.",
+    excerpt: "Menggabungkan perencanaan konten (Content Pillar), psikologi warna, dan tata letak carousel untuk membangun identitas brand di Instagram.",
+    content: "Manajemen media sosial bukan sekadar mengunggah gambar setiap hari. Kunci utamanya terletak pada keselarasan antara Brand Strategy dengan kebutuhan audiens. Dengan membagi konten ke dalam pilar edukasi, promosi, dan interaksi, brand dapat berkembang secara organik.",
     translations: {
       en: {
         title: "Visual Social Media Management Strategies for Higher Audience Engagement",
-        excerpt: "Combining content pillars, color psychology, and carousel storytelling to build a powerful brand identity on Instagram.",
-        content: "Social media management is more than posting daily graphics. The key lies in aligning Brand Strategy with audience needs. By structuring content into educational, promotional, and interactive pillars while maintaining visual grid consistency, brands can organically grow trust and conversions."
+        excerpt: "Combining content pillars, color psychology, and carousel storytelling to build a powerful brand identity.",
+        content: "Social media management is more than posting daily graphics. The key lies in aligning Brand Strategy with audience needs."
       }
     }
   }
 ];
 
 // ============================================================================
-// MAIN APPLICATION COMPONENT
+// MAIN COMPONENT
 // ============================================================================
-
 export default function App() {
-  // 1. Theme State ('dark' | 'light') & Language State ('id' | 'en' | 'ja' | 'ar')
   const [theme, setTheme] = useState('dark');
   const isDark = theme === 'dark';
   const [lang, setLang] = useState('id');
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [autoTranslateEnabled, setAutoTranslateEnabled] = useState(true);
+  const [autoTranslateEnabled] = useState(true);
   const [isTranslating, setIsTranslating] = useState(false);
 
   const t = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.id;
   const activeLangObj = SUPPORTED_LANGUAGES.find(l => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
-  // Helper to get localized field from an item (Project, Blog, Resume, Profile)
   const getLocalized = (item, field) => {
     if (!item) return '';
     if (lang === 'id') return item[field];
     return item.translations?.[lang]?.[field] || item.translations?.en?.[field] || item[field];
   };
 
-  // 2. Multi-page Route ('landingpage.html' | 'dashboard.html')
   const [currentRoute, setCurrentRoute] = useState(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.toLowerCase();
@@ -894,7 +871,6 @@ export default function App() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // 3. Authentication State for dashboard.html
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCredentials] = useState({
     username: 'aldi',
@@ -903,7 +879,7 @@ export default function App() {
   const [loginInput, setLoginInput] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
-  // Secret keyboard shortcut (Ctrl + Shift + L or Alt + L) to jump to dashboard.html
+  // Shortcut Ctrl+Shift+L or Alt+L for CMS login
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') || (e.altKey && e.key.toLowerCase() === 'l')) {
@@ -915,31 +891,27 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // 4. Portfolio & CMS Data States
   const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [education, setEducation] = useState(INITIAL_EDUCATION);
   const [experience, setExperience] = useState(INITIAL_EXPERIENCE);
   const [projects, setProjects] = useState(INITIAL_PROJECTS);
   const [blogs, setBlogs] = useState(INITIAL_BLOGS);
 
-  // 5. Eduplex CMS Navigation State (Final Version without Supabase DB & Vercel Guide tabs)
-  const [cmsMenu, setCmsMenu] = useState('overview'); // 'overview' | 'projects' | 'blogs' | 'resume' | 'profile'
+  const [cmsMenu, setCmsMenu] = useState('overview');
 
-  // 6. Landing Page Filter & Modal States
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeProjectModal, setActiveProjectModal] = useState(null);
   const [activeBlogModal, setActiveBlogModal] = useState(null);
 
-  // 7. Supabase Connection State (Pre-configured with User's URL & Publishable Key)
-  const [supabaseUrl, setSupabaseUrl] = useState(() => {
+  const [supabaseUrl] = useState(() => {
     try {
       return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || DEFAULT_SUPABASE_URL;
     } catch {
       return DEFAULT_SUPABASE_URL;
     }
   });
-  const [supabaseKey, setSupabaseKey] = useState(() => {
+  const [supabaseKey] = useState(() => {
     try {
       return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || DEFAULT_SUPABASE_KEY;
     } catch {
@@ -949,7 +921,6 @@ export default function App() {
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
 
-  // 8. CMS Form States
   const [editingProject, setEditingProject] = useState(null);
   const [projectForm, setProjectForm] = useState({
     title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
@@ -962,7 +933,6 @@ export default function App() {
   });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // 9. Resume (Experience & Education) CMS Form States
   const [resumeSubTab, setResumeSubTab] = useState('experience');
   const [editingExp, setEditingExp] = useState(null);
   const [expForm, setExpForm] = useState({
@@ -981,9 +951,6 @@ export default function App() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ============================================================================
-  // AUTHENTICATION HANDLERS
-  // ============================================================================
   const handleLogin = (e) => {
     e.preventDefault();
     if (
@@ -992,27 +959,21 @@ export default function App() {
     ) {
       setIsAuthenticated(true);
       setLoginError('');
-      showToast(`Selamat datang kembali, ${profile.name}!`);
+      showToast(`Selamat datang, ${profile.name}!`);
     } else {
-      setLoginError('Username atau password salah! Gunakan default: aldi / password123');
+      setLoginError('Username atau password salah!');
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setLoginInput({ username: '', password: '' });
-    showToast('Anda telah keluar dari sesi CMS.');
+    showToast('Sesi CMS ditutup.');
   };
 
-  // ============================================================================
-  // SUPABASE AUTO-CONNECT, AUTO-SEED & REAL-TIME SYNC ENGINE
-  // ============================================================================
   const cleanUrl = (url) => {
     if (!url) return '';
-    return url
-      .trim()
-      .replace(/\/rest\/v1\/?$/i, '')
-      .replace(/\/+$/, '');
+    return url.trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
   };
 
   const getSupabaseHeaders = (key = supabaseKey, preferMerge = false) => {
@@ -1028,7 +989,6 @@ export default function App() {
     return headers;
   };
 
-  // Push all state to Supabase (Used for initial seed or manual full sync)
   const pushAllToSupabase = async (
     customProf = profile,
     customProj = projects,
@@ -1043,12 +1003,11 @@ export default function App() {
       const base = cleanUrl(supabaseUrl);
       const headers = getSupabaseHeaders(supabaseKey, true);
 
-      const profReq = await fetch(`${base}/rest/v1/portfolio_profile`, {
+      await fetch(`${base}/rest/v1/portfolio_profile`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ id: 1, data: customProf, updated_at: new Date().toISOString() })
       });
-      if (!profReq.ok) throw new Error("Pastikan tabel SQL sudah dibuat di Supabase SQL Editor.");
 
       const formattedProjects = customProj.map(p => ({
         id: p.id, title: p.title, category: p.category, subtitle: p.subtitle,
@@ -1077,14 +1036,13 @@ export default function App() {
 
       setIsSupabaseConnected(true);
       setSyncStatus({ type: 'success', message: 'Cloud Supabase Terhubung & Tersinkronisasi!' });
-      if (!silent) showToast("Berhasil sinkronisasi penuh ke Cloud Supabase!");
+      if (!silent) showToast("Berhasil sinkronisasi penuh ke Supabase!");
     } catch (err) {
       setSyncStatus({ type: 'error', message: err.message });
       if (!silent) showToast(err.message, "error");
     }
   };
 
-  // Fetch data on startup; if database tables are empty, auto-seed them automatically!
   const fetchFromSupabase = async (url = supabaseUrl, key = supabaseKey) => {
     if (!url || !key) return;
     setSyncStatus({ type: 'loading', message: 'Menghubungkan ke Cloud Supabase...' });
@@ -1099,14 +1057,13 @@ export default function App() {
         fetch(`${base}/rest/v1/portfolio_resume?id=eq.1&select=*`, { headers })
       ]);
 
-      if (!profRes.ok) throw new Error("Tabel belum ada di Supabase.");
+      if (!profRes.ok) throw new Error("Tabel database belum terdeteksi.");
 
       const profData = await profRes.json();
       const projData = await projRes.json();
       const blogData = await blogRes.json();
       const resData = await resRes.json();
 
-      // AUTO-SEED: Jika tabel di Supabase masih kosong, otomatis isi dengan data PDF Akhmad Aldi
       if (
         (!profData || profData.length === 0) &&
         (!projData || projData.length === 0) &&
@@ -1114,7 +1071,7 @@ export default function App() {
       ) {
         await pushAllToSupabase(INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_EDUCATION, INITIAL_EXPERIENCE, true);
         setIsSupabaseConnected(true);
-        setSyncStatus({ type: 'success', message: 'Database baru terdeteksi — Data awal berhasil di-seed otomatis ke Supabase!' });
+        setSyncStatus({ type: 'success', message: 'Database di-seed otomatis ke Supabase!' });
         return;
       }
 
@@ -1157,7 +1114,6 @@ export default function App() {
     }
   }, []);
 
-  // Filtered Projects for Landing Page
   const categories = ['Semua', 'Brand Strategy', 'Logo Design & Identity', 'Social Media Management', 'UI/UX Design'];
   const filteredProjects = useMemo(() => {
     return projects.filter(proj => {
@@ -1171,9 +1127,6 @@ export default function App() {
     });
   }, [projects, selectedCategory, searchQuery, lang]);
 
-  // ============================================================================
-  // CMS CRUD HANDLERS (WITH REAL-TIME SUPABASE SYNC & AUTO-TRANSLATE)
-  // ============================================================================
   const handleProjectImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -1181,7 +1134,7 @@ export default function App() {
       setIsUploadingImage(true);
       const compressedDataUrl = await compressImageToDataUrl(file, 1000, 0.82);
       setProjectForm(prev => ({ ...prev, image: compressedDataUrl }));
-      showToast("Gambar karya berhasil diunggah & dioptimalkan!");
+      showToast("Gambar karya berhasil diunggah!");
     } catch (err) {
       showToast("Gagal mengunggah gambar.", "error");
     } finally {
@@ -1214,7 +1167,7 @@ export default function App() {
       const compressedDataUrl = await compressImageToDataUrl(file, 900, 0.8);
       const imageBlock = `\n\n![Gambar Artikel](${compressedDataUrl})\n\n`;
       setBlogForm(prev => ({ ...prev, content: (prev.content || '') + imageBlock }));
-      showToast("Gambar berhasil disisipkan ke dalam isi artikel!");
+      showToast("Gambar berhasil disisipkan ke isi artikel!");
     } catch (err) {
       showToast("Gagal menyisipkan gambar.", "error");
     } finally {
@@ -1255,10 +1208,9 @@ export default function App() {
       : projectForm.tools;
 
     let generatedTranslations = editingProject?.translations || {};
-
     if (autoTranslateEnabled) {
       setIsTranslating(true);
-      showToast("Menerjemahkan karya otomatis ke Inggris, Jepang & Arab...", "info");
+      showToast("Menerjemahkan karya otomatis...", "info");
       generatedTranslations = await autoTranslateFields({
         title: projectForm.title,
         subtitle: projectForm.subtitle,
@@ -1277,7 +1229,6 @@ export default function App() {
 
     setProjects(nextProjects);
 
-    // Real-time upsert to Supabase
     if (supabaseUrl && supabaseKey) {
       try {
         const base = cleanUrl(supabaseUrl);
@@ -1303,7 +1254,7 @@ export default function App() {
       } catch (e) {}
     }
 
-    showToast(editingProject ? "Karya berhasil diperbarui & disinkronkan ke Supabase!" : "Karya baru ditambahkan & tersimpan di Supabase!");
+    showToast(editingProject ? "Karya diperbarui di Supabase!" : "Karya baru tersimpan ke Supabase!");
     setEditingProject(null);
     setProjectForm({
       title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
@@ -1332,7 +1283,7 @@ export default function App() {
         });
       } catch (e) {}
     }
-    showToast("Karya dihapus dari daftar & Supabase.", "info");
+    showToast("Karya dihapus dari Supabase.", "info");
   };
 
   const handleSaveBlog = async (e) => {
@@ -1344,7 +1295,7 @@ export default function App() {
 
     if (autoTranslateEnabled) {
       setIsTranslating(true);
-      showToast("Menerjemahkan artikel blog otomatis ke Inggris, Jepang & Arab...", "info");
+      showToast("Menerjemahkan artikel otomatis...", "info");
       generatedTranslations = await autoTranslateFields({
         title: blogForm.title,
         excerpt: blogForm.excerpt,
@@ -1368,7 +1319,6 @@ export default function App() {
 
     setBlogs(nextBlogs);
 
-    // Real-time upsert to Supabase
     if (supabaseUrl && supabaseKey) {
       try {
         const base = cleanUrl(supabaseUrl);
@@ -1391,7 +1341,7 @@ export default function App() {
       } catch (e) {}
     }
 
-    showToast(editingBlog ? "Artikel blog diperbarui di Supabase!" : "Artikel blog diterbitkan & disimpan ke Supabase!");
+    showToast(editingBlog ? "Artikel blog diperbarui!" : "Artikel blog diterbitkan!");
     setEditingBlog(null);
     setBlogForm({
       title: '', category: 'Brand Strategy', date: new Date().toISOString().slice(0, 10),
@@ -1425,10 +1375,9 @@ export default function App() {
         });
       } catch (e) {}
     }
-    showToast("Artikel blog dihapus dari daftar & Supabase.", "info");
+    showToast("Artikel blog dihapus.", "info");
   };
 
-  // Sync Resume helper
   const syncResumeToSupabase = async (nextEdu, nextExp) => {
     if (!supabaseUrl || !supabaseKey) return;
     try {
@@ -1442,7 +1391,6 @@ export default function App() {
     } catch (e) {}
   };
 
-  // Experience CRUD Handlers
   const handleSaveExperience = async (e) => {
     e.preventDefault();
     if (!expForm.role.trim() || !expForm.company.trim()) return;
@@ -1464,7 +1412,7 @@ export default function App() {
 
     setExperience(nextExp);
     await syncResumeToSupabase(education, nextExp);
-    showToast(editingExp ? "Data pengalaman diperbarui di Supabase!" : "Pengalaman baru ditambahkan ke Supabase!");
+    showToast(editingExp ? "Data pengalaman diperbarui!" : "Pengalaman baru disimpan!");
 
     setEditingExp(null);
     setExpForm({ role: '', company: '', type: 'Penuh Waktu', period: '2026', description: '' });
@@ -1492,7 +1440,6 @@ export default function App() {
     showToast("Riwayat pengalaman dihapus.", "info");
   };
 
-  // Education CRUD Handlers
   const handleSaveEducation = async (e) => {
     e.preventDefault();
     if (!eduForm.institution.trim() || !eduForm.major.trim()) return;
@@ -1503,7 +1450,7 @@ export default function App() {
 
     setEducation(nextEdu);
     await syncResumeToSupabase(nextEdu, experience);
-    showToast(editingEdu ? "Data pendidikan diperbarui!" : "Pendidikan baru ditambahkan!");
+    showToast(editingEdu ? "Pendidikan diperbarui!" : "Pendidikan disimpan!");
 
     setEditingEdu(null);
     setEduForm({ type: 'Formal', institution: '', major: '', period: '2026', description: '' });
@@ -1563,10 +1510,12 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${
-      isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
-    }`}>
-      {/* CUSTOM KEYFRAME ANIMATIONS FOR SMOOTH MODERN EXPERIENCE */}
+    <div 
+      className={`min-h-screen font-sans transition-colors duration-300 ${
+        isDark ? 'bg-slate-950 text-slate-100' : 'text-[#000000]'
+      }`}
+      style={!isDark ? { backgroundColor: BRAND_LIGHT.bg, color: BRAND_LIGHT.textPrimary } : undefined}
+    >
       <style>{`
         @keyframes floatSlow {
           0%, 100% { transform: translate(0px, 0px) scale(1); }
@@ -1579,10 +1528,6 @@ export default function App() {
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(22px); }
           to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmerSweep {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
         }
         .animate-float-slow {
           animation: floatSlow 9s ease-in-out infinite;
@@ -1607,25 +1552,26 @@ export default function App() {
           {toast.type === 'error' ? (
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
           ) : (
-            <CheckCircle2 className="w-5 h-5 text-[#D4F34A] shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-[#FE7F2D] shrink-0" />
           )}
           <span className="text-sm font-medium">{toast.message}</span>
         </div>
       )}
 
       {/* =====================================================================
-          FILE 1: LANDINGPAGE.HTML (PUBLIC PORTFOLIO)
+          LANDINGPAGE.HTML (PUBLIC PORTFOLIO)
          ===================================================================== */}
       {currentRoute === 'landingpage.html' && (
-        <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className={isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}>
+        <div dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           {/* TOP NAVBAR */}
           <header className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors ${
-            isDark ? 'bg-slate-950/85 border-slate-800/80' : 'bg-white/85 border-slate-200'
+            isDark ? 'bg-slate-950/85 border-slate-800/80' : 'bg-[#FFFFFF]/90 border-[#D0D5DD]'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
-              {/* Brand Logo / Avatar Karakter */}
               <a href="#" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-slate-900 border border-slate-700/80 shadow-lg shadow-orange-500/20 group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0 flex items-center justify-center">
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden border shadow-lg group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0 flex items-center justify-center ${
+                  isDark ? 'bg-slate-900 border-slate-700/80 shadow-orange-500/20' : 'bg-white border-[#D0D5DD] shadow-black/5'
+                }`}>
                   <img
                     src={profile.avatar || DEFAULT_AVATAR}
                     alt={profile.name}
@@ -1634,29 +1580,27 @@ export default function App() {
                   />
                 </div>
                 <div className="min-w-0">
-                  <div className={`font-bold text-base sm:text-lg tracking-tight flex items-center gap-2 whitespace-nowrap ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <div className={`font-bold text-base sm:text-lg tracking-tight flex items-center gap-2 whitespace-nowrap ${isDark ? 'text-white' : 'text-[#000000]'}`}>
                     <span className="truncate">{profile.name}</span>
                   </div>
-                  <p className={`text-xs hidden sm:block truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  <p className={`text-xs hidden sm:block truncate ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
                     Brand Strategist • Identity & Social Media
                   </p>
                 </div>
               </a>
 
-              {/* Clean Navigation Links */}
               <nav className={`hidden lg:flex items-center gap-8 text-sm font-semibold ${
-                isDark ? 'text-slate-300' : 'text-slate-600'
+                isDark ? 'text-slate-300' : 'text-[#233D4D]'
               }`}>
-                <a href="#tentang" className="hover:text-orange-500 transition-colors">{t.navAbout}</a>
-                <a href="#karya" className="hover:text-orange-500 transition-colors">{t.navWorks}</a>
-                <a href="#pengalaman" className="hover:text-orange-500 transition-colors">{t.navResume}</a>
-                <a href="#blog" className="hover:text-orange-500 transition-colors">{t.navBlog}</a>
-                <a href="#kontak" className="hover:text-orange-500 transition-colors">{t.navContact}</a>
+                <a href="#tentang" className="hover:text-[#FE7F2D] transition-colors">{t.navAbout}</a>
+                <a href="#karya" className="hover:text-[#FE7F2D] transition-colors">{t.navWorks}</a>
+                <a href="#pengalaman" className="hover:text-[#FE7F2D] transition-colors">{t.navResume}</a>
+                <a href="#blog" className="hover:text-[#FE7F2D] transition-colors">{t.navBlog}</a>
+                <a href="#kontak" className="hover:text-[#FE7F2D] transition-colors">{t.navContact}</a>
               </nav>
 
-              {/* Right Actions */}
               <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-                {/* Multi-Language Dropdown */}
+                {/* Language Switcher */}
                 <div className="relative">
                   <button
                     type="button"
@@ -1664,43 +1608,33 @@ export default function App() {
                     className={`px-3 py-2.5 rounded-xl border text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                       isDark
                         ? 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800'
-                        : 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200'
+                        : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
                     }`}
                   >
-                    <Languages className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                    <Languages className="w-3.5 h-3.5 text-[#FE7F2D] shrink-0" />
                     <span>{activeLangObj.label}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 text-[#233D4D]/70 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {langDropdownOpen && (
                     <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setLangDropdownOpen(false)}
-                      />
-                      <div
-                        className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-fade-up ${
-                          isDark
-                            ? 'bg-slate-900/95 border-slate-800 text-slate-100'
-                            : 'bg-white/95 border-slate-200 text-slate-800'
-                        }`}
-                      >
+                      <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
+                      <div className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-fade-up ${
+                        isDark ? 'bg-slate-900/95 border-slate-800 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                      }`}>
                         {SUPPORTED_LANGUAGES.map((l) => {
                           const isSelected = lang === l.code;
                           return (
                             <button
                               key={l.code}
                               type="button"
-                              onClick={() => {
-                                setLang(l.code);
-                                setLangDropdownOpen(false);
-                              }}
+                              onClick={() => { setLang(l.code); setLangDropdownOpen(false); }}
                               className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
                                 isSelected
-                                  ? 'bg-orange-500 text-slate-950 shadow-sm'
+                                  ? 'bg-[#FE7F2D] text-white shadow-sm'
                                   : isDark
                                     ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950'
+                                    : 'text-[#233D4D] hover:bg-[#EAECF0] hover:text-[#000000]'
                               }`}
                             >
                               <span className="flex items-center gap-2">
@@ -1708,7 +1642,7 @@ export default function App() {
                                 <span>{l.name}</span>
                               </span>
                               <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
-                                isSelected ? 'bg-slate-950/20 text-slate-950' : 'text-slate-400'
+                                isSelected ? 'bg-black/20 text-white' : 'text-[#233D4D]/60'
                               }`}>
                                 {l.label}
                               </span>
@@ -1726,7 +1660,7 @@ export default function App() {
                   className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 text-xs font-semibold ${
                     isDark 
                       ? 'bg-slate-900 border-slate-800 text-amber-400 hover:bg-slate-800' 
-                      : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                      : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
                   }`}
                 >
                   {isDark ? (
@@ -1736,7 +1670,7 @@ export default function App() {
                     </>
                   ) : (
                     <>
-                      <Moon className="w-4 h-4 text-indigo-600" />
+                      <Moon className="w-4 h-4 text-[#233D4D]" />
                       <span className="hidden xl:inline">{t.nightMode}</span>
                     </>
                   )}
@@ -1746,7 +1680,7 @@ export default function App() {
                   href={`https://wa.me/${profile.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 shadow-lg shadow-orange-500/20 hover:scale-105 transition-all"
+                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-[#FE7F2D] hover:bg-[#E86E20] text-white shadow-lg shadow-[#FE7F2D]/25 hover:scale-105 transition-all"
                 >
                   <span>{t.hireMe}</span>
                   <ArrowUpRight className="w-4 h-4" />
@@ -1755,7 +1689,7 @@ export default function App() {
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className={`lg:hidden p-2.5 rounded-xl border ${
-                    isDark ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    isDark ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                   }`}
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -1763,22 +1697,22 @@ export default function App() {
               </div>
             </div>
 
-            {/* Mobile & Tablet Navigation Drawer */}
+            {/* Mobile Nav Drawer */}
             {mobileMenuOpen && (
               <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-xl animate-fade-up ${
-                isDark ? 'bg-slate-900/95 border-slate-800 text-slate-200' : 'bg-white/95 border-slate-200 text-slate-800'
+                isDark ? 'bg-slate-900/95 border-slate-800 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
               }`}>
-                <a href="#tentang" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navAbout}</a>
-                <a href="#karya" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navWorks}</a>
-                <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navResume}</a>
-                <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navBlog}</a>
-                <a href="#kontak" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-orange-500/10 hover:text-orange-500 transition-colors">{t.navContact}</a>
+                <a href="#tentang" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navAbout}</a>
+                <a href="#karya" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navWorks}</a>
+                <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navResume}</a>
+                <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navBlog}</a>
+                <a href="#kontak" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navContact}</a>
                 <div className="pt-2">
                   <a
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                    className="w-full py-3 rounded-xl text-sm font-bold bg-[#FE7F2D] text-white flex items-center justify-center gap-2 shadow-lg shadow-[#FE7F2D]/20"
                   >
                     <span>{t.contactWa}</span>
                     <ArrowUpRight className="w-4 h-4" />
@@ -1788,19 +1722,23 @@ export default function App() {
             )}
           </header>
 
-          {/* HERO SECTION (Tanpa badge 'Portfolio Resmi • Siap Berkolaborasi' sesuai permintaan) */}
+          {/* HERO SECTION */}
           <section className="relative overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
-            <div className="absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none animate-float-slow" />
-            <div className="absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none animate-float-reverse" />
+            <div className={`absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full blur-3xl pointer-events-none animate-float-slow ${
+              isDark ? 'bg-orange-500/15' : 'bg-[#FE7F2D]/12'
+            }`} />
+            <div className={`absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full blur-3xl pointer-events-none animate-float-reverse ${
+              isDark ? 'bg-indigo-500/15' : 'bg-[#233D4D]/10'
+            }`} />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
               <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
                 <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-left animate-fade-up">
                   <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${
-                    isDark ? 'text-white' : 'text-slate-900'
+                    isDark ? 'text-white' : 'text-[#000000]'
                   }`}>
                     {t.heroGreeting} <br />
-                    <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-[#FE7F2D] via-[#f78e47] to-amber-500 bg-clip-text text-transparent">
                       {profile.name}
                     </span>
                   </h1>
@@ -1809,20 +1747,20 @@ export default function App() {
                     {profile.roles.map((role, idx) => (
                       <span 
                         key={idx}
-                        className={`px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-2 transition-transform hover:-translate-y-0.5 ${
+                        className={`px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold flex items-center gap-2 transition-transform hover:-translate-y-0.5 ${
                           isDark 
                             ? 'bg-slate-900/90 border-slate-800 text-slate-200' 
-                            : 'bg-white border-slate-200 text-slate-700 shadow-sm'
+                            : 'bg-white border-[#D0D5DD] text-[#233D4D] shadow-sm'
                         }`}
                       >
-                        <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0 animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-[#FE7F2D] shrink-0 animate-pulse" />
                         {role}
                       </span>
                     ))}
                   </div>
 
-                  <p className={`text-sm sm:text-base lg:text-lg leading-relaxed max-w-2xl ${
-                    isDark ? 'text-slate-300' : 'text-slate-600'
+                  <p className={`text-sm sm:text-base lg:text-lg leading-relaxed max-w-2xl font-normal ${
+                    isDark ? 'text-slate-300' : 'text-[#233D4D]'
                   }`}>
                     {getLocalized(profile, 'bio')}
                   </p>
@@ -1830,7 +1768,7 @@ export default function App() {
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
                     <a
                       href="#karya"
-                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold text-sm shadow-xl shadow-orange-500/25 hover:scale-105 flex items-center justify-center gap-2 transition-all"
+                      className="px-6 py-3.5 rounded-xl bg-[#FE7F2D] hover:bg-[#E86E20] text-white font-bold text-sm shadow-xl shadow-[#FE7F2D]/25 hover:scale-105 flex items-center justify-center gap-2 transition-all"
                     >
                       <span>{t.exploreWorks}</span>
                       <ArrowUpRight className="w-4 h-4" />
@@ -1839,13 +1777,13 @@ export default function App() {
                       href={`https://wa.me/${profile.whatsapp}`}
                       target="_blank"
                       rel="noreferrer"
-                      className={`px-6 py-3.5 rounded-xl border font-semibold text-sm flex items-center justify-center gap-2 hover:scale-105 transition-all ${
+                      className={`px-6 py-3.5 rounded-xl border font-bold text-sm flex items-center justify-center gap-2 hover:scale-105 transition-all ${
                         isDark 
                           ? 'bg-slate-900 hover:bg-slate-800 text-white border-slate-700' 
-                          : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-sm'
+                          : 'bg-white hover:bg-[#EAECF0] text-[#233D4D] border-[#D0D5DD] shadow-sm'
                       }`}
                     >
-                      <Phone className="w-4 h-4 text-orange-500" />
+                      <Phone className="w-4 h-4 text-[#FE7F2D]" />
                       <span>{t.contactWa}</span>
                     </a>
                   </div>
@@ -1854,12 +1792,14 @@ export default function App() {
                 {/* Right Profile Card */}
                 <div className="lg:col-span-5 animate-fade-up">
                   <div className="relative mx-auto max-w-lg lg:max-w-md card-hover-3d">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 via-amber-500 to-indigo-500 rounded-3xl blur-xl opacity-35 animate-pulse" />
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#FE7F2D] via-amber-500 to-[#233D4D] rounded-3xl blur-xl opacity-25 animate-pulse" />
                     <div className={`relative rounded-3xl p-5 sm:p-8 shadow-2xl border space-y-5 sm:space-y-6 ${
-                      isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                      isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-[#D0D5DD]'
                     }`}>
                       <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-slate-950 p-1 shrink-0 border border-slate-700/80 shadow-xl group">
+                        <div className={`w-20 h-20 rounded-2xl overflow-hidden p-1 shrink-0 border shadow-lg group flex items-center justify-center ${
+                          isDark ? 'bg-slate-950 border-slate-700/80' : 'bg-[#EAECF0] border-[#D0D5DD]'
+                        }`}>
                           <img
                             src={profile.avatar || DEFAULT_AVATAR}
                             alt={profile.name}
@@ -1867,50 +1807,56 @@ export default function App() {
                             className="w-full h-full object-cover rounded-xl"
                           />
                         </div>
-                        <div>
-                          <h3 className="text-xl font-bold mt-0.5 text-white">{profile.name}</h3>
-                          <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                            <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-                            Prigen, Pasuruan, Jawa Timur
+                        <div className="min-w-0">
+                          <h3 className={`text-xl font-black mt-0.5 truncate ${
+                            isDark ? 'text-white' : 'text-[#000000]'
+                          }`}>
+                            {profile.name}
+                          </h3>
+                          <p className={`text-xs flex items-center gap-1.5 mt-1 font-medium ${
+                            isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                          }`}>
+                            <MapPin className="w-3.5 h-3.5 text-[#FE7F2D] shrink-0" />
+                            <span>Prigen, Pasuruan, Jawa Timur</span>
                           </p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2.5">
                         {[
-                          { badge: "Br", title: "Brand Strategy", sub: "Positioning & Guideline", color: "text-orange-500 bg-orange-500/10 border-orange-500/20" },
+                          { badge: "Br", title: "Brand Strategy", sub: "Positioning & Guideline", color: "text-[#FE7F2D] bg-[#FE7F2D]/10 border-[#FE7F2D]/20" },
                           { badge: "Ai/Ps", title: "Logo & Identity", sub: "Illustrator & Photoshop", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
                           { badge: "Sm", title: "Social Media Mgmt", sub: "Content & Visual Kit", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
                           { badge: "Fig", title: "Figma UI/UX", sub: "Visual & Prototyping", color: "text-purple-500 bg-purple-500/10 border-purple-500/20" }
                         ].map((tool, i) => (
                           <div key={i} className={`p-3 rounded-2xl border flex items-center gap-3 transition-transform hover:-translate-y-0.5 ${
-                            isDark ? 'bg-slate-950/80 border-slate-800/80' : 'bg-slate-50 border-slate-200/80'
+                            isDark ? 'bg-slate-950/80 border-slate-800/80' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'
                           }`}>
                             <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-bold text-xs ${tool.color}`}>
                               {tool.badge}
                             </div>
                             <div className="min-w-0">
-                              <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tool.title}</div>
-                              <div className="text-[10px] text-slate-400 truncate">{tool.sub}</div>
+                              <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{tool.title}</div>
+                              <div className={`text-[10px] truncate ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{tool.sub}</div>
                             </div>
                           </div>
                         ))}
                       </div>
 
                       <div className={`pt-4 border-t grid grid-cols-3 gap-2 text-center ${
-                        isDark ? 'border-slate-800' : 'border-slate-200'
+                        isDark ? 'border-slate-800' : 'border-[#D0D5DD]'
                       }`}>
-                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-slate-50'}`}>
-                          <div className="text-xl font-black text-orange-500">{projects.length}+</div>
-                          <div className="text-[11px] text-slate-400">{t.navWorks}</div>
+                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-[#EAECF0]/60'}`}>
+                          <div className="text-xl font-black text-[#FE7F2D]">{projects.length}+</div>
+                          <div className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.navWorks}</div>
                         </div>
-                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-slate-50'}`}>
+                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-[#EAECF0]/60'}`}>
                           <div className="text-xl font-black text-amber-500">{experience.length}</div>
-                          <div className="text-[11px] text-slate-400">{t.navResume}</div>
+                          <div className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.navResume}</div>
                         </div>
-                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-slate-50'}`}>
+                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-[#EAECF0]/60'}`}>
                           <div className="text-xl font-black text-emerald-500">4</div>
-                          <div className="text-[11px] text-slate-400">Languages</div>
+                          <div className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Languages</div>
                         </div>
                       </div>
                     </div>
@@ -1920,28 +1866,28 @@ export default function App() {
             </div>
           </section>
 
-          {/* EMPAT PILAR KEAHLIAN (Tanpa deretan 3 kartu Email/WA/Alamat di atasnya sesuai permintaan) */}
+          {/* EMPAT PILAR KEAHLIAN */}
           <section id="tentang" className={`py-16 border-y ${
-            isDark ? 'border-slate-800/80 bg-slate-900/30' : 'border-slate-200 bg-white'
+            isDark ? 'border-slate-800/80 bg-slate-900/30' : 'border-[#D0D5DD] bg-white'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
               <div className="text-center max-w-2xl mx-auto">
-                <h2 className="text-2xl sm:text-3xl font-black">{t.pillarsTitle}</h2>
-                <p className="text-slate-400 text-sm mt-2">{t.pillarsDesc}</p>
+                <h2 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.pillarsTitle}</h2>
+                <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.pillarsDesc}</p>
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {t.pillars.map((pillar, idx) => (
-                  <div key={idx} className={`p-6 rounded-3xl border hover:border-orange-500/50 card-hover-3d group ${
-                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+                  <div key={idx} className={`p-6 rounded-3xl border hover:border-[#FE7F2D] card-hover-3d group ${
+                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                   }`}>
-                    <div className="text-3xl font-black text-slate-500/30 group-hover:text-orange-500 transition-colors">
+                    <div className="text-3xl font-black text-[#233D4D]/40 group-hover:text-[#FE7F2D] transition-colors">
                       {pillar.num}
                     </div>
-                    <h3 className="text-lg font-bold mt-2">{pillar.title}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed mt-2">{pillar.desc}</p>
-                    <div className={`mt-4 pt-3 border-t text-[11px] font-semibold text-orange-500 ${
-                      isDark ? 'border-slate-800' : 'border-slate-200'
+                    <h3 className={`text-lg font-bold mt-2 ${isDark ? 'text-white' : 'text-[#000000]'}`}>{pillar.title}</h3>
+                    <p className={`text-xs leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{pillar.desc}</p>
+                    <div className={`mt-4 pt-3 border-t text-[11px] font-bold text-[#FE7F2D] ${
+                      isDark ? 'border-slate-800' : 'border-[#D0D5DD]'
                     }`}>
                       {pillar.tools}
                     </div>
@@ -1955,27 +1901,27 @@ export default function App() {
           <section id="karya" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
-                <div className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">
+                <div className="text-xs font-black uppercase tracking-widest text-[#FE7F2D] mb-2">
                   {t.selectedPortfolio}
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-black">{t.worksTitle}</h2>
+                <h2 className={`text-3xl sm:text-4xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.worksTitle}</h2>
               </div>
 
               <div className="relative w-full md:w-72">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#233D4D]/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder={t.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-orange-500 ${
-                    isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-[#FE7F2D] font-medium ${
+                    isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60'
                   }`}
                 />
               </div>
             </div>
 
-            {/* Category Filter Pills */}
+            {/* Category Filter */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               {categories.map((cat) => {
                 const active = selectedCategory === cat;
@@ -1986,10 +1932,10 @@ export default function App() {
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
                       active
-                        ? 'bg-orange-500 text-slate-950 shadow-lg shadow-orange-500/25 scale-105'
+                        ? 'bg-[#FE7F2D] text-white shadow-lg shadow-[#FE7F2D]/25 scale-105'
                         : isDark
                           ? 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                          : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+                          : 'bg-white text-[#233D4D] hover:text-[#000000] border border-[#D0D5DD]'
                     }`}
                   >
                     <span>{displayCat}</span>
@@ -2005,8 +1951,8 @@ export default function App() {
                   key={proj.id}
                   className={`group rounded-3xl border overflow-hidden card-hover-3d flex flex-col justify-between shadow-lg ${
                     isDark
-                      ? 'bg-slate-900/90 border-slate-800/90 hover:border-orange-500/50'
-                      : 'bg-white border-slate-200 hover:border-orange-500/50'
+                      ? 'bg-slate-900/90 border-slate-800/90 hover:border-[#FE7F2D]/50'
+                      : 'bg-white border-[#D0D5DD] hover:border-[#FE7F2D]'
                   }`}
                 >
                   <div>
@@ -2019,17 +1965,17 @@ export default function App() {
                           src={proj.image}
                           alt={getLocalized(proj, 'title')}
                           loading="lazy"
-                          className="absolute inset-0 w-full h-full object-cover object-center opacity-55 group-hover:scale-110 group-hover:opacity-75 transition-all duration-700"
+                          className="absolute inset-0 w-full h-full object-cover object-center opacity-65 group-hover:scale-110 group-hover:opacity-85 transition-all duration-700"
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-slate-950/20" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
 
                       <div className="relative z-10 flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/75 backdrop-blur-md text-white text-xs font-semibold border border-white/15 shadow">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md text-white text-xs font-semibold border border-white/15 shadow">
                           {getCategoryIcon(proj.category)}
                           <span>{proj.category}</span>
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-slate-950/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/15">
+                        <span className="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/15">
                           {proj.year}
                         </span>
                       </div>
@@ -2045,7 +1991,7 @@ export default function App() {
                     </div>
 
                     <div className="p-6 space-y-4">
-                      <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                      <p className={`text-xs leading-relaxed line-clamp-3 font-medium ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
                         {getLocalized(proj, 'description')}
                       </p>
 
@@ -2053,8 +1999,8 @@ export default function App() {
                         {proj.tools.map((tool, i) => (
                           <span
                             key={i}
-                            className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium ${
-                              isDark ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                            className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold ${
+                              isDark ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
                             }`}
                           >
                             {tool}
@@ -2065,11 +2011,11 @@ export default function App() {
                   </div>
 
                   <div className={`px-6 py-4 border-t flex items-center justify-between ${
-                    isDark ? 'border-slate-800/80 bg-slate-950/40' : 'border-slate-100 bg-slate-50/70'
+                    isDark ? 'border-slate-800/80 bg-slate-950/40' : 'border-[#E4E7EC] bg-[#EAECF0]/40'
                   }`}>
                     <button
                       onClick={() => setActiveProjectModal(proj)}
-                      className="text-xs font-semibold hover:text-orange-500 transition-colors flex items-center gap-1"
+                      className="text-xs font-bold text-[#233D4D] hover:text-[#FE7F2D] transition-colors flex items-center gap-1"
                     >
                       <span>{t.projectDetail}</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -2080,7 +2026,7 @@ export default function App() {
                         href={proj.link}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-500 hover:text-orange-400"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FE7F2D] hover:underline"
                       >
                         <span>{t.visitLink}</span>
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -2092,45 +2038,45 @@ export default function App() {
             </div>
           </section>
 
-          {/* RESUME: PENDIDIKAN & PENGALAMAN */}
+          {/* RESUME */}
           <section id="pengalaman" className={`py-20 border-y ${
-            isDark ? 'bg-slate-900/40 border-slate-800/80' : 'bg-white border-slate-200'
+            isDark ? 'bg-slate-900/40 border-slate-800/80' : 'bg-white border-[#D0D5DD]'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
               <div className="text-center max-w-2xl mx-auto">
-                <div className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">
+                <div className="text-xs font-black uppercase tracking-widest text-[#FE7F2D] mb-2">
                   {t.resumeBadge}
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-black">{t.resumeTitle}</h2>
+                <h2 className={`text-3xl sm:text-4xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.resumeTitle}</h2>
               </div>
 
               <div className="grid lg:grid-cols-12 gap-10">
                 <div className="lg:col-span-7 space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                    <div className="p-2.5 rounded-xl bg-[#FE7F2D]/10 text-[#FE7F2D] border border-[#FE7F2D]/20">
                       <Briefcase className="w-5 h-5" />
                     </div>
-                    <h3 className="text-xl font-bold">{t.expTitle}</h3>
+                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.expTitle}</h3>
                   </div>
 
-                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-slate-700/40">
+                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-[#D0D5DD]">
                     {experience.map((exp) => (
                       <div key={exp.id} className="relative pl-10">
-                        <div className="w-3.5 h-3.5 rounded-full bg-orange-500 border-4 border-slate-950 absolute left-[9px] top-5" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#FE7F2D] border-4 border-white absolute left-[9px] top-5" />
                         <div className={`p-5 rounded-2xl border card-hover-3d ${
-                          isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+                          isDark ? 'bg-slate-900 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-xs font-bold text-orange-500">{exp.period}</span>
-                            <span className={`px-2.5 py-0.5 rounded-full border text-[11px] ${
-                              isDark ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-600'
+                            <span className="text-xs font-bold text-[#FE7F2D]">{exp.period}</span>
+                            <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
+                              isDark ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                             }`}>
                               {getLocalized(exp, 'type')}
                             </span>
                           </div>
-                          <h4 className="text-base font-bold mt-1">{getLocalized(exp, 'role')}</h4>
-                          <div className="text-xs font-semibold text-slate-400 mt-0.5">{exp.company}</div>
-                          <p className="text-xs text-slate-400 mt-2 leading-relaxed">{getLocalized(exp, 'description')}</p>
+                          <h4 className={`text-base font-bold mt-1 ${isDark ? 'text-white' : 'text-[#000000]'}`}>{getLocalized(exp, 'role')}</h4>
+                          <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{exp.company}</div>
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
                         </div>
                       </div>
                     ))}
@@ -2142,13 +2088,13 @@ export default function App() {
                     <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
                       <GraduationCap className="w-5 h-5" />
                     </div>
-                    <h3 className="text-xl font-bold">{t.eduTitle}</h3>
+                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.eduTitle}</h3>
                   </div>
 
                   <div className="space-y-4">
                     {education.map((edu) => (
                       <div key={edu.id} className={`p-5 rounded-2xl border card-hover-3d ${
-                        isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+                        isDark ? 'bg-slate-900 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                       }`}>
                         <div className="flex items-center justify-between">
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
@@ -2158,11 +2104,11 @@ export default function App() {
                           }`}>
                             {t.eduPrefix} {edu.type}
                           </span>
-                          <span className="text-xs font-semibold text-slate-400">{edu.period}</span>
+                          <span className={`text-xs font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{edu.period}</span>
                         </div>
-                        <h4 className="text-base font-bold mt-2">{edu.institution}</h4>
-                        <div className="text-xs font-semibold text-orange-500 mt-0.5">{getLocalized(edu, 'major')}</div>
-                        <p className="text-xs text-slate-400 mt-2 leading-relaxed">{getLocalized(edu, 'description')}</p>
+                        <h4 className={`text-base font-bold mt-2 ${isDark ? 'text-white' : 'text-[#000000]'}`}>{edu.institution}</h4>
+                        <div className="text-xs font-bold text-[#FE7F2D] mt-0.5">{getLocalized(edu, 'major')}</div>
+                        <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
                       </div>
                     ))}
                   </div>
@@ -2171,13 +2117,13 @@ export default function App() {
             </div>
           </section>
 
-          {/* BLOG SECTION */}
+          {/* BLOG */}
           <section id="blog" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">
+              <div className="text-xs font-black uppercase tracking-widest text-[#FE7F2D] mb-2">
                 {t.blogBadge}
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black">{t.blogTitle}</h2>
+              <h2 className={`text-3xl sm:text-4xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.blogTitle}</h2>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -2186,7 +2132,7 @@ export default function App() {
                   key={blog.id}
                   onClick={() => setActiveBlogModal(blog)}
                   className={`rounded-3xl border overflow-hidden flex flex-col justify-between card-hover-3d cursor-pointer group ${
-                    isDark ? 'bg-slate-900 border-slate-800 hover:border-orange-500/40' : 'bg-white border-slate-200 hover:border-orange-500/40 shadow-sm'
+                    isDark ? 'bg-slate-900 border-slate-800 hover:border-[#FE7F2D]/40' : 'bg-white border-[#D0D5DD] hover:border-[#FE7F2D] shadow-sm'
                   }`}
                 >
                   <div>
@@ -2200,29 +2146,37 @@ export default function App() {
                       </div>
                     )}
                     <div className="p-6 space-y-4">
-                      <div className="flex items-center justify-between text-xs text-slate-400">
-                        <span className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 font-semibold border border-orange-500/20">
+                      <div className={`flex items-center justify-between text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                        <span className="px-3 py-1 rounded-full bg-[#FE7F2D]/10 text-[#FE7F2D] font-bold border border-[#FE7F2D]/20">
                           {blog.category}
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 font-medium">
                           <Calendar className="w-3.5 h-3.5" />
                           {blog.date}
                         </span>
                       </div>
 
-                      <h3 className="text-xl font-bold leading-snug group-hover:text-orange-500 transition-colors">{getLocalized(blog, 'title')}</h3>
-                      <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{getLocalized(blog, 'excerpt')}</p>
+                      <h3 className={`text-xl font-bold leading-snug group-hover:text-[#FE7F2D] transition-colors ${
+                        isDark ? 'text-white' : 'text-[#000000]'
+                      }`}>
+                        {getLocalized(blog, 'title')}
+                      </h3>
+                      <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                        {getLocalized(blog, 'excerpt')}
+                      </p>
                     </div>
                   </div>
 
                   <div className={`px-6 py-4 border-t flex items-center justify-between ${
-                    isDark ? 'border-slate-800' : 'border-slate-100'
+                    isDark ? 'border-slate-800' : 'border-[#E4E7EC]'
                   }`}>
-                    <span className="text-[11px] text-slate-400">{t.readTimeLabel} {blog.readTime}</span>
+                    <span className={`text-[11px] font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                      {t.readTimeLabel} {blog.readTime}
+                    </span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
-                      className="text-xs font-bold text-orange-500 hover:text-orange-400 flex items-center gap-1"
+                      className="text-xs font-bold text-[#FE7F2D] hover:underline flex items-center gap-1"
                     >
                       <span>{t.readMore}</span>
                       <ChevronRight className="w-4 h-4" />
@@ -2233,19 +2187,18 @@ export default function App() {
             </div>
           </section>
 
-          {/* FOOTER (Informasi Email Resmi, WhatsApp, dan Alamat Domisili diletakkan rapi di sini) */}
+          {/* FOOTER */}
           <footer id="kontak" className={`border-t py-16 ${
-            isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-slate-100'
+            isDark ? 'border-slate-800 bg-slate-900/60' : 'border-[#D0D5DD] bg-white'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-              {/* CTA Banner */}
-              <div className="rounded-3xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 p-6 sm:p-12 text-slate-950 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-2xl">
+              <div className="rounded-3xl bg-gradient-to-r from-[#FE7F2D] via-amber-500 to-yellow-500 p-6 sm:p-12 text-slate-950 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-2xl">
                 <div className="space-y-2 max-w-xl">
-                  <span className="text-xs font-black uppercase tracking-widest bg-slate-950/10 px-3 py-1 rounded-full">
+                  <span className="text-xs font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">
                     {t.collabBadge}
                   </span>
                   <h2 className="text-xl sm:text-3xl font-black leading-tight">{t.collabTitle}</h2>
-                  <p className="text-xs sm:text-sm font-medium text-slate-900/80">{t.collabDesc}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-slate-950/85">{t.collabDesc}</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto">
@@ -2253,14 +2206,14 @@ export default function App() {
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-3.5 rounded-xl bg-slate-950 text-white font-bold text-sm hover:bg-slate-900 hover:scale-105 transition-all flex items-center justify-center gap-2"
+                    className="px-6 py-3.5 rounded-xl bg-black text-white font-bold text-sm hover:bg-slate-900 hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
-                    <Phone className="w-4 h-4 text-orange-400" />
+                    <Phone className="w-4 h-4 text-[#FE7F2D]" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`mailto:${profile.email}`}
-                    className="px-6 py-3.5 rounded-xl bg-white/90 text-slate-950 font-bold text-sm hover:bg-white hover:scale-105 transition-all flex items-center justify-center gap-2"
+                    className="px-6 py-3.5 rounded-xl bg-white text-[#000000] font-bold text-sm hover:bg-[#EAECF0] hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
                     <Mail className="w-4 h-4" />
                     <span>Email</span>
@@ -2268,17 +2221,16 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Footer Contact Details Grid (Dipindahkan ke Footer sesuai permintaan) */}
               <div className={`grid md:grid-cols-3 gap-6 pt-4 border-t ${
-                isDark ? 'border-slate-800/80' : 'border-slate-200'
+                isDark ? 'border-slate-800/80' : 'border-[#D0D5DD]'
               }`}>
                 <div className="flex items-start gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[#FE7F2D]/10 text-[#FE7F2D] border border-[#FE7F2D]/20 shrink-0">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-400 font-medium">{t.officialEmail}</div>
-                    <a href={`mailto:${profile.email}`} className="text-sm font-bold hover:text-orange-500 break-all mt-0.5 block">
+                    <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.officialEmail}</div>
+                    <a href={`mailto:${profile.email}`} className={`text-sm font-bold hover:text-[#FE7F2D] break-all mt-0.5 block ${isDark ? 'text-white' : 'text-[#000000]'}`}>
                       {profile.email}
                     </a>
                   </div>
@@ -2289,8 +2241,8 @@ export default function App() {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-400 font-medium">{t.phoneWa}</div>
-                    <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className="text-sm font-bold hover:text-emerald-500 mt-0.5 block">
+                    <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.phoneWa}</div>
+                    <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`text-sm font-bold hover:text-emerald-500 mt-0.5 block ${isDark ? 'text-white' : 'text-[#000000]'}`}>
                       {profile.phone}
                     </a>
                   </div>
@@ -2301,15 +2253,14 @@ export default function App() {
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-400 font-medium">{t.addressTitle}</div>
-                    <p className="text-xs leading-relaxed mt-0.5 text-slate-400">{profile.address}</p>
+                    <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.addressTitle}</div>
+                    <p className={`text-xs leading-relaxed mt-0.5 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{profile.address}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Copyright & Secret Admin Button */}
-              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs text-slate-400 ${
-                isDark ? 'border-slate-800/80' : 'border-slate-200'
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs font-medium ${
+                isDark ? 'border-slate-800/80 text-slate-400' : 'border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div>© {new Date().getFullYear()} {profile.name}. All Rights Reserved.</div>
                 <div className="flex items-center gap-4">
@@ -2317,7 +2268,7 @@ export default function App() {
                   <button
                     onClick={() => setCurrentRoute('dashboard.html')}
                     title="Admin Access (dashboard.html)"
-                    className="opacity-30 hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-slate-800/30"
+                    className="opacity-40 hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-black/5"
                   >
                     <Lock className="w-3.5 h-3.5" />
                   </button>
@@ -2329,21 +2280,22 @@ export default function App() {
       )}
 
       {/* =====================================================================
-          FILE 2: DASHBOARD.HTML (FINAL CLEAN CMS WITHOUT SUPABASE/VERCEL TABS)
+          DASHBOARD.HTML (CMS)
          ===================================================================== */}
       {currentRoute === 'dashboard.html' && (
         <>
           {!isAuthenticated ? (
-            /* LOGIN SCREEN FOR DASHBOARD.HTML */
             <div className={`min-h-[calc(100vh-42px)] flex items-center justify-center p-4 ${
-              isDark ? 'bg-[#12121A]' : 'bg-[#ECE9FE]'
+              isDark ? 'bg-[#12121A]' : 'bg-[#EAECF0]'
             }`}>
               <div className={`w-full max-w-md rounded-3xl p-8 shadow-2xl border space-y-6 animate-fade-up ${
-                isDark ? 'bg-[#181824] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+                isDark ? 'bg-[#181824] border-slate-800 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-900 shadow shrink-0">
+                    <div className={`w-12 h-12 rounded-2xl overflow-hidden border shadow shrink-0 flex items-center justify-center ${
+                      isDark ? 'border-slate-700/80 bg-slate-900' : 'border-[#D0D5DD] bg-[#EAECF0]'
+                    }`}>
                       <img
                         src={profile.avatar || DEFAULT_AVATAR}
                         alt="Avatar Karakter"
@@ -2353,12 +2305,12 @@ export default function App() {
                     </div>
                     <div>
                       <h2 className="text-lg font-black">CMS Login Portal</h2>
-                      <p className="text-xs text-slate-400 font-mono">dashboard.html</p>
+                      <p className={`text-xs font-mono ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>dashboard.html</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setCurrentRoute('landingpage.html')}
-                    className="text-xs text-slate-400 hover:text-orange-500 flex items-center gap-1"
+                    className="text-xs text-[#233D4D] hover:text-[#FE7F2D] flex items-center gap-1 font-bold"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Kembali</span>
@@ -2366,7 +2318,7 @@ export default function App() {
                 </div>
 
                 {loginError && (
-                  <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+                  <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{loginError}</span>
                   </div>
@@ -2374,34 +2326,34 @@ export default function App() {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-1.5">Username</label>
+                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Username</label>
                     <input
                       type="text"
                       required
                       value={loginInput.username}
                       onChange={(e) => setLoginInput({ ...loginInput, username: e.target.value })}
                       placeholder="Masukkan username..."
-                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none ${
-                        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FE7F2D] ${
+                        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
                       }`}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-1.5">Password</label>
+                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Password</label>
                     <input
                       type="password"
                       required
                       value={loginInput.password}
                       onChange={(e) => setLoginInput({ ...loginInput, password: e.target.value })}
                       placeholder="••••••••"
-                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none ${
-                        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FE7F2D] ${
+                        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
                       }`}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-2xl bg-[#D4F34A] hover:bg-[#c6e63b] text-slate-950 font-black text-sm shadow-lg transition-all"
+                    className="w-full py-3.5 rounded-2xl bg-[#FE7F2D] hover:bg-[#E86E20] text-white font-black text-sm shadow-lg shadow-[#FE7F2D]/20 transition-all"
                   >
                     Masuk ke Dashboard CMS
                   </button>
@@ -2409,19 +2361,18 @@ export default function App() {
               </div>
             </div>
           ) : (
-            /* AUTHENTICATED EDUPLEX CMS LAYOUT (FINAL VERSION) */
             <div className={`min-h-[calc(100vh-42px)] p-2 sm:p-4 lg:p-6 transition-colors ${
-              isDark ? 'bg-[#0F0F17]' : 'bg-[#DFD7F9]'
+              isDark ? 'bg-[#0F0F17]' : 'bg-[#EAECF0]'
             }`}>
               <div className={`max-w-[1440px] mx-auto rounded-[24px] sm:rounded-[34px] shadow-2xl border overflow-hidden flex flex-col lg:flex-row min-h-[820px] relative ${
-                isDark ? 'bg-[#171723] border-slate-800/80 text-slate-100' : 'bg-[#F8F9FB] border-white text-slate-900'
+                isDark ? 'bg-[#171723] border-slate-800/80 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
               }`}>
-                {/* SIDEBAR (Clean Final Menu: Dashboard, My Works, Blog Posts, Resume CV, Profile Info) */}
+                {/* SIDEBAR */}
                 <aside className="w-full lg:w-64 bg-[#181824] text-white p-5 flex flex-col justify-between shrink-0">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#D4F34A] flex items-center justify-center text-[#181824] font-black text-base">
+                        <div className="w-9 h-9 rounded-xl bg-[#FE7F2D] flex items-center justify-center text-white font-black text-base">
                           <Sparkles className="w-5 h-5" />
                         </div>
                         <div>
@@ -2449,7 +2400,7 @@ export default function App() {
                             onClick={() => setCmsMenu(item.id)}
                             className={`px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all whitespace-nowrap ${
                               active
-                                ? 'bg-[#D4F34A] text-[#181824] shadow-lg'
+                                ? 'bg-[#FE7F2D] text-white shadow-lg shadow-[#FE7F2D]/20'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`}
                           >
@@ -2459,7 +2410,7 @@ export default function App() {
                             </div>
                             {item.badge !== undefined && (
                               <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                                active ? 'bg-[#181824] text-[#D4F34A]' : 'bg-orange-500/20 text-orange-400'
+                                active ? 'bg-black/20 text-white' : 'bg-orange-500/20 text-orange-400'
                               }`}>
                                 {item.badge}
                               </span>
@@ -2488,7 +2439,7 @@ export default function App() {
                   </div>
                 </aside>
 
-                {/* MAIN CONTENT AREA */}
+                {/* MAIN CMS CONTENT */}
                 <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6">
                   {/* Top Bar */}
                   <div className="flex flex-wrap items-center justify-between gap-4">
@@ -2496,7 +2447,7 @@ export default function App() {
                       <h1 className="text-xl sm:text-2xl font-black tracking-tight">
                         Welcome back {profile.name.split(' ')[1] || profile.name} 👋
                       </h1>
-                      <p className="text-xs text-slate-400">
+                      <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
                         Setiap perubahan karya, blog, dan resume otomatis tersimpan ke Cloud Supabase.
                       </p>
                     </div>
@@ -2505,7 +2456,7 @@ export default function App() {
                       <button
                         onClick={() => setTheme(isDark ? 'light' : 'dark')}
                         className={`p-2.5 rounded-2xl border ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-amber-400' : 'bg-white border-slate-200 text-slate-700'
+                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-amber-400' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                         }`}
                       >
                         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -2514,14 +2465,14 @@ export default function App() {
                         onClick={() => fetchFromSupabase()}
                         title="Muat Ulang dari Cloud"
                         className={`p-2.5 rounded-2xl border ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-700'
+                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                         }`}
                       >
                         <RefreshCw className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => pushAllToSupabase()}
-                        className="px-4 py-2.5 rounded-2xl bg-[#D4F34A] hover:bg-[#c8e93e] text-[#181824] font-extrabold text-xs flex items-center gap-2 shadow"
+                        className="px-4 py-2.5 rounded-2xl bg-[#FE7F2D] hover:bg-[#E86E20] text-white font-extrabold text-xs flex items-center gap-2 shadow"
                       >
                         <UploadCloud className="w-4 h-4" />
                         <span>Sync Cloud</span>
@@ -2532,10 +2483,10 @@ export default function App() {
                   {syncStatus && (
                     <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between gap-2 ${
                       syncStatus.type === 'error'
-                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-500'
                         : syncStatus.type === 'success'
-                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                          : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
+                          : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600'
                     }`}>
                       <div className="flex items-center gap-2">
                         {syncStatus.type === 'loading' ? (
@@ -2557,39 +2508,38 @@ export default function App() {
                   {cmsMenu === 'overview' && (
                     <div className="space-y-6 animate-fade-up">
                       <div className="grid sm:grid-cols-3 gap-4">
-                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                          <div className="text-xs text-slate-400 font-bold">Total Karya Portofolio</div>
-                          <div className="text-3xl font-black mt-2 text-orange-500">{projects.length}</div>
-                          <div className="text-[11px] text-slate-400 mt-1">Klik untuk kelola karya →</div>
+                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Total Karya Portofolio</div>
+                          <div className="text-3xl font-black mt-2 text-[#FE7F2D]">{projects.length}</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Klik untuk kelola karya →</div>
                         </div>
-                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                          <div className="text-xs text-slate-400 font-bold">Total Artikel Blog</div>
+                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Total Artikel Blog</div>
                           <div className="text-3xl font-black mt-2 text-emerald-500">{blogs.length}</div>
-                          <div className="text-[11px] text-slate-400 mt-1">Klik untuk tulis artikel →</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Klik untuk tulis artikel →</div>
                         </div>
-                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                          <div className="text-xs text-slate-400 font-bold">Pengalaman & Pendidikan</div>
-                          <div className="text-3xl font-black mt-2 text-[#D4F34A]">
+                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Pengalaman & Pendidikan</div>
+                          <div className="text-3xl font-black mt-2 text-[#FE7F2D]">
                             {experience.length + education.length}
                           </div>
-                          <div className="text-[11px] text-slate-400 mt-1">Klik untuk edit resume →</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Klik untuk edit resume →</div>
                         </div>
                       </div>
 
-                      {/* Recent Works Preview in Dashboard */}
-                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
                         <div className="flex items-center justify-between">
-                          <h3 className="font-extrabold text-sm">Karya Terbaru</h3>
-                          <button onClick={() => setCmsMenu('projects')} className="text-xs font-bold text-orange-500 hover:underline">
+                          <h3 className={`font-black text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>Karya Terbaru</h3>
+                          <button onClick={() => setCmsMenu('projects')} className="text-xs font-bold text-[#FE7F2D] hover:underline">
                              + Tambah Karya
                           </button>
                         </div>
                         <div className="grid sm:grid-cols-2 gap-3">
                           {projects.slice(0, 4).map((p) => (
-                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'}`}>
                               <div className="min-w-0">
-                                <div className="text-[11px] font-bold text-orange-500 truncate">{p.category}</div>
-                                <div className="text-xs font-bold truncate">{p.title}</div>
+                                <div className="text-[11px] font-bold text-[#FE7F2D] truncate">{p.category}</div>
+                                <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{p.title}</div>
                               </div>
                               <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200 shrink-0">
                                 <Edit3 className="w-3.5 h-3.5" />
@@ -2604,21 +2554,21 @@ export default function App() {
                   {/* TAB 2: PROJECTS CRUD */}
                   {cmsMenu === 'projects' && (
                     <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
-                      <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <h3 className="font-extrabold text-base">{editingProject ? 'Edit Karya' : 'Tambah Karya Baru'}</h3>
+                      <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                        <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingProject ? 'Edit Karya' : 'Tambah Karya Baru'}</h3>
                         <input
                           type="text"
                           required
                           placeholder="Judul Karya"
                           value={projectForm.title}
                           onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
                           <select
                             value={projectForm.category}
                             onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           >
                             <option value="Brand Strategy">Brand Strategy</option>
                             <option value="Logo Design & Identity">Logo Design & Identity</option>
@@ -2630,7 +2580,7 @@ export default function App() {
                             placeholder="Tahun (misal: 2026)"
                             value={projectForm.year}
                             onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <input
@@ -2638,26 +2588,26 @@ export default function App() {
                           placeholder="Subjudul Singkat"
                           value={projectForm.subtitle}
                           onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <textarea
                           rows={3}
-                          placeholder="Deskripsi Karya (Otomatis diterjemahkan ke EN, JA, AR)"
+                          placeholder="Deskripsi Karya"
                           value={projectForm.description}
                           onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
 
-                        {/* Upload Gambar Karya Langsung */}
+                        {/* Upload Gambar */}
                         <div className="space-y-2">
-                          <label className="block text-[11px] font-bold text-slate-400">
-                            Gambar Preview Karya (Upload dari Perangkat)
+                          <label className={`block text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                            Gambar Preview Karya
                           </label>
                           {projectForm.image ? (
-                            <div className="relative rounded-2xl overflow-hidden border border-slate-700 h-36 bg-slate-950 group">
+                            <div className="relative rounded-2xl overflow-hidden border border-[#D0D5DD] h-36 bg-[#EAECF0] group">
                               <img src={projectForm.image} alt="Preview Karya" className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <label className="px-3 py-1.5 rounded-xl bg-[#D4F34A] text-slate-950 text-xs font-extrabold cursor-pointer">
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer">
                                   Ganti Gambar
                                   <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
                                 </label>
@@ -2672,13 +2622,13 @@ export default function App() {
                             </div>
                           ) : (
                             <label className={`flex flex-col items-center justify-center h-28 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
-                              isDark ? 'border-slate-700 hover:border-[#D4F34A] bg-slate-900/60' : 'border-slate-300 hover:border-orange-500 bg-slate-50'
+                              isDark ? 'border-slate-700 hover:border-[#FE7F2D] bg-slate-900/60' : 'border-[#D0D5DD] hover:border-[#FE7F2D] bg-[#EAECF0]/40'
                             }`}>
-                              <UploadCloud className="w-6 h-6 text-[#D4F34A] mb-1" />
+                              <UploadCloud className="w-6 h-6 text-[#FE7F2D] mb-1" />
                               <span className="text-xs font-bold">
                                 {isUploadingImage ? 'Mengoptimalkan Gambar...' : 'Klik untuk Upload Gambar Karya'}
                               </span>
-                              <span className="text-[10px] text-slate-400">PNG, JPG, WEBP (Otomatis dikompres)</span>
+                              <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>PNG, JPG, WEBP (Otomatis dikompres)</span>
                               <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
                             </label>
                           )}
@@ -2689,14 +2639,14 @@ export default function App() {
                           placeholder="Tools (pisahkan koma: Adobe Illustrator, Figma)"
                           value={projectForm.tools}
                           onChange={(e) => setProjectForm({ ...projectForm, tools: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <input
                           type="url"
                           placeholder="Link Proyek (https://s.id/...)"
                           value={projectForm.link}
                           onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="flex gap-2">
                           {editingProject && (
@@ -2709,7 +2659,7 @@ export default function App() {
                                   tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
                                 });
                               }}
-                              className="px-4 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs"
+                              className="px-4 py-3 rounded-xl bg-slate-200 text-[#233D4D] font-bold text-xs"
                             >
                               Batal
                             </button>
@@ -2717,7 +2667,7 @@ export default function App() {
                           <button
                             type="submit"
                             disabled={isTranslating}
-                            className="flex-1 py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs"
+                            className="flex-1 py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs"
                           >
                             {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingProject ? 'Update Karya' : 'Simpan Karya ke Cloud')}
                           </button>
@@ -2726,15 +2676,15 @@ export default function App() {
 
                       <div className="lg:col-span-7 space-y-3">
                         {projects.map((p) => (
-                          <div key={p.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                          <div key={p.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
                             <div>
-                              <div className="text-xs font-bold text-orange-500">{p.category} • {p.year}</div>
-                              <div className="font-bold text-sm">{p.title}</div>
-                              <div className="text-xs text-slate-400 line-clamp-1">{p.subtitle}</div>
+                              <div className="text-xs font-bold text-[#FE7F2D]">{p.category} • {p.year}</div>
+                              <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{p.title}</div>
+                              <div className={`text-xs line-clamp-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{p.subtitle}</div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -2745,21 +2695,21 @@ export default function App() {
                   {/* TAB 3: BLOGS CRUD */}
                   {cmsMenu === 'blogs' && (
                     <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
-                      <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                        <h3 className="font-extrabold text-base">{editingBlog ? 'Edit Artikel Blog' : 'Tulis Artikel Blog'}</h3>
+                      <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                        <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingBlog ? 'Edit Artikel Blog' : 'Tulis Artikel Blog'}</h3>
                         <input
                           type="text"
                           required
                           placeholder="Judul Artikel"
                           value={blogForm.title}
                           onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
                           <select
                             value={blogForm.category}
                             onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           >
                             <option value="Brand Strategy">Brand Strategy</option>
                             <option value="Logo Design & Identity">Logo Design & Identity</option>
@@ -2771,20 +2721,20 @@ export default function App() {
                             placeholder="Waktu Baca (5 Menit)"
                             value={blogForm.readTime}
                             onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
 
-                        {/* Upload Gambar Sampul (Cover) Blog */}
+                        {/* Upload Cover Blog */}
                         <div className="space-y-1.5">
-                          <label className="block text-[11px] font-bold text-slate-400">
+                          <label className={`block text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
                             Gambar Sampul Blog (Cover)
                           </label>
                           {blogForm.image ? (
-                            <div className="relative rounded-2xl overflow-hidden border border-slate-700 h-32 bg-slate-950 group">
+                            <div className="relative rounded-2xl overflow-hidden border border-[#D0D5DD] h-32 bg-[#EAECF0] group">
                               <img src={blogForm.image} alt="Cover Blog" className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <label className="px-3 py-1.5 rounded-xl bg-[#D4F34A] text-slate-950 text-xs font-extrabold cursor-pointer">
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer">
                                   Ganti Sampul
                                   <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
                                 </label>
@@ -2799,9 +2749,9 @@ export default function App() {
                             </div>
                           ) : (
                             <label className={`flex flex-col items-center justify-center h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
-                              isDark ? 'border-slate-700 hover:border-[#D4F34A] bg-slate-900/60' : 'border-slate-300 hover:border-orange-500 bg-slate-50'
+                              isDark ? 'border-slate-700 hover:border-[#FE7F2D] bg-slate-900/60' : 'border-[#D0D5DD] hover:border-[#FE7F2D] bg-[#EAECF0]/40'
                             }`}>
-                              <UploadCloud className="w-5 h-5 text-[#D4F34A] mb-1" />
+                              <UploadCloud className="w-5 h-5 text-[#FE7F2D] mb-1" />
                               <span className="text-xs font-bold">Upload Gambar Sampul Blog</span>
                               <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
                             </label>
@@ -2813,14 +2763,14 @@ export default function App() {
                           placeholder="Ringkasan (Excerpt)"
                           value={blogForm.excerpt}
                           onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
 
-                        {/* Isi Artikel Blog + Tombol Sisipkan Gambar ke Dalam Isi */}
+                        {/* Isi Artikel */}
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
-                            <label className="text-[11px] font-bold text-slate-400">Isi Lengkap Artikel</label>
-                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#D4F34A]/15 text-[#D4F34A] hover:bg-[#D4F34A]/25 text-[11px] font-bold cursor-pointer transition-colors">
+                            <label className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Isi Lengkap Artikel</label>
+                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FE7F2D]/15 text-[#FE7F2D] hover:bg-[#FE7F2D]/25 text-[11px] font-bold cursor-pointer transition-colors">
                               <ImageIcon className="w-3.5 h-3.5" />
                               <span>+ Sisipkan Gambar di Isi</span>
                               <input type="file" accept="image/*" onChange={handleBlogInlineImageUpload} className="hidden" />
@@ -2828,10 +2778,10 @@ export default function App() {
                           </div>
                           <textarea
                             rows={6}
-                            placeholder="Tulis isi artikel di sini... Gunakan tombol '+ Sisipkan Gambar di Isi' di kanan atas untuk memasukkan foto ke dalam paragraf."
+                            placeholder="Tulis isi artikel di sini..."
                             value={blogForm.content}
                             onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
 
@@ -2846,35 +2796,35 @@ export default function App() {
                                   readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
                                 });
                               }}
-                              className="px-4 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs"
+                              className="px-4 py-3 rounded-xl bg-slate-200 text-[#233D4D] font-bold text-xs"
                             >
                               Batal
                             </button>
                           )}
-                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs">
                             {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingBlog ? 'Update Artikel' : 'Terbitkan ke Cloud')}
                           </button>
                         </div>
                       </form>
                       <div className="lg:col-span-7 space-y-3">
                         {blogs.map((b) => (
-                          <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                          <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
                             <div className="flex items-center gap-3 min-w-0">
                               {(b.image || b.translations?._coverImage) && (
                                 <img
                                   src={b.image || b.translations?._coverImage}
                                   alt={b.title}
-                                  className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700"
+                                  className="w-12 h-12 rounded-xl object-cover shrink-0 border border-[#D0D5DD]"
                                 />
                               )}
                               <div className="min-w-0">
                                 <div className="text-xs text-emerald-500 font-bold">{b.category} • {b.date}</div>
-                                <div className="font-bold text-sm truncate">{b.title}</div>
+                                <div className={`font-bold text-sm truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{b.title}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -2888,16 +2838,16 @@ export default function App() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => setResumeSubTab('experience')}
-                          className={`px-4 py-2 rounded-xl text-xs font-extrabold ${
-                            resumeSubTab === 'experience' ? 'bg-[#D4F34A] text-[#181824]' : 'bg-slate-800 text-slate-300'
+                          className={`px-4 py-2 rounded-xl text-xs font-black ${
+                            resumeSubTab === 'experience' ? 'bg-[#FE7F2D] text-white' : 'bg-slate-800 text-slate-300'
                           }`}
                         >
                           Pengalaman Kerja ({experience.length})
                         </button>
                         <button
                           onClick={() => setResumeSubTab('education')}
-                          className={`px-4 py-2 rounded-xl text-xs font-extrabold ${
-                            resumeSubTab === 'education' ? 'bg-[#D4F34A] text-[#181824]' : 'bg-slate-800 text-slate-300'
+                          className={`px-4 py-2 rounded-xl text-xs font-black ${
+                            resumeSubTab === 'education' ? 'bg-[#FE7F2D] text-white' : 'bg-slate-800 text-slate-300'
                           }`}
                         >
                           Pendidikan ({education.length})
@@ -2906,15 +2856,15 @@ export default function App() {
 
                       {resumeSubTab === 'experience' ? (
                         <div className="grid lg:grid-cols-12 gap-6">
-                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                            <h3 className="font-extrabold text-base">{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
+                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                            <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
                             <input
                               type="text"
                               required
                               placeholder="Posisi / Jabatan"
                               value={expForm.role}
                               onChange={(e) => setExpForm({ ...expForm, role: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <input
                               type="text"
@@ -2922,7 +2872,7 @@ export default function App() {
                               placeholder="Nama Instansi / Perusahaan"
                               value={expForm.company}
                               onChange={(e) => setExpForm({ ...expForm, company: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <div className="grid grid-cols-2 gap-2.5">
                               <input
@@ -2930,14 +2880,14 @@ export default function App() {
                                 placeholder="Jenis (Penuh Waktu / Magang)"
                                 value={expForm.type}
                                 onChange={(e) => setExpForm({ ...expForm, type: e.target.value })}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               />
                               <input
                                 type="text"
                                 placeholder="Periode (2022 - 2023)"
                                 value={expForm.period}
                                 onChange={(e) => setExpForm({ ...expForm, period: e.target.value })}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               />
                             </div>
                             <textarea
@@ -2945,22 +2895,22 @@ export default function App() {
                               placeholder="Deskripsi Tugas"
                               value={expForm.description}
                               onChange={(e) => setExpForm({ ...expForm, description: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
-                            <button type="submit" className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs">
                               Simpan Pengalaman ke Cloud
                             </button>
                           </form>
                           <div className="lg:col-span-7 space-y-3">
                             {experience.map((exp) => (
-                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
                                 <div>
-                                  <div className="text-xs text-orange-500 font-bold">{exp.period} • {exp.company}</div>
-                                  <div className="font-bold text-sm">{exp.role}</div>
+                                  <div className="text-xs text-[#FE7F2D] font-bold">{exp.period} • {exp.company}</div>
+                                  <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{exp.role}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
                             ))}
@@ -2968,12 +2918,12 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="grid lg:grid-cols-12 gap-6">
-                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                            <h3 className="font-extrabold text-base">{editingEdu ? 'Edit Pendidikan' : 'Tambah Pendidikan'}</h3>
+                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                            <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingEdu ? 'Edit Pendidikan' : 'Tambah Pendidikan'}</h3>
                             <select
                               value={eduForm.type}
                               onChange={(e) => setEduForm({ ...eduForm, type: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             >
                               <option value="Formal">Formal</option>
                               <option value="Non-Formal">Non-Formal</option>
@@ -2984,7 +2934,7 @@ export default function App() {
                               placeholder="Nama Institusi / Kampus"
                               value={eduForm.institution}
                               onChange={(e) => setEduForm({ ...eduForm, institution: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <input
                               type="text"
@@ -2992,37 +2942,37 @@ export default function App() {
                               placeholder="Jurusan / Program"
                               value={eduForm.major}
                               onChange={(e) => setEduForm({ ...eduForm, major: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <input
                               type="text"
                               placeholder="Periode (2020 - 2024)"
                               value={eduForm.period}
                               onChange={(e) => setEduForm({ ...eduForm, period: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <textarea
                               rows={3}
                               placeholder="Deskripsi"
                               value={eduForm.description}
                               onChange={(e) => setEduForm({ ...eduForm, description: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
-                            <button type="submit" className="w-full py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs">
                               Simpan Pendidikan ke Cloud
                             </button>
                           </form>
                           <div className="lg:col-span-7 space-y-3">
                             {education.map((edu) => (
-                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
+                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
                                 <div>
-                                  <div className="text-xs text-indigo-400 font-bold">{edu.type} • {edu.period}</div>
-                                  <div className="font-bold text-sm">{edu.institution}</div>
-                                  <div className="text-xs text-slate-400">{edu.major}</div>
+                                  <div className="text-xs text-indigo-500 font-bold">{edu.type} • {edu.period}</div>
+                                  <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{edu.institution}</div>
+                                  <div className={`text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{edu.major}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <button onClick={() => handleEditEducation(edu)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
                             ))}
@@ -3034,10 +2984,10 @@ export default function App() {
 
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
-                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <h3 className="font-extrabold text-base">Profil & Avatar Karakter</h3>
-                      <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-700/60 bg-slate-900/40">
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-600 bg-slate-950 shrink-0">
+                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                      <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil & Avatar Karakter</h3>
+                      <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                        <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-slate-600 bg-slate-950' : 'border-[#D0D5DD] bg-white'}`}>
                           <img
                             src={profile.avatar || DEFAULT_AVATAR}
                             alt="Preview Avatar"
@@ -3046,8 +2996,8 @@ export default function App() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <span className="text-xs font-bold block text-slate-200">Foto Avatar Karakter</span>
-                          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#D4F34A] text-slate-950 text-xs font-bold cursor-pointer hover:bg-[#c6e63b] transition-colors">
+                          <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Foto Avatar Karakter</span>
+                          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
                             <UploadCloud className="w-3.5 h-3.5" />
                             <span>Ganti Gambar Avatar</span>
                             <input
@@ -3071,52 +3021,52 @@ export default function App() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-slate-400 mb-1">Nama Lengkap</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Nama Lengkap</label>
                           <input
                             type="text"
                             value={profile.name}
                             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-400 mb-1">Email Resmi</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Email Resmi</label>
                           <input
                             type="email"
                             value={profile.email}
                             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-400 mb-1">Nomor Telepon / WhatsApp Tampil</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Nomor Telepon / WhatsApp</label>
                           <input
                             type="text"
                             value={profile.phone}
                             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-400 mb-1">Alamat Domisili (Footer)</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Alamat Domisili (Footer)</label>
                           <input
                             type="text"
                             value={profile.address}
                             onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs text-slate-400 mb-1">Bio Singkat</label>
+                        <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Bio Singkat</label>
                         <textarea
                           rows={4}
                           value={profile.bio}
                           onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                       </div>
-                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#D4F34A] text-[#181824] font-extrabold text-xs">
+                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs shadow-md">
                         {isTranslating ? 'Menyimpan...' : 'Simpan Profil ke Cloud Supabase'}
                       </button>
                     </form>
@@ -3128,13 +3078,11 @@ export default function App() {
         </>
       )}
 
-      {/* =====================================================================
-          MODAL DETAIL PROYEK (UNTUK LANDINGPAGE.HTML)
-         ===================================================================== */}
+      {/* MODAL DETAIL PROYEK */}
       {activeProjectModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
           <div className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-up ${
-            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
           }`}>
             <div className={`h-48 sm:h-52 bg-gradient-to-br ${activeProjectModal.accentColor} p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden`}>
               {activeProjectModal.image && (
@@ -3144,15 +3092,15 @@ export default function App() {
                   className="absolute inset-0 w-full h-full object-cover object-center opacity-75"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
               <button
                 onClick={() => setActiveProjectModal(null)}
-                className="relative z-10 self-end p-2 rounded-full bg-slate-950/60 text-white hover:bg-slate-950"
+                className="relative z-10 self-end p-2 rounded-full bg-black/60 text-white hover:bg-black"
               >
                 <X className="w-4 h-4" />
               </button>
               <div className="relative z-10">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white/90 bg-slate-950/60 border border-white/15 px-2.5 py-1 rounded-full">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white/90 bg-black/60 border border-white/15 px-2.5 py-1 rounded-full">
                   {activeProjectModal.category} • {activeProjectModal.year}
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-white mt-1.5 drop-shadow">
@@ -3162,19 +3110,19 @@ export default function App() {
             </div>
 
             <div className="p-5 sm:p-6 space-y-4">
-              <div className="text-xs font-semibold text-orange-500">
+              <div className="text-xs font-bold text-[#FE7F2D]">
                 {getLocalized(activeProjectModal, 'subtitle')}
               </div>
-              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
                 {getLocalized(activeProjectModal, 'description')}
               </p>
 
               <div>
-                <div className="text-xs font-bold text-slate-400 mb-2">{t.toolsTech}</div>
+                <div className={`text-xs font-bold mb-2 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.toolsTech}</div>
                 <div className="flex flex-wrap gap-2">
                   {activeProjectModal.tools.map((tool, i) => (
-                    <span key={i} className={`px-3 py-1 rounded-lg border text-xs ${
-                      isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    <span key={i} className={`px-3 py-1 rounded-lg border text-xs font-semibold ${
+                      isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
                     }`}>
                       {tool}
                     </span>
@@ -3182,10 +3130,12 @@ export default function App() {
                 </div>
               </div>
 
-              <div className={`pt-4 border-t flex justify-end gap-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div className={`pt-4 border-t flex justify-end gap-3 ${isDark ? 'border-slate-800' : 'border-[#D0D5DD]'}`}>
                 <button
                   onClick={() => setActiveProjectModal(null)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-semibold"
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold ${
+                    isDark ? 'bg-slate-800 text-white' : 'bg-[#EAECF0] text-[#233D4D]'
+                  }`}
                 >
                   {t.closeBtn}
                 </button>
@@ -3194,7 +3144,7 @@ export default function App() {
                     href={activeProjectModal.link}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-5 py-2.5 rounded-xl bg-orange-500 text-slate-950 text-xs font-bold flex items-center gap-1.5"
+                    className="px-5 py-2.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold flex items-center gap-1.5 hover:bg-[#E86E20]"
                   >
                     <span>{t.openProjectLink}</span>
                     <ExternalLink className="w-4 h-4" />
@@ -3206,29 +3156,27 @@ export default function App() {
         </div>
       )}
 
-      {/* =====================================================================
-          MODAL BACA ARTIKEL BLOG
-         ===================================================================== */}
+      {/* MODAL BACA ARTIKEL BLOG */}
       {activeBlogModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-fade-up ${
-            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
           }`}>
             <div className="flex items-center justify-between">
-              <span className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 text-xs font-bold">
+              <span className="px-3 py-1 rounded-full bg-[#FE7F2D]/10 text-[#FE7F2D] text-xs font-bold border border-[#FE7F2D]/20">
                 {activeBlogModal.category}
               </span>
               <button
                 onClick={() => setActiveBlogModal(null)}
-                className="p-2 rounded-full bg-slate-200 dark:bg-slate-800"
+                className={`p-2 rounded-full ${isDark ? 'bg-slate-800 text-white' : 'bg-[#EAECF0] text-[#233D4D]'}`}
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <h2 className="text-2xl font-black leading-snug">{getLocalized(activeBlogModal, 'title')}</h2>
-            <div className={`text-xs text-slate-400 flex items-center gap-4 border-b pb-4 ${
-              isDark ? 'border-slate-800' : 'border-slate-200'
+            <div className={`text-xs flex items-center gap-4 border-b pb-4 font-semibold ${
+              isDark ? 'border-slate-800 text-slate-400' : 'border-[#D0D5DD] text-[#233D4D]'
             }`}>
               <span>{t.byAuthor} {profile.name}</span>
               <span>•</span>
@@ -3238,7 +3186,7 @@ export default function App() {
             </div>
 
             {(activeBlogModal.image || activeBlogModal.translations?._coverImage) && (
-              <div className="rounded-2xl overflow-hidden border border-slate-800 max-h-80">
+              <div className="rounded-2xl overflow-hidden border border-[#D0D5DD] max-h-80">
                 <img
                   src={activeBlogModal.image || activeBlogModal.translations?._coverImage}
                   alt={getLocalized(activeBlogModal, 'title')}
@@ -3248,7 +3196,7 @@ export default function App() {
             )}
 
             <div className={`text-sm sm:text-base leading-relaxed ${
-              isDark ? 'text-slate-200' : 'text-slate-700'
+              isDark ? 'text-slate-200' : 'text-[#233D4D]'
             }`}>
               {renderRichBlogContent(getLocalized(activeBlogModal, 'content'))}
             </div>
