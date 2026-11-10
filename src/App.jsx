@@ -1609,50 +1609,6 @@ export default function App() {
         </div>
       )}
 
-      {/* SIMULATED BROWSER URL BAR (Hanya tampil di mode preview lokal, otomatis hilang di domain Vercel) */}
-      {(typeof window === 'undefined' || !window.location.hostname.includes('vercel.app')) && (
-        <div className="bg-[#111118] text-slate-300 border-b border-slate-800 px-3 sm:px-6 py-2 text-xs flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 mr-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            </div>
-            <div className="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800">
-              <button
-                onClick={() => setCurrentRoute('landingpage.html')}
-                className={`px-3 py-1 rounded-md font-mono text-[11px] transition-all flex items-center gap-1.5 ${
-                  currentRoute === 'landingpage.html'
-                    ? 'bg-orange-500 text-slate-950 font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Globe className="w-3 h-3" />
-                /landingpage.html
-              </button>
-              <button
-                onClick={() => setCurrentRoute('dashboard.html')}
-                className={`px-3 py-1 rounded-md font-mono text-[11px] transition-all flex items-center gap-1.5 ${
-                  currentRoute === 'dashboard.html'
-                    ? 'bg-[#D4F34A] text-slate-950 font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Lock className="w-3 h-3" />
-                /dashboard.html
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 text-[11px] text-slate-400">
-            <span className="inline-flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isSupabaseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span>{isSupabaseConnected ? 'Supabase Connected' : 'Connecting Supabase...'}</span>
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* =====================================================================
           FILE 1: LANDINGPAGE.HTML (PUBLIC PORTFOLIO)
          ===================================================================== */}
@@ -2437,12 +2393,12 @@ export default function App() {
                   </button>
                 </form>
 
-                {/* <div className="p-3.5 rounded-2xl bg-slate-500/10 text-xs text-slate-400 flex items-center justify-between">
+                <div className="p-3.5 rounded-2xl bg-slate-500/10 text-xs text-slate-400 flex items-center justify-between">
                   <span>Default Login:</span>
                   <code className="font-mono font-bold text-[#D4F34A] bg-slate-900 px-2.5 py-1 rounded-lg">
                     aldi / password123
                   </code>
-                </div> */}
+                </div>
               </div>
             </div>
           ) : (
