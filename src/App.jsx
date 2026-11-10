@@ -7,7 +7,8 @@ import {
   Search, ArrowUpRight, Sparkles,
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
   FolderGit2, FileText, RefreshCw, UploadCloud,
-  Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown, Image as ImageIcon
+  Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown, Image as ImageIcon,
+  Plus
 } from 'lucide-react';
 
 // ============================================================================
@@ -399,6 +400,13 @@ function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
 // INITIAL DATA
 // ============================================================================
 const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/adventurer/svg?seed=AkhmadAldi&skinColor=f2d3b1&hair=short04&hairColor=09090b";
+
+const DEFAULT_CATEGORIES = [
+  'Brand Strategy',
+  'Logo Design & Identity',
+  'Social Media Management',
+  'UI/UX Design'
+];
 
 const INITIAL_PROFILE = {
   name: "Akhmad Aldi",
@@ -926,11 +934,17 @@ export default function App() {
     title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
     tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
   });
+  // State input kategori kustom baru
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
 
   const [editingBlog, setEditingBlog] = useState(null);
   const [blogForm, setBlogForm] = useState({
     title: '', category: 'Brand Strategy', date: '2026-11-02', readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
   });
+  const [isBlogCustomCategory, setIsBlogCustomCategory] = useState(false);
+  const [blogCustomCategoryInput, setBlogCustomCategoryInput] = useState('');
+
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [resumeSubTab, setResumeSubTab] = useState('experience');
@@ -1114,7 +1128,17 @@ export default function App() {
     }
   }, []);
 
-  const categories = ['Semua', 'Brand Strategy', 'Logo Design & Identity', 'Social Media Management', 'UI/UX Design'];
+  // List kategori dinamis: Default + semua kategori unik yang ada di list projects
+  const categories = useMemo(() => {
+    const dynamicCats = new Set([...DEFAULT_CATEGORIES, ...projects.map(p => p.category).filter(Boolean)]);
+    return ['Semua', ...Array.from(dynamicCats)];
+  }, [projects]);
+
+  const blogCategories = useMemo(() => {
+    const dynamicCats = new Set([...DEFAULT_CATEGORIES, ...blogs.map(b => b.category).filter(Boolean)]);
+    return Array.from(dynamicCats);
+  }, [blogs]);
+
   const filteredProjects = useMemo(() => {
     return projects.filter(proj => {
       const matchCat = selectedCategory === 'Semua' || proj.category === selectedCategory;
@@ -1203,6 +1227,11 @@ export default function App() {
     e.preventDefault();
     if (!projectForm.title.trim()) return;
 
+    // Tentukan kategori final (apakah dari input kustom atau dropdown)
+    const finalCategory = isCustomCategory 
+      ? (customCategoryInput.trim() || 'Logo Design & Identity')
+      : projectForm.category;
+
     const toolsArray = typeof projectForm.tools === 'string'
       ? projectForm.tools.split(',').map(t => t.trim()).filter(Boolean)
       : projectForm.tools;
@@ -1220,8 +1249,8 @@ export default function App() {
     }
 
     const savedItem = editingProject
-      ? { ...editingProject, ...projectForm, tools: toolsArray, translations: generatedTranslations }
-      : { ...projectForm, id: `proj-${Date.now()}`, tools: toolsArray, rate: '5.0', translations: generatedTranslations };
+      ? { ...editingProject, ...projectForm, category: finalCategory, tools: toolsArray, translations: generatedTranslations }
+      : { ...projectForm, category: finalCategory, id: `proj-${Date.now()}`, tools: toolsArray, rate: '5.0', translations: generatedTranslations };
 
     const nextProjects = editingProject
       ? projects.map(p => p.id === editingProject.id ? savedItem : p)
@@ -1256,6 +1285,8 @@ export default function App() {
 
     showToast(editingProject ? "Karya diperbarui di Supabase!" : "Karya baru tersimpan ke Supabase!");
     setEditingProject(null);
+    setIsCustomCategory(false);
+    setCustomCategoryInput('');
     setProjectForm({
       title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
       tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
@@ -1269,6 +1300,15 @@ export default function App() {
       image: proj.image || '',
       tools: Array.isArray(proj.tools) ? proj.tools.join(', ') : proj.tools
     });
+    // Jika kategorinya bukan bawaan baku, aktifkan input kustom
+    const isStandard = DEFAULT_CATEGORIES.includes(proj.category);
+    if (!isStandard) {
+      setIsCustomCategory(true);
+      setCustomCategoryInput(proj.category);
+    } else {
+      setIsCustomCategory(false);
+      setCustomCategoryInput('');
+    }
     setCmsMenu('projects');
   };
 
@@ -1290,6 +1330,10 @@ export default function App() {
     e.preventDefault();
     if (!blogForm.title.trim()) return;
 
+    const finalCategory = isBlogCustomCategory
+      ? (blogCustomCategoryInput.trim() || 'Brand Strategy')
+      : blogForm.category;
+
     const slug = blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     let generatedTranslations = editingBlog?.translations || {};
 
@@ -1310,8 +1354,8 @@ export default function App() {
     };
 
     const savedBlog = editingBlog
-      ? { ...editingBlog, ...blogForm, slug, translations: translationsWithCover }
-      : { ...blogForm, id: `blog-${Date.now()}`, slug, translations: translationsWithCover };
+      ? { ...editingBlog, ...blogForm, category: finalCategory, slug, translations: translationsWithCover }
+      : { ...blogForm, category: finalCategory, id: `blog-${Date.now()}`, slug, translations: translationsWithCover };
 
     const nextBlogs = editingBlog
       ? blogs.map(b => b.id === editingBlog.id ? savedBlog : b)
@@ -1343,6 +1387,8 @@ export default function App() {
 
     showToast(editingBlog ? "Artikel blog diperbarui!" : "Artikel blog diterbitkan!");
     setEditingBlog(null);
+    setIsBlogCustomCategory(false);
+    setBlogCustomCategoryInput('');
     setBlogForm({
       title: '', category: 'Brand Strategy', date: new Date().toISOString().slice(0, 10),
       readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
@@ -1361,6 +1407,14 @@ export default function App() {
       excerpt: blog.excerpt,
       content: blog.content
     });
+    const isStandard = DEFAULT_CATEGORIES.includes(blog.category);
+    if (!isStandard) {
+      setIsBlogCustomCategory(true);
+      setBlogCustomCategoryInput(blog.category);
+    } else {
+      setIsBlogCustomCategory(false);
+      setBlogCustomCategoryInput('');
+    }
     setCmsMenu('blogs');
   };
 
@@ -2565,16 +2619,52 @@ export default function App() {
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
-                          <select
-                            value={projectForm.category}
-                            onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
-                          >
-                            <option value="Brand Strategy">Brand Strategy</option>
-                            <option value="Logo Design & Identity">Logo Design & Identity</option>
-                            <option value="Social Media Management">Social Media Management</option>
-                            <option value="UI/UX Design">UI/UX Design</option>
-                          </select>
+                          {/* Kategori Fleksibel: Dropdown + Opsi Kustom */}
+                          <div>
+                            {!isCustomCategory ? (
+                              <select
+                                value={projectForm.category}
+                                onChange={(e) => {
+                                  if (e.target.value === '__NEW__') {
+                                    setIsCustomCategory(true);
+                                    setCustomCategoryInput('');
+                                  } else {
+                                    setProjectForm({ ...projectForm, category: e.target.value });
+                                  }
+                                }}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              >
+                                {categories.filter(c => c !== 'Semua').map(cat => (
+                                  <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                                <option value="__NEW__" className="font-bold text-[#FE7F2D]">+ Tambah Kategori Baru...</option>
+                              </select>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  required
+                                  placeholder="Ketik Kategori Baru..."
+                                  value={customCategoryInput}
+                                  onChange={(e) => setCustomCategoryInput(e.target.value)}
+                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FE7F2D] ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsCustomCategory(false);
+                                    setCustomCategoryInput('');
+                                  }}
+                                  title="Kembali ke pilihan"
+                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
                           <input
                             type="text"
                             placeholder="Tahun (misal: 2026)"
@@ -2654,6 +2744,8 @@ export default function App() {
                               type="button"
                               onClick={() => {
                                 setEditingProject(null);
+                                setIsCustomCategory(false);
+                                setCustomCategoryInput('');
                                 setProjectForm({
                                   title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
                                   tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
@@ -2706,16 +2798,52 @@ export default function App() {
                           className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
-                          <select
-                            value={blogForm.category}
-                            onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
-                          >
-                            <option value="Brand Strategy">Brand Strategy</option>
-                            <option value="Logo Design & Identity">Logo Design & Identity</option>
-                            <option value="Social Media Management">Social Media Management</option>
-                            <option value="UI/UX Design">UI/UX Design</option>
-                          </select>
+                          {/* Kategori Fleksibel Blog */}
+                          <div>
+                            {!isBlogCustomCategory ? (
+                              <select
+                                value={blogForm.category}
+                                onChange={(e) => {
+                                  if (e.target.value === '__NEW__') {
+                                    setIsBlogCustomCategory(true);
+                                    setBlogCustomCategoryInput('');
+                                  } else {
+                                    setBlogForm({ ...blogForm, category: e.target.value });
+                                  }
+                                }}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              >
+                                {blogCategories.map(cat => (
+                                  <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                                <option value="__NEW__" className="font-bold text-[#FE7F2D]">+ Tambah Kategori Baru...</option>
+                              </select>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  required
+                                  placeholder="Ketik Kategori Baru..."
+                                  value={blogCustomCategoryInput}
+                                  onChange={(e) => setBlogCustomCategoryInput(e.target.value)}
+                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FE7F2D] ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsBlogCustomCategory(false);
+                                    setBlogCustomCategoryInput('');
+                                  }}
+                                  title="Kembali ke pilihan"
+                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
                           <input
                             type="text"
                             placeholder="Waktu Baca (5 Menit)"
@@ -2791,6 +2919,8 @@ export default function App() {
                               type="button"
                               onClick={() => {
                                 setEditingBlog(null);
+                                setIsBlogCustomCategory(false);
+                                setBlogCustomCategoryInput('');
                                 setBlogForm({
                                   title: '', category: 'Brand Strategy', date: new Date().toISOString().slice(0, 10),
                                   readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
