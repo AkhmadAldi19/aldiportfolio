@@ -8,7 +8,7 @@ import {
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
   FolderGit2, FileText, RefreshCw, UploadCloud,
   Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown, Image as ImageIcon,
-  Plus
+  Plus, Play, Mouse
 } from 'lucide-react';
 
 // ============================================================================
@@ -61,7 +61,7 @@ const UI_TRANSLATIONS = {
     pillarsTitle: "Fokus & Bidang Keahlian Utama",
     pillarsDesc: "Membangun karakter bisnis, UMKM, dan destinasi wisata melalui strategi brand yang kuat, identitas logo yang ikonik, serta manajemen visual media sosial.",
     selectedPortfolio: "PORTOFOLIO TERPILIH",
-    worksTitle: "Karya & Proyek",
+    worksTitle: "Portfolio",
     searchPlaceholder: "Cari karya atau tools...",
     allCategory: "Semua",
     projectDetail: "Detail Proyek",
@@ -127,7 +127,7 @@ const UI_TRANSLATIONS = {
     pillarsTitle: "Core Focus & Expertise",
     pillarsDesc: "Building strong character for businesses, SMEs, and tourism destinations through strategic branding, iconic logo identity, and visual social media management.",
     selectedPortfolio: "SELECTED PORTFOLIO",
-    worksTitle: "Featured Works & Projects",
+    worksTitle: "Portfolio",
     searchPlaceholder: "Search works or tools...",
     allCategory: "All",
     projectDetail: "Project Details",
@@ -193,7 +193,7 @@ const UI_TRANSLATIONS = {
     pillarsTitle: "専門分野と主要スキル",
     pillarsDesc: "強力なブランド戦略、象徴的なロゴアイデンティティ、ソーシャルメディアの視覚的管理を通じて、企業や観光地のブランド価値を構築します。",
     selectedPortfolio: "厳選ポートフォリオ",
-    worksTitle: "制作実績・プロジェクト",
+    worksTitle: "Portfolio",
     searchPlaceholder: "作品やツールを検索...",
     allCategory: "すべて",
     projectDetail: "プロジェクト詳細",
@@ -259,7 +259,7 @@ const UI_TRANSLATIONS = {
     pillarsTitle: "مجالات التخصص والخبرة الأساسية",
     pillarsDesc: "بناء هوية قوية للشركات والمشاريع والوجهات السياحية من خلال استراتيجية العلامة التجارية، تصميم الشعارات، وإدارة وسائل التواصل الاجتماعي.",
     selectedPortfolio: "أعمال مختارة",
-    worksTitle: "المشاريع والأعمال الإبداعية",
+    worksTitle: "Portfolio",
     searchPlaceholder: "ابحث في الأعمال أو الأدوات...",
     allCategory: "الكل",
     projectDetail: "تفاصيل المشروع",
@@ -397,10 +397,139 @@ function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
 }
 
 // ============================================================================
+// AUTOMATIC CHECKERBOARD / SOLID BACKGROUND REMOVER FOR CHARACTER AVATAR
+// ============================================================================
+function CleanCharacterAvatar({ src, alt, className }) {
+  // Start with null while processing so no white-faced placeholder flashes during load
+  const [cleanedSrc, setCleanedSrc] = useState(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!src) {
+      setCleanedSrc(null);
+      return;
+    }
+
+    let cancelled = false;
+    setFailed(false);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      try {
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        if (!w || !h) {
+          if (!cancelled) setCleanedSrc(src);
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+
+        // Sample top-left corner color to also support solid-colored backgrounds (e.g., purple)
+        const cornerR = data[0];
+        const cornerG = data[1];
+        const cornerB = data[2];
+        const cornerA = data[3];
+
+        const isCheckerOrBgPixel = (r, g, b, a) => {
+          if (a < 20) return true;
+          // 1. Neutral gray/white checkerboard background
+          const maxC = Math.max(r, g, b);
+          const minC = Math.min(r, g, b);
+          const diff = maxC - minC;
+          if (diff <= 16 && minC >= 145) return true;
+
+          // 2. Solid uniform outer background matching top-left corner
+          if (cornerA > 200) {
+            const dist = Math.abs(r - cornerR) + Math.abs(g - cornerG) + Math.abs(b - cornerB);
+            if (dist <= 45) return true;
+          }
+          return false;
+        };
+
+        const visited = new Uint8Array(w * h);
+        const queue = new Int32Array(w * h);
+        let head = 0;
+        let tail = 0;
+
+        const enqueue = (x, y) => {
+          if (x < 0 || x >= w || y < 0 || y >= h) return;
+          const idx = y * w + x;
+          if (visited[idx]) return;
+          const p = idx * 4;
+          if (isCheckerOrBgPixel(data[p], data[p + 1], data[p + 2], data[p + 3])) {
+            visited[idx] = 1;
+            queue[tail++] = idx;
+          }
+        };
+
+        for (let x = 0; x < w; x++) {
+          enqueue(x, 0);
+          enqueue(x, h - 1);
+        }
+        for (let y = 0; y < h; y++) {
+          enqueue(0, y);
+          enqueue(w - 1, y);
+        }
+
+        while (head < tail) {
+          const idx = queue[head++];
+          const p = idx * 4;
+          data[p + 3] = 0;
+
+          const x = idx % w;
+          const y = (idx - x) / w;
+          enqueue(x + 1, y);
+          enqueue(x - 1, y);
+          enqueue(x, y + 1);
+          enqueue(x, y - 1);
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        if (!cancelled) {
+          setCleanedSrc(canvas.toDataURL('image/png'));
+        }
+      } catch (err) {
+        if (!cancelled) setCleanedSrc(src);
+      }
+    };
+
+    img.onerror = () => {
+      if (!cancelled) {
+        setFailed(true);
+        setCleanedSrc(null);
+      }
+    };
+
+    img.src = src;
+    return () => { cancelled = true; };
+  }, [src]);
+
+  // Jangan tampilkan karakter cadangan lain saat gagal/kosong
+  if (failed || !cleanedSrc) {
+    return null;
+  }
+
+  return (
+    <img
+      src={cleanedSrc}
+      alt={alt}
+      className={`${className} transition-opacity duration-300 opacity-100`}
+    />
+  );
+}
+
+// ============================================================================
 // INITIAL DATA
 // ============================================================================
-const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/adventurer/svg?seed=AkhmadAldi&skinColor=f2d3b1&hair=short04&hairColor=09090b";
-
 const DEFAULT_CATEGORIES = [
   'Brand Strategy',
   'Logo Design & Identity',
@@ -411,6 +540,7 @@ const DEFAULT_CATEGORIES = [
 const INITIAL_PROFILE = {
   name: "Akhmad Aldi",
   avatar: "/avatar.png",
+  aboutCover: "/about-cover.png",
   roles: [
     "Brand Strategy",
     "Logo Design & Identity",
@@ -899,6 +1029,8 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const [aboutCoverFailed, setAboutCoverFailed] = useState(false);
+
   const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [education, setEducation] = useState(INITIAL_EDUCATION);
   const [experience, setExperience] = useState(INITIAL_EXPERIENCE);
@@ -911,6 +1043,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeProjectModal, setActiveProjectModal] = useState(null);
   const [activeBlogModal, setActiveBlogModal] = useState(null);
+  const [showcaseIndex, setShowcaseIndex] = useState(0);
 
   const [supabaseUrl] = useState(() => {
     try {
@@ -1128,11 +1261,45 @@ export default function App() {
     }
   }, []);
 
-  // List kategori dinamis: Default + semua kategori unik yang ada di list projects
-  const categories = useMemo(() => {
-    const dynamicCats = new Set([...DEFAULT_CATEGORIES, ...projects.map(p => p.category).filter(Boolean)]);
-    return ['Semua', ...Array.from(dynamicCats)];
+  // Showcase Carousel items (prioritize featured projects, fallback to all projects)
+  const showcaseItems = useMemo(() => {
+    const featuredList = projects.filter(p => p.featured);
+    return featuredList.length > 0 ? featuredList : projects;
   }, [projects]);
+
+  // Auto-advance Brand Showcase carousel every 10 seconds
+  useEffect(() => {
+    if (showcaseItems.length <= 1) return;
+    const timer = setInterval(() => {
+      setShowcaseIndex((prev) => (prev + 1) % showcaseItems.length);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [showcaseItems.length]);
+
+  useEffect(() => {
+    if (showcaseIndex >= showcaseItems.length) {
+      setShowcaseIndex(0);
+    }
+  }, [showcaseItems.length, showcaseIndex]);
+
+  // List kategori dinamis untuk filter publik: Hanya kategori yang SUDAH TERISI karya
+  const publicCategories = useMemo(() => {
+    const populatedCats = new Set(projects.map(p => p.category).filter(Boolean));
+    return ['Semua', ...Array.from(populatedCats)];
+  }, [projects]);
+
+  // List kategori untuk opsi dropdown di CMS (default + kategori custom yang pernah dibuat)
+  const cmsProjectCategories = useMemo(() => {
+    const allCats = new Set([...DEFAULT_CATEGORIES, ...projects.map(p => p.category).filter(Boolean)]);
+    return Array.from(allCats);
+  }, [projects]);
+
+  // Reset selectedCategory ke 'Semua' jika kategori aktif sudah tidak memiliki item
+  useEffect(() => {
+    if (selectedCategory !== 'Semua' && !publicCategories.includes(selectedCategory)) {
+      setSelectedCategory('Semua');
+    }
+  }, [publicCategories, selectedCategory]);
 
   const blogCategories = useMemo(() => {
     const dynamicCats = new Set([...DEFAULT_CATEGORIES, ...blogs.map(b => b.category).filter(Boolean)]);
@@ -1571,32 +1738,38 @@ export default function App() {
       style={!isDark ? { backgroundColor: BRAND_LIGHT.bg, color: BRAND_LIGHT.textPrimary } : undefined}
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        .font-marker {
+          font-family: 'Permanent Marker', cursive;
+          letter-spacing: 0.02em;
+        }
         @keyframes floatSlow {
-          0%, 100% { transform: translate(0px, 0px) scale(1); }
-          50% { transform: translate(18px, -18px) scale(1.06); }
+          0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+          50% { transform: translate(8px, -12px) rotate(2deg); }
         }
         @keyframes floatReverse {
-          0%, 100% { transform: translate(0px, 0px) scale(1); }
-          50% { transform: translate(-18px, 16px) scale(1.05); }
+          0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+          50% { transform: translate(-8px, 10px) rotate(-2deg); }
         }
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(22px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-float-slow {
-          animation: floatSlow 9s ease-in-out infinite;
+          animation: floatSlow 7s ease-in-out infinite;
         }
         .animate-float-reverse {
-          animation: floatReverse 11s ease-in-out infinite;
+          animation: floatReverse 9s ease-in-out infinite;
         }
         .animate-fade-up {
           animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .card-hover-3d {
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
         }
         .card-hover-3d:hover {
-          transform: translateY(-8px) scale(1.01);
+          transform: translateY(-6px);
         }
       `}</style>
 
@@ -1613,44 +1786,50 @@ export default function App() {
       )}
 
       {/* =====================================================================
-          LANDINGPAGE.HTML (PUBLIC PORTFOLIO)
+          LANDINGPAGE.HTML (PUBLIC PORTFOLIO - CREATIVE DOODLE & ILLUSTRATION STYLE)
          ===================================================================== */}
       {currentRoute === 'landingpage.html' && (
-        <div dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          {/* TOP NAVBAR */}
-          <header className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors ${
-            isDark ? 'bg-slate-950/85 border-slate-800/80' : 'bg-[#FFFFFF]/90 border-[#D0D5DD]'
+        <div 
+          dir={lang === 'ar' ? 'rtl' : 'ltr'}
+          style={{ fontFamily: "'Poppins', 'Plus Jakarta Sans', sans-serif" }}
+          className={isDark ? 'bg-[#0D0D12] text-white selection:bg-[#D6F83B] selection:text-black' : 'bg-[#EAECF0] text-[#000000] selection:bg-[#FE7F2D] selection:text-white'}
+        >
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap');
+            .font-card-title {
+              font-family: 'Poppins', 'Montserrat', sans-serif;
+            }
+          `}</style>
+          {/* TOP NAVBAR WITH ORGANIC PURPLE BLOB */}
+          <header className={`sticky top-0 z-40 backdrop-blur-xl transition-colors ${
+            isDark ? 'bg-[#0D0D12]/90 border-b border-white/5' : 'bg-white/95 border-b border-[#D0D5DD]'
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
-              <a href="#" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden border shadow-lg group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0 flex items-center justify-center ${
-                  isDark ? 'bg-slate-900 border-slate-700/80 shadow-orange-500/20' : 'bg-white border-[#D0D5DD] shadow-black/5'
+            {/* Organic Purple Corner Blob */}
+            <svg className="pointer-events-none absolute -top-2 -left-4 w-52 h-24 text-[#6D28D9] opacity-90 z-0" viewBox="0 0 240 110" fill="currentColor">
+              <path d="M0,0 L230,0 C205,48 165,78 112,72 C62,66 36,96 0,104 Z" />
+            </svg>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2 relative z-10">
+              <a href="#" className="flex items-center gap-2.5 group min-w-0">
+                <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow ${
+                  isDark ? 'text-white' : 'text-[#000000]'
                 }`}>
-                  <img
-                    src={profile.avatar || DEFAULT_AVATAR}
-                    alt={profile.name}
-                    onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <div className={`font-bold text-base sm:text-lg tracking-tight flex items-center gap-2 whitespace-nowrap ${isDark ? 'text-white' : 'text-[#000000]'}`}>
-                    <span className="truncate">{profile.name}</span>
-                  </div>
-                  <p className={`text-xs hidden sm:block truncate ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
-                    Brand Strategist • Identity & Social Media
-                  </p>
-                </div>
+                  <span className="text-[#D6F83B]">.</span>gudelz
+                </span>
               </a>
 
-              <nav className={`hidden lg:flex items-center gap-8 text-sm font-semibold ${
+              <nav className={`hidden lg:flex items-center gap-8 text-sm font-bold ${
                 isDark ? 'text-slate-300' : 'text-[#233D4D]'
               }`}>
-                <a href="#tentang" className="hover:text-[#FE7F2D] transition-colors">{t.navAbout}</a>
-                <a href="#karya" className="hover:text-[#FE7F2D] transition-colors">{t.navWorks}</a>
-                <a href="#pengalaman" className="hover:text-[#FE7F2D] transition-colors">{t.navResume}</a>
-                <a href="#blog" className="hover:text-[#FE7F2D] transition-colors">{t.navBlog}</a>
-                <a href="#kontak" className="hover:text-[#FE7F2D] transition-colors">{t.navContact}</a>
+                <a href="#" className={`relative py-1 ${isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'}`}>
+                  Home
+                  <span className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full ${isDark ? 'bg-[#D6F83B]' : 'bg-[#FE7F2D]'}`} />
+                </a>
+                <a href="#karya" className="hover:text-[#D6F83B] transition-colors">{t.navWorks}</a>
+                <a href="#tentang" className="hover:text-[#D6F83B] transition-colors">{t.navAbout}</a>
+                <a href="#pengalaman" className="hover:text-[#D6F83B] transition-colors">{t.navResume}</a>
+                <a href="#blog" className="hover:text-[#D6F83B] transition-colors">{t.navBlog}</a>
+                <a href="#kontak" className="hover:text-[#D6F83B] transition-colors">{t.navContact}</a>
               </nav>
 
               <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
@@ -1659,22 +1838,22 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                    className={`px-3 py-2.5 rounded-xl border text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-2 rounded-full border text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                       isDark
-                        ? 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800'
+                        ? 'bg-[#181822] border-white/10 text-slate-200 hover:border-[#D6F83B]'
                         : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
                     }`}
                   >
-                    <Languages className="w-3.5 h-3.5 text-[#FE7F2D] shrink-0" />
+                    <Languages className="w-3.5 h-3.5 text-[#D6F83B] shrink-0" />
                     <span>{activeLangObj.label}</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-[#233D4D]/70 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {langDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
                       <div className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-fade-up ${
-                        isDark ? 'bg-slate-900/95 border-slate-800 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                        isDark ? 'bg-[#181822]/95 border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
                       }`}>
                         {SUPPORTED_LANGUAGES.map((l) => {
                           const isSelected = lang === l.code;
@@ -1685,9 +1864,9 @@ export default function App() {
                               onClick={() => { setLang(l.code); setLangDropdownOpen(false); }}
                               className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
                                 isSelected
-                                  ? 'bg-[#FE7F2D] text-white shadow-sm'
+                                  ? 'bg-[#D6F83B] text-black shadow-sm'
                                   : isDark
-                                    ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                    ? 'text-slate-300 hover:bg-white/10 hover:text-white'
                                     : 'text-[#233D4D] hover:bg-[#EAECF0] hover:text-[#000000]'
                               }`}
                             >
@@ -1696,7 +1875,7 @@ export default function App() {
                                 <span>{l.name}</span>
                               </span>
                               <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
-                                isSelected ? 'bg-black/20 text-white' : 'text-[#233D4D]/60'
+                                isSelected ? 'bg-black/15 text-black' : 'opacity-60'
                               }`}>
                                 {l.label}
                               </span>
@@ -1708,67 +1887,59 @@ export default function App() {
                   )}
                 </div>
 
+                {/* Theme Toggle */}
                 <button
                   onClick={() => setTheme(isDark ? 'light' : 'dark')}
                   title={isDark ? t.dayMode : t.nightMode}
-                  className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 text-xs font-semibold ${
+                  className={`p-2.5 rounded-full border transition-all flex items-center gap-1.5 text-xs font-bold ${
                     isDark 
-                      ? 'bg-slate-900 border-slate-800 text-amber-400 hover:bg-slate-800' 
+                      ? 'bg-[#181822] border-white/10 text-[#D6F83B] hover:border-[#D6F83B]' 
                       : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
                   }`}
                 >
-                  {isDark ? (
-                    <>
-                      <Sun className="w-4 h-4" />
-                      <span className="hidden xl:inline">{t.dayMode}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="w-4 h-4 text-[#233D4D]" />
-                      <span className="hidden xl:inline">{t.nightMode}</span>
-                    </>
-                  )}
+                  {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
 
+                {/* Desktop Hire Me Button */}
                 <a
                   href={`https://wa.me/${profile.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-[#FE7F2D] hover:bg-[#E86E20] text-white shadow-lg shadow-[#FE7F2D]/25 hover:scale-105 transition-all"
+                  className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D6F83B] hover:bg-[#c5ea25] text-black font-extrabold text-xs shadow-md transition-transform hover:scale-105"
                 >
                   <span>{t.hireMe}</span>
-                  <ArrowUpRight className="w-4 h-4" />
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
 
+                {/* Mobile & Tablet Only Hamburger Button (Hidden on Desktop lg+) */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className={`lg:hidden p-2.5 rounded-xl border ${
-                    isDark ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
-                  }`}
+                  aria-label="Menu"
+                  className="lg:hidden w-10 h-10 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white flex items-center justify-center shadow-lg shadow-[#6D28D9]/30 transition-transform hover:scale-105"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Mobile Nav Drawer */}
+            {/* Mobile & Tablet Drawer Menu */}
             {mobileMenuOpen && (
-              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-xl animate-fade-up ${
-                isDark ? 'bg-slate-900/95 border-slate-800 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fade-up ${
+                isDark ? 'bg-[#14141D]/95 border-white/10 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
               }`}>
-                <a href="#tentang" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navAbout}</a>
-                <a href="#karya" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navWorks}</a>
-                <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navResume}</a>
-                <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navBlog}</a>
-                <a href="#kontak" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl font-semibold hover:bg-[#FE7F2D]/10 hover:text-[#FE7F2D] transition-colors">{t.navContact}</a>
-                <div className="pt-2">
+                <div className="max-w-7xl mx-auto grid sm:grid-cols-2 gap-2">
+                  <a href="#tentang" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navAbout}</a>
+                  <a href="#karya" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navWorks}</a>
+                  <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navResume}</a>
+                  <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navBlog}</a>
+                  <a href="#kontak" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navContact}</a>
                   <a
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-3 rounded-xl text-sm font-bold bg-[#FE7F2D] text-white flex items-center justify-center gap-2 shadow-lg shadow-[#FE7F2D]/20"
+                    className="px-4 py-2.5 rounded-xl font-extrabold bg-[#D6F83B] text-black flex items-center justify-center gap-1.5"
                   >
-                    <span>{t.contactWa}</span>
+                    <span>{t.hireMe}</span>
                     <ArrowUpRight className="w-4 h-4" />
                   </a>
                 </div>
@@ -1776,172 +1947,380 @@ export default function App() {
             )}
           </header>
 
-          {/* HERO SECTION */}
-          <section className="relative overflow-hidden pt-10 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
-            <div className={`absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full blur-3xl pointer-events-none animate-float-slow ${
-              isDark ? 'bg-orange-500/15' : 'bg-[#FE7F2D]/12'
-            }`} />
-            <div className={`absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full blur-3xl pointer-events-none animate-float-reverse ${
-              isDark ? 'bg-indigo-500/15' : 'bg-[#233D4D]/10'
-            }`} />
+          {/* =================================================================
+              HERO SECTION: BRUSH TYPOGRAPHY, DOODLES, BLOBS & CHARACTER
+             ================================================================= */}
+          <section className="relative overflow-hidden pt-8 pb-10 sm:pt-12 sm:pb-14 md:pt-14 md:pb-16">
+            {/* Organic Background Blobs & Doodles */}
+            <svg className="pointer-events-none absolute -bottom-12 -left-16 w-48 h-48 md:w-64 md:h-64 text-[#38BDF8] opacity-90" viewBox="0 0 200 200" fill="currentColor">
+              <path d="M38,-56C51,-48,64,-39,71,-26C78,-13,79,4,73,19C67,34,54,47,39,56C24,65,7,70,-9,71C-25,72,-40,69,-52,59C-64,49,-73,32,-76,14C-79,-4,-76,-23,-66,-38C-56,-53,-39,-64,-23,-68C-7,-72,8,-69,23,-63Z" transform="translate(90 105)" />
+            </svg>
+            <svg className="pointer-events-none absolute top-10 -right-24 w-72 h-72 md:w-96 md:h-96 text-[#F97316] opacity-90" viewBox="0 0 200 200" fill="currentColor">
+              <path d="M44,-66C57,-57,68,-44,74,-29C80,-14,81,3,76,19C71,35,60,50,46,60C32,70,15,75,-2,77C-19,79,-36,78,-49,69C-62,60,-71,43,-75,25C-79,7,-78,-12,-70,-28C-62,-44,-47,-57,-32,-66C-17,-75,-2,-80,13,-79C28,-78,31,-75,44,-66Z" transform="translate(105 95)" />
+            </svg>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-              <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-                <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-left animate-fade-up">
-                  <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] ${
-                    isDark ? 'text-white' : 'text-[#000000]'
-                  }`}>
-                    {t.heroGreeting} <br />
-                    <span className="bg-gradient-to-r from-[#FE7F2D] via-[#f78e47] to-amber-500 bg-clip-text text-transparent">
-                      {profile.name}
-                    </span>
-                  </h1>
+            {/* Floating Hand-drawn Doodles */}
+            <svg className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#FACC15] animate-float-slow hidden sm:block" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+            </svg>
+            <svg className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#D6F83B] animate-float-reverse hidden md:block" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+            </svg>
 
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {profile.roles.map((role, idx) => (
-                      <span 
-                        key={idx}
-                        className={`px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-semibold flex items-center gap-2 transition-transform hover:-translate-y-0.5 ${
-                          isDark 
-                            ? 'bg-slate-900/90 border-slate-800 text-slate-200' 
-                            : 'bg-white border-[#D0D5DD] text-[#233D4D] shadow-sm'
-                        }`}
-                      >
-                        <span className="w-2 h-2 rounded-full bg-[#FE7F2D] shrink-0 animate-pulse" />
-                        {role}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 relative z-10">
+              <div className="grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-6 items-center">
+                
+                {/* LEFT COLUMN: BRUSH DISPLAY NAME & CTA PILLS */}
+                <div className="md:col-span-7 space-y-4 md:space-y-5 text-left animate-fade-up">
+                  {/* "Hey, I'm" + Hand-drawn arrow + Crown Doodle */}
+                  <div className="relative inline-flex items-end gap-2.5 md:gap-3">
+                    <div className="flex flex-col items-start">
+                      <span className={`font-marker text-lg sm:text-xl md:text-2xl -rotate-6 ${isDark ? 'text-slate-200' : 'text-[#233D4D]'}`}>
+                        Hey,
                       </span>
-                    ))}
+                      <svg className={`w-6 h-6 md:w-7 md:h-7 ml-3 md:ml-4 -mt-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                        <path d="M6 6 C 6 20, 16 26, 28 24 M23 19 L29 24 L23 29" />
+                      </svg>
+                    </div>
+
+                    <span className={`font-marker text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-wide ${isDark ? 'text-white' : 'text-[#000000]'}`}>
+                      I&apos;m
+                    </span>
+
+                    {/* Little Neon Crown Doodle */}
+                    <svg className="w-8 h-8 md:w-10 md:h-10 text-[#D6F83B] -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow" viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 28 L8 10 L18 20 L24 6 L30 20 L40 10 L44 28 Z" />
+                      <line x1="6" y1="33" x2="42" y2="33" />
+                    </svg>
                   </div>
 
-                  <p className={`text-sm sm:text-base lg:text-lg leading-relaxed max-w-2xl font-normal ${
-                    isDark ? 'text-slate-300' : 'text-[#233D4D]'
+                  {/* GIANT BRUSH NAME + NEON UNDERLINE (Responsive Tablet Scale) */}
+                  <div className="relative inline-block">
+                    <h1 className={`font-marker text-4xl sm:text-5xl md:text-[54px] lg:text-[78px] leading-[0.98] uppercase tracking-tight ${
+                      isDark ? 'text-white' : 'text-[#000000]'
+                    }`}>
+                      {profile.name}
+                    </h1>
+                    {/* Hand-drawn Lime Brush Underline */}
+                    <svg className="w-full max-w-xs sm:max-w-sm md:max-w-md h-4 md:h-5 mt-1 text-[#D6F83B]" viewBox="0 0 320 18" fill="none">
+                      <path d="M4 12 C 95 4, 210 4, 316 11" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+                    </svg>
+                  </div>
+
+                  {/* Dot-separated Roles */}
+                  <p className={`text-xs sm:text-sm md:text-[15px] lg:text-lg font-bold tracking-wide flex flex-wrap items-center gap-x-2 md:gap-x-2.5 gap-y-1 ${
+                    isDark ? 'text-slate-200' : 'text-[#233D4D]'
                   }`}>
-                    {getLocalized(profile, 'bio')}
+                    {profile.roles.map((role, i) => (
+                      <React.Fragment key={i}>
+                        <span>{role}</span>
+                        {i < profile.roles.length - 1 && (
+                          <span className="text-[#D6F83B] font-black">•</span>
+                        )}
+                      </React.Fragment>
+                    ))}
                   </p>
 
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
+                  {/* Pill CTA Buttons (Lime Filled + Outlined) */}
+                  <div className="flex flex-wrap items-center gap-3 md:gap-3.5 pt-2 relative">
+                    <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <path d="M18 4 C 4 16, 4 34, 28 38 M22 32 L30 38 L22 44" />
+                    </svg>
+
                     <a
                       href="#karya"
-                      className="px-6 py-3.5 rounded-xl bg-[#FE7F2D] hover:bg-[#E86E20] text-white font-bold text-sm shadow-xl shadow-[#FE7F2D]/25 hover:scale-105 flex items-center justify-center gap-2 transition-all"
+                      className="px-5 py-3 md:px-7 md:py-3.5 rounded-full bg-[#D6F83B] hover:bg-[#c5ea25] text-black font-extrabold text-xs md:text-sm shadow-xl shadow-[#D6F83B]/20 hover:scale-105 flex items-center gap-2 md:gap-2.5 transition-all"
                     >
+                      <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-black" />
                       <span>{t.exploreWorks}</span>
-                      <ArrowUpRight className="w-4 h-4" />
                     </a>
+
                     <a
                       href={`https://wa.me/${profile.whatsapp}`}
                       target="_blank"
                       rel="noreferrer"
-                      className={`px-6 py-3.5 rounded-xl border font-bold text-sm flex items-center justify-center gap-2 hover:scale-105 transition-all ${
+                      className={`px-5 py-3 md:px-7 md:py-3.5 rounded-full border font-extrabold text-xs md:text-sm flex items-center gap-2 hover:scale-105 transition-all ${
                         isDark 
-                          ? 'bg-slate-900 hover:bg-slate-800 text-white border-slate-700' 
-                          : 'bg-white hover:bg-[#EAECF0] text-[#233D4D] border-[#D0D5DD] shadow-sm'
+                          ? 'bg-transparent border-white/25 text-white hover:border-[#D6F83B] hover:text-[#D6F83B]' 
+                          : 'bg-white border-[#233D4D] text-[#000000] hover:bg-[#233D4D] hover:text-white'
                       }`}
                     >
-                      <Phone className="w-4 h-4 text-[#FE7F2D]" />
-                      <span>{t.contactWa}</span>
+                      <span>{t.hireMe}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </a>
                   </div>
                 </div>
 
-                {/* Right Profile Card */}
-                <div className="lg:col-span-5 animate-fade-up">
-                  <div className="relative mx-auto max-w-lg lg:max-w-md card-hover-3d">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[#FE7F2D] via-amber-500 to-[#233D4D] rounded-3xl blur-xl opacity-25 animate-pulse" />
-                    <div className={`relative rounded-3xl p-5 sm:p-8 shadow-2xl border space-y-5 sm:space-y-6 ${
-                      isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-[#D0D5DD]'
-                    }`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-20 h-20 rounded-2xl overflow-hidden p-1 shrink-0 border shadow-lg group flex items-center justify-center ${
-                          isDark ? 'bg-slate-950 border-slate-700/80' : 'bg-[#EAECF0] border-[#D0D5DD]'
-                        }`}>
-                          <img
-                            src={profile.avatar || DEFAULT_AVATAR}
-                            alt={profile.name}
-                            onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
-                            className="w-full h-full object-cover rounded-xl"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className={`text-xl font-black mt-0.5 truncate ${
-                            isDark ? 'text-white' : 'text-[#000000]'
-                          }`}>
-                            {profile.name}
-                          </h3>
-                          <p className={`text-xs flex items-center gap-1.5 mt-1 font-medium ${
-                            isDark ? 'text-slate-400' : 'text-[#233D4D]'
-                          }`}>
-                            <MapPin className="w-3.5 h-3.5 text-[#FE7F2D] shrink-0" />
-                            <span>Prigen, Pasuruan, Jawa Timur</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {[
-                          { badge: "Br", title: "Brand Strategy", sub: "Positioning & Guideline", color: "text-[#FE7F2D] bg-[#FE7F2D]/10 border-[#FE7F2D]/20" },
-                          { badge: "Ai/Ps", title: "Logo & Identity", sub: "Illustrator & Photoshop", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
-                          { badge: "Sm", title: "Social Media Mgmt", sub: "Content & Visual Kit", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
-                          { badge: "Fig", title: "Figma UI/UX", sub: "Visual & Prototyping", color: "text-purple-500 bg-purple-500/10 border-purple-500/20" }
-                        ].map((tool, i) => (
-                          <div key={i} className={`p-3 rounded-2xl border flex items-center gap-3 transition-transform hover:-translate-y-0.5 ${
-                            isDark ? 'bg-slate-950/80 border-slate-800/80' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'
-                          }`}>
-                            <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-bold text-xs ${tool.color}`}>
-                              {tool.badge}
-                            </div>
-                            <div className="min-w-0">
-                              <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{tool.title}</div>
-                              <div className={`text-[10px] truncate ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{tool.sub}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className={`pt-4 border-t grid grid-cols-3 gap-2 text-center ${
-                        isDark ? 'border-slate-800' : 'border-[#D0D5DD]'
-                      }`}>
-                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-[#EAECF0]/60'}`}>
-                          <div className="text-xl font-black text-[#FE7F2D]">{projects.length}+</div>
-                          <div className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.navWorks}</div>
-                        </div>
-                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-[#EAECF0]/60'}`}>
-                          <div className="text-xl font-black text-amber-500">{experience.length}</div>
-                          <div className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.navResume}</div>
-                        </div>
-                        <div className={`p-2.5 rounded-xl ${isDark ? 'bg-slate-950/60' : 'bg-[#EAECF0]/60'}`}>
-                          <div className="text-xl font-black text-emerald-500">4</div>
-                          <div className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Languages</div>
-                        </div>
-                      </div>
+                {/* RIGHT COLUMN: ENLARGED CHARACTER & CLOSE COMIC SPEECH BUBBLE */}
+                <div className="md:col-span-5 relative flex flex-col items-center justify-center animate-fade-up mt-2 md:mt-0">
+                  {/* Comic Speech Bubble positioned closer to character */}
+                  <div className="self-center md:self-start md:ml-0 lg:ml-4 -mb-4 sm:-mb-5 lg:-mb-7 relative z-20 animate-float-slow">
+                    <div className="bg-[#38BDF8] text-black font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-xl border-2 border-black leading-tight text-center -rotate-6">
+                      LET&apos;S CREATE <br /> SOMETHING <br /> AWESOME!
                     </div>
+                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#38BDF8] border-r-2 border-b-2 border-black rotate-45 mx-auto -mt-2" />
+                  </div>
+
+                  {/* Enlarged Clean Character Illustration */}
+                  <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[440px] lg:h-[440px] flex items-center justify-center">
+                    {/* Organic Multi-layered Blob Behind Character */}
+                    <svg
+                      className="pointer-events-none absolute inset-0 w-full h-full text-[#6D28D9] opacity-90 scale-110 animate-float-reverse z-0"
+                      viewBox="0 0 200 200"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M44.7,-67.1C57.6,-58.5,67.5,-45.2,73.4,-30.3C79.3,-15.4,81.2,1.1,76.8,15.8C72.4,30.5,61.7,43.4,48.9,53.4C36.1,63.4,21.2,70.5,5.1,72.9C-11,75.3,-28.3,73,-42.5,64.4C-56.7,55.8,-67.8,40.9,-73.3,24.4C-78.8,7.9,-78.7,-10.2,-71.8,-25.4C-64.9,-40.6,-51.2,-52.9,-36.6,-60.9C-22,-68.9,-6.5,-72.6,8.1,-73.7C22.7,-74.8,31.8,-75.7,44.7,-67.1Z"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+                    <svg
+                      className="pointer-events-none absolute inset-0 w-full h-full text-[#FE7F2D] opacity-35 scale-95 rotate-45 animate-float-slow z-0"
+                      viewBox="0 0 200 200"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M39.5,-61.6C51.4,-53.8,61.4,-43.1,67.9,-30.3C74.4,-17.5,77.4,-2.6,74.5,11.1C71.6,24.8,62.8,37.3,51.7,47.3C40.6,57.3,27.2,64.8,12.5,68.6C-2.2,72.4,-18.2,72.5,-32.1,66.6C-46,60.7,-57.8,48.8,-65.3,34.8C-72.8,20.8,-76,4.7,-73.1,-10.3C-70.2,-25.3,-61.2,-39.2,-49.2,-47.1C-37.2,-55,-22.2,-56.9,-7.8,-56.1C6.6,-55.3,27.6,-69.4,39.5,-61.6Z"
+                        transform="translate(100 100)"
+                      />
+                    </svg>
+
+                    <CleanCharacterAvatar
+                      src={profile.avatar || "/avatar.png"}
+                      alt={profile.name}
+                      className="relative z-10 w-full h-full object-contain scale-105 drop-shadow-[0_22px_30px_rgba(0,0,0,0.48)] hover:scale-110 transition-transform duration-500"
+                    />
+
+                    {/* Smiley Doodle */}
+                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#D6F83B] animate-float-reverse z-20" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+                      <circle cx="20" cy="20" r="16" />
+                      <circle cx="14" cy="15" r="1.5" fill="currentColor" />
+                      <circle cx="26" cy="15" r="1.5" fill="currentColor" />
+                      <path d="M13 23 C 16 28, 24 28, 27 23" />
+                    </svg>
                   </div>
                 </div>
+              </div>
+
+              {/* Scroll Down Indicator */}
+              <div className="flex items-center justify-center gap-2 pt-6 pb-2 opacity-75">
+                <Mouse className="w-4 h-4 animate-bounce" />
+                <span className="text-xs font-bold tracking-wide">Scroll Down</span>
               </div>
             </div>
           </section>
 
-          {/* EMPAT PILAR KEAHLIAN */}
-          <section id="tentang" className={`py-16 border-y ${
-            isDark ? 'border-slate-800/80 bg-slate-900/30' : 'border-[#D0D5DD] bg-white'
-          }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-              <div className="text-center max-w-2xl mx-auto">
-                <h2 className={`text-2xl sm:text-3xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.pillarsTitle}</h2>
-                <p className={`text-sm mt-2 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.pillarsDesc}</p>
+          {/* =================================================================
+              SHOWREEL / FEATURED SHOWCASE CARD (2-COLUMN + MINI CAROUSEL TABS)
+             ================================================================= */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
+            {(() => {
+              const currentSlide = showcaseItems[showcaseIndex] || projects[0];
+              return (
+                <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center relative ${
+                  isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+                }`}>
+                  {/* Decorative Purple Spark Lines on Right Edge */}
+                  <svg className="pointer-events-none absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-14 text-[#7C3AED] hidden md:block" viewBox="0 0 32 56" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                    <line x1="4" y1="16" x2="24" y2="8" />
+                    <line x1="6" y1="28" x2="28" y2="28" />
+                    <line x1="4" y1="40" x2="24" y2="48" />
+                  </svg>
+
+                  {/* LEFT COLUMN: ★ SHOWREEL + DESCRIPTION + WATCH NOW + MINI CAROUSEL TABS */}
+                  <div className="md:col-span-5 lg:col-span-4 space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2.5">
+                        <svg className="w-6 h-6 text-[#7C3AED] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        <h2 className="font-marker text-2xl sm:text-3xl uppercase tracking-wide">
+                          SHOWREEL
+                        </h2>
+                      </div>
+
+                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+                        {currentSlide
+                          ? getLocalized(currentSlide, 'subtitle') || getLocalized(currentSlide, 'description')
+                          : 'Sekilas karya terbaik dan dedikasi saya dalam membangun identitas visual & cerita brand.'}
+                      </p>
+
+                      {currentSlide && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveProjectModal(currentSlide)}
+                          className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 transition-all group ${
+                            isDark ? 'text-[#D6F83B] hover:opacity-90' : 'text-[#FE7F2D] hover:opacity-90'
+                          }`}
+                        >
+                          <span>Watch Now</span>
+                          <span className={`w-6 h-6 rounded-full border flex items-center justify-center transition-transform group-hover:scale-110 ${
+                            isDark ? 'border-[#D6F83B]' : 'border-[#FE7F2D]'
+                          }`}>
+                            <Play className="w-3 h-3 fill-current ml-0.5" />
+                          </span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Mini Carousel Tabs Below */}
+                    {showcaseItems.length > 1 && (
+                      <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {showcaseItems.map((item, idx) => {
+                            const isActive = idx === showcaseIndex;
+                            return (
+                              <button
+                                key={item.id || idx}
+                                type="button"
+                                onClick={() => setShowcaseIndex(idx)}
+                                title={getLocalized(item, 'title')}
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  isActive
+                                    ? (isDark ? 'w-7 bg-[#D6F83B]' : 'w-7 bg-[#FE7F2D]')
+                                    : (isDark ? 'w-2 bg-white/25 hover:bg-white/50' : 'w-2 bg-[#233D4D]/30 hover:bg-[#233D4D]/60')
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setShowcaseIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length)}
+                            aria-label="Sebelumnya"
+                            className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
+                              isDark ? 'border-white/15 hover:border-[#D6F83B] text-slate-300' : 'border-[#D0D5DD] hover:border-[#FE7F2D] text-[#233D4D]'
+                            }`}
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowcaseIndex((prev) => (prev + 1) % showcaseItems.length)}
+                            aria-label="Berikutnya"
+                            className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
+                              isDark ? 'border-white/15 hover:border-[#D6F83B] text-slate-300' : 'border-[#D0D5DD] hover:border-[#FE7F2D] text-[#233D4D]'
+                            }`}
+                          >
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* RIGHT COLUMN: WIDE FEATURED BANNER */}
+                  <div
+                    onClick={() => currentSlide && setActiveProjectModal(currentSlide)}
+                    className="md:col-span-7 lg:col-span-8 relative h-48 sm:h-56 md:h-60 lg:h-64 rounded-2xl overflow-hidden group cursor-pointer border border-white/10"
+                  >
+                    <img
+                      key={currentSlide?.id || showcaseIndex}
+                      src={currentSlide?.image || "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80"}
+                      alt={currentSlide?.title || "Showreel Preview"}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 animate-fade-up"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#3B0764]/75 via-purple-900/30 to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#D6F83B] text-black flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                        <Play className="w-6 h-6 md:w-7 md:h-7 fill-black ml-0.5" />
+                      </div>
+                    </div>
+                    {currentSlide && (
+                      <div className="absolute bottom-3.5 left-4 right-4 flex items-end justify-between gap-3 text-white">
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur inline-block">
+                            {currentSlide.category}
+                          </span>
+                          <h3 className="font-card-title font-extrabold text-sm sm:text-base lg:text-lg mt-1 drop-shadow truncate">
+                            {getLocalized(currentSlide, 'title')}
+                          </h3>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+          </section>
+
+          {/* =================================================================
+              SKILL & PILLARS SECTION (APP ICON BADGES + 4 PILLARS CARDS)
+             ================================================================= */}
+          <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
+            <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative overflow-hidden space-y-8 ${
+              isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+            }`}>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
+                <div className="shrink-0">
+                  <div className="inline-block">
+                    <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
+                      SKILL
+                    </h2>
+                    <svg className="w-full h-3.5 mt-0.5 text-[#D6F83B]" viewBox="0 0 120 14" fill="none">
+                      <path d="M3 10 C 35 3, 85 3, 117 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                    {t.pillarsTitle}
+                  </p>
+                </div>
+
+                {/* App Badges Row (3 cols on Mobile, 6 cols on Tablet & Desktop) */}
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4 flex-1 max-w-2xl">
+                  {[
+                    { code: 'Ai', name: 'Adobe Illustrator', bg: 'bg-[#330000]', border: 'border-[#FF9A00]', text: 'text-[#FF9A00]' },
+                    { code: 'Ps', name: 'Adobe Photoshop', bg: 'bg-[#001E36]', border: 'border-[#31A8FF]', text: 'text-[#31A8FF]' },
+                    { code: 'Fig', name: 'Figma UI/UX', bg: 'bg-[#1E1E1E]', border: 'border-[#A259FF]', text: 'text-[#0ACF83]' },
+                    { code: 'Id', name: 'Brand Guideline', bg: 'bg-[#49021F]', border: 'border-[#FF3366]', text: 'text-[#FF3366]' },
+                    { code: 'Sm', name: 'Social Media', bg: 'bg-[#1A103C]', border: 'border-[#8B5CF6]', text: 'text-[#C4B5FD]' },
+                    { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#0B2E1E]', border: 'border-[#D6F83B]', text: 'text-[#D6F83B]' }
+                  ].map((app, i) => (
+                    <div key={i} className="flex flex-col items-center text-center gap-2 group">
+                      <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${app.bg} border-2 ${app.border} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                        <span className={`font-black text-lg sm:text-xl ${app.text}`}>{app.code}</span>
+                      </div>
+                      <span className={`text-[11px] font-bold leading-tight ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+                        {app.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* 4 Core Expertise Pillar Cards (01 - 04) */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 pt-2">
                 {t.pillars.map((pillar, idx) => (
-                  <div key={idx} className={`p-6 rounded-3xl border hover:border-[#FE7F2D] card-hover-3d group ${
-                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
-                  }`}>
-                    <div className="text-3xl font-black text-[#233D4D]/40 group-hover:text-[#FE7F2D] transition-colors">
-                      {pillar.num}
+                  <div
+                    key={idx}
+                    className={`p-5 md:p-6 rounded-2xl border flex flex-col justify-between card-hover-3d transition-all ${
+                      isDark
+                        ? 'bg-[#0D0D12] border-white/10 hover:border-[#D6F83B]'
+                        : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#FE7F2D]'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <span className={`font-card-title text-2xl font-black block ${
+                        isDark ? 'text-slate-600' : 'text-[#233D4D]/35'
+                      }`}>
+                        {pillar.num}
+                      </span>
+                      <h3 className={`font-card-title font-extrabold text-base md:text-lg leading-snug ${
+                        isDark ? 'text-white' : 'text-[#000000]'
+                      }`}>
+                        {pillar.title}
+                      </h3>
+                      <p className={`text-xs leading-relaxed ${
+                        isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                      }`}>
+                        {pillar.desc}
+                      </p>
                     </div>
-                    <h3 className={`text-lg font-bold mt-2 ${isDark ? 'text-white' : 'text-[#000000]'}`}>{pillar.title}</h3>
-                    <p className={`text-xs leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{pillar.desc}</p>
-                    <div className={`mt-4 pt-3 border-t text-[11px] font-bold text-[#FE7F2D] ${
-                      isDark ? 'border-slate-800' : 'border-[#D0D5DD]'
+
+                    <div className={`mt-5 pt-3.5 border-t text-[11px] font-extrabold ${
+                      isDark ? 'border-white/10 text-[#FE7F2D]' : 'border-[#D0D5DD] text-[#FE7F2D]'
                     }`}>
                       {pillar.tools}
                     </div>
@@ -1951,184 +2330,93 @@ export default function App() {
             </div>
           </section>
 
-          {/* KARYA / PORTOFOLIO SECTION */}
-          <section id="karya" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div>
-                <div className="text-xs font-black uppercase tracking-widest text-[#FE7F2D] mb-2">
-                  {t.selectedPortfolio}
-                </div>
-                <h2 className={`text-3xl sm:text-4xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.worksTitle}</h2>
-              </div>
-
-              <div className="relative w-full md:w-72">
-                <Search className="w-4 h-4 text-[#233D4D]/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder={t.searchPlaceholder}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-[#FE7F2D] font-medium ${
-                    isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60'
-                  }`}
+          {/* =================================================================
+              ABOUT ME SECTION (NEON-LIME SKETCH COVER + BIO)
+             ================================================================= */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-16">
+            <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center ${
+              isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+            }`}>
+              {/* Left Neon-Lime Charcoal Sketch Cover */}
+              <div className="md:col-span-5 relative rounded-3xl bg-[#D6F83B] text-black overflow-hidden flex items-center justify-center min-h-[225px] md:min-h-[250px] border-2 border-black shadow-xl group">
+                <img
+                  src={profile.aboutCover || "/about-cover.png"}
+                  alt="Focus Discipline Consistency Cover"
+                  className="w-full h-full min-h-[225px] md:min-h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-            </div>
 
-            {/* Category Filter */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              {categories.map((cat) => {
-                const active = selectedCategory === cat;
-                const displayCat = cat === 'Semua' ? t.allCategory : cat;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
-                      active
-                        ? 'bg-[#FE7F2D] text-white shadow-lg shadow-[#FE7F2D]/25 scale-105'
-                        : isDark
-                          ? 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                          : 'bg-white text-[#233D4D] hover:text-[#000000] border border-[#D0D5DD]'
-                    }`}
-                  >
-                    <span>{displayCat}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Project Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((proj) => (
-                <div
-                  key={proj.id}
-                  className={`group rounded-3xl border overflow-hidden card-hover-3d flex flex-col justify-between shadow-lg ${
-                    isDark
-                      ? 'bg-slate-900/90 border-slate-800/90 hover:border-[#FE7F2D]/50'
-                      : 'bg-white border-[#D0D5DD] hover:border-[#FE7F2D]'
+              {/* Right Bio Info */}
+              <div className="md:col-span-7 space-y-3 md:space-y-4">
+                <div className="inline-block">
+                  <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
+                    ABOUT ME
+                  </h2>
+                  <svg className="w-full h-3.5 mt-0.5 text-[#D6F83B]" viewBox="0 0 180 14" fill="none">
+                    <path d="M3 10 C 55 3, 125 3, 177 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+                  {getLocalized(profile, 'bio')}
+                </p>
+                <a
+                  href="#pengalaman"
+                  className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold ${
+                    isDark ? 'text-[#D6F83B] hover:underline' : 'text-[#FE7F2D] hover:underline'
                   }`}
                 >
-                  <div>
-                    <div
-                      onClick={() => setActiveProjectModal(proj)}
-                      className={`h-48 sm:h-52 bg-gradient-to-br ${proj.accentColor} p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden cursor-pointer`}
-                    >
-                      {proj.image && (
-                        <img
-                          src={proj.image}
-                          alt={getLocalized(proj, 'title')}
-                          loading="lazy"
-                          className="absolute inset-0 w-full h-full object-cover object-center opacity-65 group-hover:scale-110 group-hover:opacity-85 transition-all duration-700"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
-
-                      <div className="relative z-10 flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md text-white text-xs font-semibold border border-white/15 shadow">
-                          {getCategoryIcon(proj.category)}
-                          <span>{proj.category}</span>
-                        </span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/15">
-                          {proj.year}
-                        </span>
-                      </div>
-
-                      <div className="relative z-10">
-                        <h3 className="text-xl font-black text-white leading-tight drop-shadow-md group-hover:translate-x-1 transition-transform">
-                          {getLocalized(proj, 'title')}
-                        </h3>
-                        <p className="text-xs text-white/90 line-clamp-1 mt-1 font-medium drop-shadow">
-                          {getLocalized(proj, 'subtitle')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-6 space-y-4">
-                      <p className={`text-xs leading-relaxed line-clamp-3 font-medium ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
-                        {getLocalized(proj, 'description')}
-                      </p>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        {proj.tools.map((tool, i) => (
-                          <span
-                            key={i}
-                            className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold ${
-                              isDark ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
-                            }`}
-                          >
-                            {tool}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={`px-6 py-4 border-t flex items-center justify-between ${
-                    isDark ? 'border-slate-800/80 bg-slate-950/40' : 'border-[#E4E7EC] bg-[#EAECF0]/40'
+                  <span>EXPERIENCE</span>
+                  <span className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                    isDark ? 'border-[#D6F83B]' : 'border-[#FE7F2D]'
                   }`}>
-                    <button
-                      onClick={() => setActiveProjectModal(proj)}
-                      className="text-xs font-bold text-[#233D4D] hover:text-[#FE7F2D] transition-colors flex items-center gap-1"
-                    >
-                      <span>{t.projectDetail}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-
-                    {proj.link && (
-                      <a
-                        href={proj.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FE7F2D] hover:underline"
-                      >
-                        <span>{t.visitLink}</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </a>
+              </div>
             </div>
           </section>
 
-          {/* RESUME */}
-          <section id="pengalaman" className={`py-20 border-y ${
-            isDark ? 'bg-slate-900/40 border-slate-800/80' : 'bg-white border-[#D0D5DD]'
+          {/* =================================================================
+              EXPERIENCE SECTION (EXPERIENCE & EDUCATION)
+             ================================================================= */}
+          <section id="pengalaman" className={`py-14 md:py-16 border-y ${
+            isDark ? 'bg-[#12121A] border-white/10' : 'bg-white border-[#D0D5DD]'
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-10 md:space-y-12">
               <div className="text-center max-w-2xl mx-auto">
-                <div className="text-xs font-black uppercase tracking-widest text-[#FE7F2D] mb-2">
-                  {t.resumeBadge}
+                <div className="inline-block">
+                  <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">EXPERIENCE</h2>
+                  <svg className="w-full h-3.5 mt-1 text-[#D6F83B]" viewBox="0 0 220 14" fill="none">
+                    <path d="M4 10 C 65 3, 155 3, 216 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                  </svg>
                 </div>
-                <h2 className={`text-3xl sm:text-4xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.resumeTitle}</h2>
               </div>
 
-              <div className="grid lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-7 space-y-6">
+              <div className="grid md:grid-cols-12 gap-8 lg:gap-10">
+                <div className="md:col-span-7 space-y-5 md:space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#FE7F2D]/10 text-[#FE7F2D] border border-[#FE7F2D]/20">
+                    <div className="p-2.5 rounded-xl bg-[#D6F83B] text-black">
                       <Briefcase className="w-5 h-5" />
                     </div>
-                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.expTitle}</h3>
+                    <h3 className="text-lg md:text-xl font-black">{t.expTitle}</h3>
                   </div>
 
-                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-[#D0D5DD]">
+                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-[#6D28D9]/40">
                     {experience.map((exp) => (
-                      <div key={exp.id} className="relative pl-10">
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#FE7F2D] border-4 border-white absolute left-[9px] top-5" />
-                        <div className={`p-5 rounded-2xl border card-hover-3d ${
-                          isDark ? 'bg-slate-900 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
+                      <div key={exp.id} className="relative pl-9 md:pl-10">
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#D6F83B] border-2 border-black absolute left-[9px] top-5" />
+                        <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d ${
+                          isDark ? 'bg-[#181822] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-xs font-bold text-[#FE7F2D]">{exp.period}</span>
+                            <span className={`text-xs font-extrabold ${isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'}`}>{exp.period}</span>
                             <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
-                              isDark ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                              isDark ? 'bg-[#0D0D12] border-white/10 text-slate-300' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                             }`}>
                               {getLocalized(exp, 'type')}
                             </span>
                           </div>
-                          <h4 className={`text-base font-bold mt-1 ${isDark ? 'text-white' : 'text-[#000000]'}`}>{getLocalized(exp, 'role')}</h4>
+                          <h4 className="text-sm md:text-base font-bold mt-1">{getLocalized(exp, 'role')}</h4>
                           <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{exp.company}</div>
                           <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
                         </div>
@@ -2137,31 +2425,31 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-5 space-y-6">
+                <div className="md:col-span-5 space-y-5 md:space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                    <div className="p-2.5 rounded-xl bg-[#6D28D9] text-white">
                       <GraduationCap className="w-5 h-5" />
                     </div>
-                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.eduTitle}</h3>
+                    <h3 className="text-lg md:text-xl font-black">{t.eduTitle}</h3>
                   </div>
 
                   <div className="space-y-4">
                     {education.map((edu) => (
-                      <div key={edu.id} className={`p-5 rounded-2xl border card-hover-3d ${
-                        isDark ? 'bg-slate-900 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
+                      <div key={edu.id} className={`p-4 md:p-5 rounded-2xl border card-hover-3d ${
+                        isDark ? 'bg-[#181822] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                       }`}>
                         <div className="flex items-center justify-between">
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                             edu.type === 'Formal'
-                              ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20'
-                              : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                              ? 'bg-[#6D28D9]/20 text-[#A855F7] border border-[#6D28D9]/30'
+                              : 'bg-[#D6F83B]/15 text-[#D6F83B] border border-[#D6F83B]/30'
                           }`}>
                             {t.eduPrefix} {edu.type}
                           </span>
                           <span className={`text-xs font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{edu.period}</span>
                         </div>
-                        <h4 className={`text-base font-bold mt-2 ${isDark ? 'text-white' : 'text-[#000000]'}`}>{edu.institution}</h4>
-                        <div className="text-xs font-bold text-[#FE7F2D] mt-0.5">{getLocalized(edu, 'major')}</div>
+                        <h4 className="text-sm md:text-base font-bold mt-2">{edu.institution}</h4>
+                        <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'}`}>{getLocalized(edu, 'major')}</div>
                         <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
                       </div>
                     ))}
@@ -2171,22 +2459,26 @@ export default function App() {
             </div>
           </section>
 
-          {/* BLOG */}
-          <section id="blog" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* =================================================================
+              MY LITTLE NOTES (BLOG SECTION)
+             ================================================================= */}
+          <section id="blog" className="py-14 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8">
             <div>
-              <div className="text-xs font-black uppercase tracking-widest text-[#FE7F2D] mb-2">
-                {t.blogBadge}
+              <div className="inline-block">
+                <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">MY LITTLE NOTES</h2>
+                <svg className="w-full h-3.5 mt-1 text-[#D6F83B]" viewBox="0 0 260 14" fill="none">
+                  <path d="M4 10 C 80 3, 180 3, 256 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                </svg>
               </div>
-              <h2 className={`text-3xl sm:text-4xl font-black ${isDark ? 'text-white' : 'text-[#000000]'}`}>{t.blogTitle}</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
               {blogs.map((blog) => (
                 <article
                   key={blog.id}
                   onClick={() => setActiveBlogModal(blog)}
                   className={`rounded-3xl border overflow-hidden flex flex-col justify-between card-hover-3d cursor-pointer group ${
-                    isDark ? 'bg-slate-900 border-slate-800 hover:border-[#FE7F2D]/40' : 'bg-white border-[#D0D5DD] hover:border-[#FE7F2D] shadow-sm'
+                    isDark ? 'bg-[#15151E] border-white/10 hover:border-[#D6F83B]' : 'bg-white border-[#D0D5DD] hover:border-[#FE7F2D] shadow-sm'
                   }`}
                 >
                   <div>
@@ -2199,9 +2491,9 @@ export default function App() {
                         />
                       </div>
                     )}
-                    <div className="p-6 space-y-4">
+                    <div className="p-5 md:p-6 space-y-4">
                       <div className={`flex items-center justify-between text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
-                        <span className="px-3 py-1 rounded-full bg-[#FE7F2D]/10 text-[#FE7F2D] font-bold border border-[#FE7F2D]/20">
+                        <span className="px-3 py-1 rounded-full bg-[#6D28D9]/20 text-[#A855F7] font-bold border border-[#6D28D9]/30">
                           {blog.category}
                         </span>
                         <span className="flex items-center gap-1 font-medium">
@@ -2210,8 +2502,8 @@ export default function App() {
                         </span>
                       </div>
 
-                      <h3 className={`text-xl font-bold leading-snug group-hover:text-[#FE7F2D] transition-colors ${
-                        isDark ? 'text-white' : 'text-[#000000]'
+                      <h3 className={`text-lg md:text-xl font-bold leading-snug transition-colors ${
+                        isDark ? 'text-white group-hover:text-[#D6F83B]' : 'text-[#000000] group-hover:text-[#FE7F2D]'
                       }`}>
                         {getLocalized(blog, 'title')}
                       </h3>
@@ -2221,8 +2513,8 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className={`px-6 py-4 border-t flex items-center justify-between ${
-                    isDark ? 'border-slate-800' : 'border-[#E4E7EC]'
+                  <div className={`px-5 md:px-6 py-4 border-t flex items-center justify-between ${
+                    isDark ? 'border-white/10' : 'border-[#E4E7EC]'
                   }`}>
                     <span className={`text-[11px] font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
                       {t.readTimeLabel} {blog.readTime}
@@ -2230,7 +2522,9 @@ export default function App() {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
-                      className="text-xs font-bold text-[#FE7F2D] hover:underline flex items-center gap-1"
+                      className={`text-xs font-extrabold hover:underline flex items-center gap-1 ${
+                        isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'
+                      }`}
                     >
                       <span>{t.readMore}</span>
                       <ChevronRight className="w-4 h-4" />
@@ -2241,80 +2535,86 @@ export default function App() {
             </div>
           </section>
 
-          {/* FOOTER */}
-          <footer id="kontak" className={`border-t py-16 ${
-            isDark ? 'border-slate-800 bg-slate-900/60' : 'border-[#D0D5DD] bg-white'
+          {/* =================================================================
+              FOOTER ("LET'S MAKE SOMETHING DOPE!" STYLE WITH CORNER BLOB)
+             ================================================================= */}
+          <footer id="kontak" className={`relative overflow-hidden border-t py-12 md:py-14 ${
+            isDark ? 'border-white/10 bg-[#0A0A0F]' : 'border-[#D0D5DD] bg-white'
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-              <div className="rounded-3xl bg-gradient-to-r from-[#FE7F2D] via-amber-500 to-yellow-500 p-6 sm:p-12 text-slate-950 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-2xl">
-                <div className="space-y-2 max-w-xl">
-                  <span className="text-xs font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">
-                    {t.collabBadge}
-                  </span>
-                  <h2 className="text-xl sm:text-3xl font-black leading-tight">{t.collabTitle}</h2>
-                  <p className="text-xs sm:text-sm font-semibold text-slate-950/85">{t.collabDesc}</p>
+            {/* Cute Blue Corner Character Blob */}
+            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#38BDF8] opacity-90" viewBox="0 0 160 160" fill="currentColor">
+              <path d="M45,160 C25,115 45,55 95,40 C130,30 155,45 160,75 L160,160 Z" />
+              <circle cx="95" cy="92" r="5" fill="#0A0A0F" />
+              <circle cx="122" cy="86" r="5" fill="#0A0A0F" />
+              <path d="M98,108 Q112,122 124,104" stroke="#0A0A0F" strokeWidth="4" fill="none" strokeLinecap="round" />
+            </svg>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
+                {/* Left Brush Headline */}
+                <div>
+                  <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase leading-tight">
+                    LET&apos;S MAKE <br />
+                    SOMETHING{' '}
+                    <span className="inline-block px-3 py-0.5 rounded-full border-2 border-[#6D28D9] text-[#D6F83B] bg-[#6D28D9]/20 -rotate-2">
+                      DOPE!
+                    </span>
+                  </h2>
                 </div>
 
-                <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto">
+                {/* Middle Contact Details */}
+                <div className="space-y-2.5 text-xs sm:text-sm">
+                  <a href={`mailto:${profile.email}`} className="flex items-center gap-3 font-bold hover:text-[#D6F83B] transition-colors">
+                    <Mail className="w-4 h-4 text-[#D6F83B] shrink-0" />
+                    <span>{profile.email}</span>
+                  </a>
+                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 font-bold hover:text-[#D6F83B] transition-colors">
+                    <Phone className="w-4 h-4 text-[#D6F83B] shrink-0" />
+                    <span>{profile.phone}</span>
+                  </a>
+                  <div className="flex items-center gap-3 font-medium opacity-80">
+                    <MapPin className="w-4 h-4 text-[#D6F83B] shrink-0" />
+                    <span>Prigen, Pasuruan, Jawa Timur</span>
+                  </div>
+                </div>
+
+                {/* Right Social Circles */}
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`https://instagram.com/${profile.socials.instagram}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
+                      isDark ? 'border-white/20 hover:bg-[#D6F83B] hover:text-black' : 'border-[#D0D5DD] hover:bg-[#FE7F2D] hover:text-white'
+                    }`}
+                  >
+                    IG
+                  </a>
+                  <a
+                    href={`https://linkedin.com/in/${profile.socials.linkedin}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
+                      isDark ? 'border-white/20 hover:bg-[#D6F83B] hover:text-black' : 'border-[#D0D5DD] hover:bg-[#FE7F2D] hover:text-white'
+                    }`}
+                  >
+                    IN
+                  </a>
                   <a
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-3.5 rounded-xl bg-black text-white font-bold text-sm hover:bg-slate-900 hover:scale-105 transition-all flex items-center justify-center gap-2"
+                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
+                      isDark ? 'border-white/20 hover:bg-[#D6F83B] hover:text-black' : 'border-[#D0D5DD] hover:bg-[#FE7F2D] hover:text-white'
+                    }`}
                   >
-                    <Phone className="w-4 h-4 text-[#FE7F2D]" />
-                    <span>WhatsApp</span>
+                    WA
                   </a>
-                  <a
-                    href={`mailto:${profile.email}`}
-                    className="px-6 py-3.5 rounded-xl bg-white text-[#000000] font-bold text-sm hover:bg-[#EAECF0] hover:scale-105 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>Email</span>
-                  </a>
-                </div>
-              </div>
-
-              <div className={`grid md:grid-cols-3 gap-6 pt-4 border-t ${
-                isDark ? 'border-slate-800/80' : 'border-[#D0D5DD]'
-              }`}>
-                <div className="flex items-start gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-[#FE7F2D]/10 text-[#FE7F2D] border border-[#FE7F2D]/20 shrink-0">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.officialEmail}</div>
-                    <a href={`mailto:${profile.email}`} className={`text-sm font-bold hover:text-[#FE7F2D] break-all mt-0.5 block ${isDark ? 'text-white' : 'text-[#000000]'}`}>
-                      {profile.email}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.phoneWa}</div>
-                    <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`text-sm font-bold hover:text-emerald-500 mt-0.5 block ${isDark ? 'text-white' : 'text-[#000000]'}`}>
-                      {profile.phone}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.addressTitle}</div>
-                    <p className={`text-xs leading-relaxed mt-0.5 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{profile.address}</p>
-                  </div>
                 </div>
               </div>
 
               <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs font-medium ${
-                isDark ? 'border-slate-800/80 text-slate-400' : 'border-[#D0D5DD] text-[#233D4D]'
+                isDark ? 'border-white/10 text-slate-400' : 'border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div>© {new Date().getFullYear()} {profile.name}. All Rights Reserved.</div>
                 <div className="flex items-center gap-4">
@@ -2322,7 +2622,7 @@ export default function App() {
                   <button
                     onClick={() => setCurrentRoute('dashboard.html')}
                     title="Admin Access (dashboard.html)"
-                    className="opacity-40 hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-black/5"
+                    className="opacity-40 hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-white/10"
                   >
                     <Lock className="w-3.5 h-3.5" />
                   </button>
@@ -2350,10 +2650,9 @@ export default function App() {
                     <div className={`w-12 h-12 rounded-2xl overflow-hidden border shadow shrink-0 flex items-center justify-center ${
                       isDark ? 'border-slate-700/80 bg-slate-900' : 'border-[#D0D5DD] bg-[#EAECF0]'
                     }`}>
-                      <img
-                        src={profile.avatar || DEFAULT_AVATAR}
+                      <CleanCharacterAvatar
+                        src={profile.avatar || "/avatar.png"}
                         alt="Avatar Karakter"
-                        onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -2634,7 +2933,7 @@ export default function App() {
                                 }}
                                 className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               >
-                                {categories.filter(c => c !== 'Semua').map(cat => (
+                                {cmsProjectCategories.map(cat => (
                                   <option key={cat} value={cat}>{cat}</option>
                                 ))}
                                 <option value="__NEW__" className="font-bold text-[#FE7F2D]">+ Tambah Kategori Baru...</option>
@@ -3115,38 +3414,75 @@ export default function App() {
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
                     <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
-                      <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil & Avatar Karakter</h3>
-                      <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                        <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-slate-600 bg-slate-950' : 'border-[#D0D5DD] bg-white'}`}>
-                          <img
-                            src={profile.avatar || DEFAULT_AVATAR}
-                            alt="Preview Avatar"
-                            onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR; }}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Foto Avatar Karakter</span>
-                          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
-                            <UploadCloud className="w-3.5 h-3.5" />
-                            <span>Ganti Gambar Avatar</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                try {
-                                  const compressed = await compressImageToDataUrl(file, 600, 0.85);
-                                  setProfile(prev => ({ ...prev, avatar: compressed }));
-                                  showToast("Avatar berhasil diperbarui!");
-                                } catch (err) {
-                                  showToast("Gagal mengunggah avatar.", "error");
-                                }
-                              }}
-                              className="hidden"
+                      <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil, Avatar Hero & Sampul About Me</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {/* Avatar Hero Upload */}
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-slate-600 bg-slate-950' : 'border-[#D0D5DD] bg-white'}`}>
+                            <CleanCharacterAvatar
+                              src={profile.avatar || "/avatar.png"}
+                              alt="Preview Avatar Hero"
+                              className="w-full h-full object-contain"
                             />
-                          </label>
+                          </div>
+                          <div className="space-y-1.5">
+                            <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Karakter Hero (Utama)</span>
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              <span>Upload Karakter Hero</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  try {
+                                    const compressed = await compressImageToDataUrl(file, 800, 0.88);
+                                    setProfile(prev => ({ ...prev, avatar: compressed }));
+                                    showToast("Karakter Hero berhasil diperbarui!");
+                                  } catch (err) {
+                                    showToast("Gagal mengunggah gambar.", "error");
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* About Me Cover Upload */}
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                          <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#D6F83B] ${isDark ? 'border-slate-600' : 'border-[#D0D5DD]'}`}>
+                            {profile.aboutCover && !aboutCoverFailed ? (
+                              <img src={profile.aboutCover} alt="Sampul About Me" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="font-marker text-[10px] text-black text-center leading-tight px-1">FOCUS<br/>SKETCH</span>
+                            )}
+                          </div>
+                          <div className="space-y-1.5">
+                            <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Sampul About Me</span>
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              <span>Upload Sampul About</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  try {
+                                    const compressed = await compressImageToDataUrl(file, 1000, 0.88);
+                                    setAboutCoverFailed(false);
+                                    setProfile(prev => ({ ...prev, aboutCover: compressed }));
+                                    showToast("Sampul About Me berhasil diperbarui!");
+                                  } catch (err) {
+                                    showToast("Gagal mengunggah sampul.", "error");
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
                         </div>
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
