@@ -1836,19 +1836,15 @@ export default function App() {
               font-family: 'Poppins', 'Montserrat', sans-serif;
             }
           `}</style>
-          {/* TOP NAVBAR WITH ORGANIC PURPLE BLOB */}
+
+          {/* TOP NAVBAR */}
           <header className={`sticky top-0 z-40 backdrop-blur-xl transition-colors ${
             isDark ? 'bg-[#0D0D12]/90 border-b border-white/5' : 'bg-white/95 border-b border-[#D0D5DD]'
           }`}>
-            {/* Organic Purple Corner Blob */}
-            <svg className="pointer-events-none absolute -top-2 -left-4 w-52 h-24 text-[#6D28D9] opacity-90 z-0" viewBox="0 0 240 110" fill="currentColor">
-              <path d="M0,0 L230,0 C205,48 165,78 112,72 C62,66 36,96 0,104 Z" />
-            </svg>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2 relative z-10">
               <a href="#" className="flex items-center gap-2.5 group min-w-0">
-                <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow ${
-                  isDark ? 'text-white' : 'text-[#000000]'
+                <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow transition-colors ${
+                  isDark ? 'text-[#8B5CF6]' : 'text-[#000000]'
                 }`}>
                   <span className="text-[#D6F83B]">.</span>gudelz
                 </span>
