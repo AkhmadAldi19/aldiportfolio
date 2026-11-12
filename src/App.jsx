@@ -2283,6 +2283,120 @@ export default function App() {
           </section>
 
           {/* =================================================================
+              FEATURED PROJECT SECTION (4-COLUMN GRID + DYNAMIC CATEGORY TABS)
+             ================================================================= */}
+          <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
+            <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative space-y-6 ${
+              isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+            }`}>
+              {/* Header: FEATURED PROJECT + Brush Underline + Search Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="inline-block">
+                    <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase tracking-wide">
+                      FEATURED PROJECT
+                    </h2>
+                    <svg className="w-full h-3.5 mt-0.5 text-[#D6F83B]" viewBox="0 0 280 14" fill="none">
+                      <path d="M4 10 C 85 3, 195 3, 276 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <svg className="w-10 h-5 text-[#7C3AED] hidden sm:block" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                    <path d="M2 12 Q 12 2, 22 12 T 42 12" />
+                  </svg>
+                </div>
+
+                {/* Search Box */}
+                <div className="relative w-full md:w-72">
+                  <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${
+                    isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                  }`} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t.searchPlaceholder}
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-full border text-xs font-medium focus:outline-none transition-colors ${
+                      isDark
+                        ? 'bg-[#0D0D12] border-white/15 text-white placeholder:text-slate-500 focus:border-[#D6F83B]'
+                        : 'bg-[#EAECF0]/60 border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60 focus:border-[#FE7F2D]'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Dynamic Category Tabs (Only populated categories appear) */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {publicCategories.map((cat) => {
+                  const isActive = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                        isActive
+                          ? (isDark ? 'bg-[#D6F83B] text-black shadow-lg shadow-[#D6F83B]/20' : 'bg-[#FE7F2D] text-white shadow-md')
+                          : (isDark ? 'bg-[#0D0D12] text-slate-300 border border-white/10 hover:border-[#D6F83B]' : 'bg-[#EAECF0]/70 text-[#233D4D] border border-[#D0D5DD] hover:border-[#FE7F2D]')
+                      }`}
+                    >
+                      {cat !== 'Semua' && getCategoryIcon(cat)}
+                      <span>{cat === 'Semua' ? t.allCategory : cat}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 4-Column Project Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                {filteredProjects.map((proj) => (
+                  <div
+                    key={proj.id}
+                    onClick={() => setActiveProjectModal(proj)}
+                    className={`rounded-2xl border overflow-hidden cursor-pointer card-hover-3d group flex flex-col justify-between ${
+                      isDark
+                        ? 'bg-[#0D0D12] border-white/10 hover:border-[#D6F83B]'
+                        : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#FE7F2D]'
+                    }`}
+                  >
+                    {/* Thumbnail Image */}
+                    <div className={`h-40 sm:h-44 w-full relative overflow-hidden bg-gradient-to-br ${proj.accentColor}`}>
+                      {proj.image && (
+                        <img
+                          src={proj.image}
+                          alt={getLocalized(proj, 'title')}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
+                      <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur text-[10px] font-extrabold text-white">
+                        {proj.year}
+                      </span>
+                    </div>
+
+                    {/* Card Footer Info (Poppins/Montserrat Title + Category + Arrow) */}
+                    <div className="p-4 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
+                          isDark ? 'text-white group-hover:text-[#D6F83B]' : 'text-[#000000] group-hover:text-[#FE7F2D]'
+                        }`}>
+                          {getLocalized(proj, 'title')}
+                        </h3>
+                        <p className={`text-xs truncate mt-0.5 font-medium ${
+                          isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                        }`}>
+                          {proj.category}
+                        </p>
+                      </div>
+                      <ArrowUpRight className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
+                        isDark ? 'text-slate-300 group-hover:text-[#D6F83B]' : 'text-[#233D4D] group-hover:text-[#FE7F2D]'
+                      }`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* =================================================================
               SKILL & PILLARS SECTION (APP ICON BADGES + 4 PILLARS CARDS)
              ================================================================= */}
           <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
