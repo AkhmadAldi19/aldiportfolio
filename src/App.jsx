@@ -541,6 +541,8 @@ const INITIAL_PROFILE = {
   name: "Akhmad Aldi",
   avatar: "/avatar.png",
   aboutCover: "/about-cover.png",
+  favicon: "/logo.png",
+  siteTitle: ".gudelz — Akhmad Aldi Portfolio",
   roles: [
     "Brand Strategy",
     "Logo Design & Identity",
@@ -1032,6 +1034,40 @@ export default function App() {
   const [aboutCoverFailed, setAboutCoverFailed] = useState(false);
 
   const [profile, setProfile] = useState(INITIAL_PROFILE);
+
+  // Sync Favicon & Browser Tab Title dynamically (replaces default Vite icon)
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.title = profile.siteTitle || `.gudelz — ${profile.name} Portfolio`;
+
+    const defaultSvgFavicon =
+      "data:image/svg+xml," +
+      encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0D0D12"/><circle cx="17" cy="42" r="5" fill="#D6F83B"/><text x="24" y="45" font-family="Arial Black, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF">g</text></svg>`
+      );
+
+    const applyFavicon = (href) => {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = href;
+    };
+
+    if (profile.favicon && profile.favicon.startsWith('data:')) {
+      applyFavicon(profile.favicon);
+    } else if (profile.favicon) {
+      const tester = new Image();
+      tester.onload = () => applyFavicon(profile.favicon);
+      tester.onerror = () => applyFavicon(defaultSvgFavicon);
+      tester.src = profile.favicon;
+    } else {
+      applyFavicon(defaultSvgFavicon);
+    }
+  }, [profile.favicon, profile.siteTitle, profile.name]);
+
   const [education, setEducation] = useState(INITIAL_EDUCATION);
   const [experience, setExperience] = useState(INITIAL_EXPERIENCE);
   const [projects, setProjects] = useState(INITIAL_PROJECTS);
@@ -3414,8 +3450,8 @@ export default function App() {
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
                     <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
-                      <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil, Avatar Hero & Sampul About Me</h3>
-                      <div className="grid sm:grid-cols-2 gap-4">
+                      <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil, Avatar Hero, Sampul & Favicon Tab Browser</h3>
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Avatar Hero Upload */}
                         <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
                           <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-slate-600 bg-slate-950' : 'border-[#D0D5DD] bg-white'}`}>
@@ -3484,8 +3520,52 @@ export default function App() {
                             </label>
                           </div>
                         </div>
+
+                        {/* Favicon / Tab Icon Upload */}
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#0D0D12] ${isDark ? 'border-slate-600' : 'border-[#D0D5DD]'}`}>
+                            {profile.favicon && profile.favicon.startsWith('data:') ? (
+                              <img src={profile.favicon} alt="Favicon Tab" className="w-10 h-10 object-contain" />
+                            ) : (
+                              <span className="font-marker text-xl text-white"><span className="text-[#D6F83B]">.</span>g</span>
+                            )}
+                          </div>
+                          <div className="space-y-1.5">
+                            <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Ikon Tab Browser (Favicon)</span>
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              <span>Upload Ikon Tab</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  try {
+                                    const compressed = await compressImageToDataUrl(file, 128, 0.9);
+                                    setProfile(prev => ({ ...prev, favicon: compressed }));
+                                    showToast("Ikon tab browser (Favicon) diperbarui!");
+                                  } catch (err) {
+                                    showToast("Gagal mengunggah ikon.", "error");
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Judul Tab Browser (Title)</label>
+                          <input
+                            type="text"
+                            value={profile.siteTitle || ''}
+                            onChange={(e) => setProfile({ ...profile, siteTitle: e.target.value })}
+                            placeholder=".gudelz — Akhmad Aldi Portfolio"
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          />
+                        </div>
                         <div>
                           <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Nama Lengkap</label>
                           <input
