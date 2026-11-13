@@ -1769,6 +1769,36 @@ export default function App() {
     }
   };
 
+  // Handler khusus untuk unggah dan kompresi gambar di Profile Info (Avatar, Sampul About Me, Favicon)
+  const handleProfileAssetUpload = async (file, fieldKey, maxWidth, quality, successMessage) => {
+    if (!file) return;
+    try {
+      setIsUploadingImage(true);
+      const compressed = await compressImageToDataUrl(file, maxWidth, quality);
+      if (fieldKey === 'aboutCover') {
+        setAboutCoverFailed(false);
+      }
+      const nextProfile = { ...profile, [fieldKey]: compressed };
+      setProfile(nextProfile);
+      
+      // Langsung sinkronkan ke Supabase agar perubahan gambar tidak hilang saat reload
+      if (supabaseUrl && supabaseKey) {
+        const base = cleanUrl(supabaseUrl);
+        await fetch(`${base}/rest/v1/portfolio_profile`, {
+          method: 'POST',
+          headers: getSupabaseHeaders(supabaseKey, true),
+          body: JSON.stringify({ id: 1, data: nextProfile, updated_at: new Date().toISOString() })
+        });
+      }
+      showToast(successMessage);
+    } catch (err) {
+      console.error('Upload error:', err);
+      showToast("Gagal memproses gambar. Pastikan format JPG/PNG/WEBP valid.", "error");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const getCategoryIcon = (cat) => {
     switch (cat) {
       case 'Brand Strategy': return <Sparkles className="w-4 h-4 shrink-0" />;
@@ -3719,20 +3749,14 @@ export default function App() {
                             <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Karakter Hero (Utama)</span>
                             <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
-                              <span>Upload Karakter Hero</span>
+                              <span>{isUploadingImage ? 'Memproses...' : 'Upload Karakter Hero'}</span>
                               <input
                                 type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
+                                accept="image/png, image/jpeg, image/webp, image/gif"
+                                onChange={(e) => {
                                   const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  try {
-                                    const compressed = await compressImageToDataUrl(file, 800, 0.88);
-                                    setProfile(prev => ({ ...prev, avatar: compressed }));
-                                    showToast("Karakter Hero berhasil diperbarui!");
-                                  } catch (err) {
-                                    showToast("Gagal mengunggah gambar.", "error");
-                                  }
+                                  handleProfileAssetUpload(file, 'avatar', 800, 0.85, "Karakter Hero berhasil diperbarui & tersimpan!");
+                                  e.target.value = '';
                                 }}
                                 className="hidden"
                               />
@@ -3744,34 +3768,47 @@ export default function App() {
                         <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
                           <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#5C3E94] ${isDark ? 'border-white/20' : 'border-[#D0D5DD]'}`}>
                             {profile.aboutCover && !aboutCoverFailed ? (
-                              <img src={profile.aboutCover} alt="Sampul About Me" className="w-full h-full object-cover" />
+                              <img
+                                src={profile.aboutCover}
+                                alt="Sampul About Me"
+                                onError={() => setAboutCoverFailed(true)}
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
                               <span className="font-marker text-[10px] text-white text-center leading-tight px-1">FOCUS<br/>SKETCH</span>
                             )}
                           </div>
                           <div className="space-y-1.5">
                             <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Sampul About Me</span>
-                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
-                              <UploadCloud className="w-3.5 h-3.5" />
-                              <span>Upload Sampul About</span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  try {
-                                    const compressed = await compressImageToDataUrl(file, 1000, 0.88);
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
+                                <UploadCloud className="w-3.5 h-3.5" />
+                                <span>{isUploadingImage ? 'Mengunggah...' : 'Upload Sampul'}</span>
+                                <input
+                                  type="file"
+                                  accept="image/png, image/jpeg, image/webp, image/gif"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    handleProfileAssetUpload(file, 'aboutCover', 900, 0.82, "Sampul About Me berhasil diunggah & tersimpan!");
+                                    e.target.value = '';
+                                  }}
+                                  className="hidden"
+                                />
+                              </label>
+                              {profile.aboutCover && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
                                     setAboutCoverFailed(false);
-                                    setProfile(prev => ({ ...prev, aboutCover: compressed }));
-                                    showToast("Sampul About Me berhasil diperbarui!");
-                                  } catch (err) {
-                                    showToast("Gagal mengunggah sampul.", "error");
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                            </label>
+                                    setProfile(prev => ({ ...prev, aboutCover: '' }));
+                                    showToast("Sampul About Me direset ke default.", "info");
+                                  }}
+                                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 text-xs font-bold transition-colors"
+                                >
+                                  Reset
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -3791,17 +3828,11 @@ export default function App() {
                               <span>Upload Ikon Tab</span>
                               <input
                                 type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
+                                accept="image/png, image/jpeg, image/webp, image/x-icon, image/svg+xml"
+                                onChange={(e) => {
                                   const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  try {
-                                    const compressed = await compressImageToDataUrl(file, 128, 0.9);
-                                    setProfile(prev => ({ ...prev, favicon: compressed }));
-                                    showToast("Ikon tab browser (Favicon) diperbarui!");
-                                  } catch (err) {
-                                    showToast("Gagal mengunggah ikon.", "error");
-                                  }
+                                  handleProfileAssetUpload(file, 'favicon', 128, 0.9, "Ikon tab browser (Favicon) diperbarui!");
+                                  e.target.value = '';
                                 }}
                                 className="hidden"
                               />
