@@ -1814,6 +1814,14 @@ export default function App() {
         .animate-fade-up {
           animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+        @keyframes popInLetter {
+          0% { opacity: 0; transform: translateY(15px) scale(0.8) rotate(-8deg); }
+          100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+        }
+        .animate-pop-letter {
+          animation: popInLetter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          opacity: 0;
+        }
         .card-hover-3d {
           transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
         }
@@ -1870,7 +1878,9 @@ export default function App() {
                   { id: 'home', label: 'Home', href: '#' },
                   { id: 'karya', label: t.navWorks, href: '#karya' },
                   { id: 'tentang', label: t.navAbout, href: '#tentang' },
-                  {id: 'kontak', label: t.navContact, href: '#kontak'}
+                  { id: 'pengalaman', label: t.navResume, href: '#pengalaman' },
+                  { id: 'blog', label: t.navBlog, href: '#blog' },
+                  { id: 'kontak', label: t.navContact, href: '#kontak' }
                 ].map(navItem => {
                   const isActive = activeSection === navItem.id;
                   return (
@@ -2019,7 +2029,7 @@ export default function App() {
               <path d="M 38 60 C 45 70 55 70 62 60" />
               <path d="M 10 30 L 20 40 M 90 30 L 80 40" strokeWidth="3" />
             </svg>
-            <svg className="pointer-events-none absolute top-10 -right-24 w-72 h-72 md:w-96 md:h-96 text-[#FFC300] opacity-90" viewBox="0 0 200 200" fill="currentColor">
+            <svg className="pointer-events-none absolute top-10 -right-24 w-72 h-72 md:w-96 md:h-96 text-[#FFC300] opacity-90 hidden md:block" viewBox="0 0 200 200" fill="currentColor">
               <path d="M44,-66C57,-57,68,-44,74,-29C80,-14,81,3,76,19C71,35,60,50,46,60C32,70,15,75,-2,77C-19,79,-36,78,-49,69C-62,60,-71,43,-75,25C-79,7,-78,-12,-70,-28C-62,-44,-47,-57,-32,-66C-17,-75,-2,-80,13,-79C28,-78,31,-75,44,-66Z" transform="translate(105 95)" />
             </svg>
 
@@ -2035,9 +2045,9 @@ export default function App() {
               <div className="grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-6 items-center">
                 
                 {/* LEFT COLUMN: BRUSH DISPLAY NAME & CTA PILLS */}
-                <div className="md:col-span-7 space-y-4 md:space-y-5 text-left animate-fade-up">
+                <div className="md:col-span-7 space-y-4 md:space-y-5 text-center md:text-left flex flex-col items-center md:items-start animate-fade-up">
                   {/* "Hey, I'm" + Hand-drawn arrow + Crown Doodle */}
-                  <div className="relative inline-flex items-end gap-2.5 md:gap-3">
+                  <div className="relative inline-flex items-end justify-center md:justify-start gap-2.5 md:gap-3">
                     <div className="flex flex-col items-start">
                       <span className={`font-marker text-lg sm:text-xl md:text-2xl -rotate-6 ${isDark ? 'text-slate-200' : 'text-[#233D4D]'}`}>
                         Hey,
@@ -2058,17 +2068,32 @@ export default function App() {
                     </svg>
                   </div>
 
-                  {/* GIANT BRUSH NAME (Enlarged Responsive Scale & Removed Underline) */}
-                  <div className="relative inline-block">
-                    <h1 className={`font-marker text-5xl sm:text-6xl md:text-[72px] lg:text-[96px] leading-[0.95] uppercase tracking-tight ${
+                  {/* GIANT BRUSH NAME (Enlarged Responsive Scale & Word-Wrap Fix) */}
+                  <div className="relative flex justify-center md:justify-start w-full">
+                    <h1 className={`font-marker text-5xl sm:text-6xl md:text-[72px] lg:text-[96px] leading-[0.95] uppercase tracking-tight flex flex-wrap justify-center md:justify-start gap-x-3 sm:gap-x-4 lg:gap-x-6 ${
                       isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
                     }`}>
-                      {profile.name}
+                      {profile.name.split(' ').map((word, wordIdx) => (
+                        <span key={wordIdx} className="inline-flex">
+                          {word.split('').map((char, charIdx) => {
+                            const delay = (wordIdx * 6 + charIdx) * 0.05;
+                            return (
+                              <span 
+                                key={charIdx} 
+                                className="inline-block animate-pop-letter" 
+                                style={{ animationDelay: `${delay}s` }}
+                              >
+                                {char}
+                              </span>
+                            );
+                          })}
+                        </span>
+                      ))}
                     </h1>
                   </div>
 
                   {/* Dot-separated Roles */}
-                  <p className={`text-xs sm:text-sm md:text-[15px] lg:text-lg font-bold tracking-wide flex flex-wrap items-center gap-x-2 md:gap-x-2.5 gap-y-1 ${
+                  <p className={`text-xs sm:text-sm md:text-[15px] lg:text-lg font-bold tracking-wide flex flex-wrap items-center justify-center md:justify-start gap-x-2 md:gap-x-2.5 gap-y-1 ${
                     isDark ? 'text-slate-200' : 'text-[#233D4D]'
                   }`}>
                     {profile.roles.map((role, i) => (
@@ -2082,7 +2107,7 @@ export default function App() {
                   </p>
 
                   {/* Pill CTA Buttons */}
-                  <div className="flex flex-wrap items-center gap-3 md:gap-3.5 pt-2 relative">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-3.5 pt-2 relative">
                     <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 4 C 4 16, 4 34, 28 38 M22 32 L30 38 L22 44" />
                     </svg>
@@ -2174,7 +2199,12 @@ export default function App() {
               SHOWREEL / FEATURED SHOWCASE CARD (2-COLUMN + MINI CAROUSEL TABS)
               (Diberikan margin top lebih besar di mobile/tablet)
              ================================================================= */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 pt-8 sm:pt-12 md:pt-0 mt-6 sm:mt-10 md:mt-0">
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 pt-8 sm:pt-12 md:pt-0 mt-6 sm:mt-10 md:mt-0 relative">
+            {/* Doodle: Cross / Spark */}
+            <svg className={`pointer-events-none absolute top-6 -left-4 w-8 h-8 opacity-60 animate-float-reverse hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            
             {(() => {
               const currentSlide = showcaseItems[showcaseIndex] || projects[0];
               return (
@@ -2310,7 +2340,12 @@ export default function App() {
           {/* =================================================================
               FEATURED PROJECT SECTION (4-COLUMN GRID + DYNAMIC CATEGORY TABS)
              ================================================================= */}
-          <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
+          <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 relative">
+            {/* Doodle: Lightning Bolt */}
+            <svg className={`pointer-events-none absolute top-20 -right-2 w-10 h-10 opacity-70 animate-float-slow hidden xl:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+            </svg>
+
             <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative space-y-6 ${
               isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
             }`}>
@@ -2424,7 +2459,12 @@ export default function App() {
           {/* =================================================================
               SKILL & PILLARS SECTION (APP ICON BADGES + 4 PILLARS CARDS)
              ================================================================= */}
-          <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
+          <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 relative">
+            {/* Doodle: Squiggly Line */}
+            <svg className={`pointer-events-none absolute bottom-32 -left-6 w-14 h-14 opacity-50 animate-float-reverse hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round">
+              <path d="M10 50 Q 30 20, 50 50 T 90 50" />
+            </svg>
+
             <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative overflow-hidden space-y-8 ${
               isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
             }`}>
@@ -2508,7 +2548,12 @@ export default function App() {
           {/* =================================================================
               ABOUT ME SECTION (NEON-LIME SKETCH COVER + BIO)
              ================================================================= */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-16">
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-16 relative">
+            {/* Doodle: Sparkle Star */}
+            <svg className={`pointer-events-none absolute -top-4 right-8 w-10 h-10 opacity-60 animate-float-slow hidden md:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+            </svg>
+
             <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center ${
               isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
             }`}>
@@ -2554,10 +2599,19 @@ export default function App() {
           {/* =================================================================
               EXPERIENCE SECTION (EXPERIENCE & EDUCATION)
              ================================================================= */}
-          <section id="pengalaman" className={`py-14 md:py-16 border-y ${
+          <section id="pengalaman" className={`py-14 md:py-16 border-y relative overflow-hidden ${
             isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-10 md:space-y-12">
+            {/* Doodle: Dotted Circle & Sparkles */}
+            <svg className={`pointer-events-none absolute top-40 left-[2%] w-16 h-16 opacity-30 animate-float-reverse hidden xl:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+               <circle cx="20" cy="20" r="14" strokeDasharray="4 4" />
+               <circle cx="20" cy="20" r="4" fill="currentColor" />
+            </svg>
+            <svg className={`pointer-events-none absolute bottom-20 right-[2%] w-12 h-12 opacity-30 animate-float-slow hidden xl:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-10 md:space-y-12 relative z-10">
               <div className="text-center max-w-2xl mx-auto">
                 <div className="inline-block">
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">EXPERIENCE</h2>
@@ -2602,7 +2656,7 @@ export default function App() {
 
                 <div className="md:col-span-5 space-y-5 md:space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#5C3E94] text-white">
+                    <div className={`p-2.5 rounded-xl ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
                       <GraduationCap className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.eduTitle}</h3>
@@ -2616,8 +2670,8 @@ export default function App() {
                         <div className="flex items-center justify-between">
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                             edu.type === 'Formal'
-                              ? 'bg-[#5C3E94]/20 text-[#5C3E94] border border-[#5C3E94]/30'
-                              : (isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border border-[#5C3E94]/30')
+                              ? (isDark ? 'bg-white/15 text-white border border-white/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border border-[#5C3E94]/30')
+                              : (isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border border-[#FFC300]/30' : 'bg-[#FFC300]/20 text-[#211832] border border-[#FFC300]/40')
                           }`}>
                             {t.eduPrefix} {edu.type}
                           </span>
@@ -2637,7 +2691,12 @@ export default function App() {
           {/* =================================================================
               MY LITTLE NOTES (BLOG SECTION)
              ================================================================= */}
-          <section id="blog" className="py-14 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8">
+          <section id="blog" className="py-14 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 relative">
+            {/* Doodle: Small Lightning */}
+            <svg className={`pointer-events-none absolute top-12 right-[12%] w-8 h-8 opacity-70 animate-float-slow hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+            </svg>
+
             <div>
               <div className="inline-block">
                 <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">MY LITTLE NOTES</h2>
@@ -2726,21 +2785,25 @@ export default function App() {
               <path d="M98,108 Q112,122 124,104" stroke={isDark ? "#211832" : "#FFFFFF"} strokeWidth="4" fill="none" strokeLinecap="round" />
             </svg>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10 text-center md:text-left">
+              <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-8">
                 {/* Left Brush Headline */}
-                <div>
+                <div className="relative flex flex-col items-center md:items-start w-full md:w-auto">
+                  {/* Doodle: Spark near Title */}
+                  <svg className={`pointer-events-none absolute -top-6 md:-top-8 -left-2 md:-left-4 w-6 h-6 md:w-7 md:h-7 opacity-80 animate-float-reverse ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+                  </svg>
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase leading-tight">
-                    LET&apos;S MAKE <br />
-                    SOMETHING{' '}
-                    <span className={`inline-block px-3 py-0.5 rounded-full border-2 -rotate-2 ${isDark ? 'border-[#5C3E94] text-[#FFC300] bg-[#5C3E94]/20' : 'border-[#5C3E94] text-[#5C3E94] bg-[#5C3E94]/10'}`}>
+                    LET&apos;S MAKE <br className="hidden md:block" />
+                    <span className="md:hidden"> </span>SOMETHING{' '}
+                    <span className={`inline-block px-3 py-0.5 mt-2 md:mt-0 rounded-full border-2 -rotate-2 ${isDark ? 'border-[#5C3E94] text-[#FFC300] bg-[#5C3E94]/20' : 'border-[#5C3E94] text-[#5C3E94] bg-[#5C3E94]/10'}`}>
                       DOPE!
                     </span>
                   </h2>
                 </div>
 
                 {/* Middle Contact Details */}
-                <div className="space-y-2.5 text-xs sm:text-sm">
+                <div className="space-y-2.5 text-xs sm:text-sm flex flex-col items-center md:items-start w-full md:w-auto">
                   <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 font-bold transition-colors ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
                     <Mail className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>{profile.email}</span>
@@ -2751,12 +2814,12 @@ export default function App() {
                   </a>
                   <div className="flex items-center gap-3 font-medium opacity-80">
                     <MapPin className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
-                    <span>Prigen, Pasuruan, Jawa Timur</span>
+                    <span>{profile.address || 'Prigen, Pasuruan, Jawa Timur'}</span>
                   </div>
                 </div>
 
                 {/* Right Social Circles */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-3 w-full md:w-auto">
                   <a
                     href={`https://instagram.com/${profile.socials.instagram}`}
                     target="_blank"
@@ -2790,11 +2853,11 @@ export default function App() {
                 </div>
               </div>
 
-              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs font-medium ${
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs font-medium text-center sm:text-left ${
                 isDark ? 'border-white/10 text-white/60' : 'border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div>© {new Date().getFullYear()} {profile.name}. All Rights Reserved.</div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center gap-4">
                   <span>@{profile.socials.instagram}</span>
                   <button
                     onClick={() => setCurrentRoute('dashboard.html')}
