@@ -2918,7 +2918,11 @@ export default function App() {
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase leading-tight">
                     LET&apos;S MAKE <br className="hidden md:block" />
                     <span className="md:hidden"> </span>SOMETHING{' '}
-                    <span className={`inline-block px-3 py-0.5 mt-2 md:mt-0 rounded-full border-2 -rotate-2 ${isDark ? 'border-[#5C3E94] text-[#FFC300] bg-[#5C3E94]/20' : 'border-[#5C3E94] text-[#5C3E94] bg-[#5C3E94]/10'}`}>
+                    <span className={`font-marker inline-block px-3.5 py-0.5 mt-2 md:mt-0 rounded-full border-2 -rotate-2 ${
+                      isDark
+                        ? 'border-[#FFC300]/50 text-[#FFC300] bg-[#FFC300]/15'
+                        : 'border-[#5C3E94] text-[#211832] bg-[#FFC300]'
+                    }`}>
                       DOPE!
                     </span>
                   </h2>
