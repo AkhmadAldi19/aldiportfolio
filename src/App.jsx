@@ -18,15 +18,15 @@ const DEFAULT_SUPABASE_URL = 'https://juxhrebslwfcsidfppaa.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_7xCDMG1gLSTcnZbX0q-rPg_S6Jw8qF0';
 
 // ============================================================================
-// BRAND COLOR TOKENS (LIGHT MODE PALETTE: #000000, #233D4D, #FE7F2D, #EAECF0)
+// BRAND COLOR TOKENS (LIGHT MODE PALETTE: #000000, #233D4D, #FFC300, #EAECF0)
 // ============================================================================
 const BRAND_LIGHT = {
   bg: '#EAECF0',
   surface: '#FFFFFF',
-  textPrimary: '#000000',
-  textSecondary: '#233D4D',
-  accent: '#FE7F2D',
-  accentHover: '#E86E20',
+  textPrimary: '#211832',
+  textSecondary: '#412B6B',
+  accent: '#FFC300',
+  accentHover: '#E6B000',
   border: '#D0D5DD',
   borderSubtle: '#E4E7EC'
 };
@@ -400,7 +400,6 @@ function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
 // AUTOMATIC CHECKERBOARD / SOLID BACKGROUND REMOVER FOR CHARACTER AVATAR
 // ============================================================================
 function CleanCharacterAvatar({ src, alt, className }) {
-  // Start with null while processing so no white-faced placeholder flashes during load
   const [cleanedSrc, setCleanedSrc] = useState(null);
   const [failed, setFailed] = useState(false);
 
@@ -433,7 +432,6 @@ function CleanCharacterAvatar({ src, alt, className }) {
         const imgData = ctx.getImageData(0, 0, w, h);
         const data = imgData.data;
 
-        // Sample top-left corner color to also support solid-colored backgrounds (e.g., purple)
         const cornerR = data[0];
         const cornerG = data[1];
         const cornerB = data[2];
@@ -441,13 +439,10 @@ function CleanCharacterAvatar({ src, alt, className }) {
 
         const isCheckerOrBgPixel = (r, g, b, a) => {
           if (a < 20) return true;
-          // 1. Neutral gray/white checkerboard background
           const maxC = Math.max(r, g, b);
           const minC = Math.min(r, g, b);
           const diff = maxC - minC;
           if (diff <= 16 && minC >= 145) return true;
-
-          // 2. Solid uniform outer background matching top-left corner
           if (cornerA > 200) {
             const dist = Math.abs(r - cornerR) + Math.abs(g - cornerG) + Math.abs(b - cornerB);
             if (dist <= 45) return true;
@@ -484,7 +479,6 @@ function CleanCharacterAvatar({ src, alt, className }) {
           const idx = queue[head++];
           const p = idx * 4;
           data[p + 3] = 0;
-
           const x = idx % w;
           const y = (idx - x) / w;
           enqueue(x + 1, y);
@@ -513,7 +507,6 @@ function CleanCharacterAvatar({ src, alt, className }) {
     return () => { cancelled = true; };
   }, [src]);
 
-  // Jangan tampilkan karakter cadangan lain saat gagal/kosong
   if (failed || !cleanedSrc) {
     return null;
   }
@@ -1011,6 +1004,36 @@ export default function App() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    if (currentRoute !== 'landingpage.html') return;
+    
+    const handleScroll = () => {
+      const sections = ['home', 'karya', 'tentang', 'pengalaman', 'blog', 'kontak'];
+      let current = 'home';
+      
+      for (const section of sections) {
+        if (section === 'home') {
+          if (window.scrollY < 250) current = 'home';
+          continue;
+        }
+        const el = document.getElementById(section);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 250) {
+            current = section;
+          }
+        }
+      }
+      setActiveSection(current);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); 
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentRoute]);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCredentials] = useState({
     username: 'aldi',
@@ -1019,7 +1042,6 @@ export default function App() {
   const [loginInput, setLoginInput] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
-  // Shortcut Ctrl+Shift+L or Alt+L for CMS login
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') || (e.altKey && e.key.toLowerCase() === 'l')) {
@@ -1035,7 +1057,6 @@ export default function App() {
 
   const [profile, setProfile] = useState(INITIAL_PROFILE);
 
-  // Sync Favicon & Browser Tab Title dynamically (replaces default Vite icon)
   useEffect(() => {
     if (typeof document === 'undefined') return;
     document.title = profile.siteTitle || `.gudelz — ${profile.name} Portfolio`;
@@ -1043,7 +1064,7 @@ export default function App() {
     const defaultSvgFavicon =
       "data:image/svg+xml," +
       encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0D0D12"/><circle cx="17" cy="42" r="5" fill="#D6F83B"/><text x="24" y="45" font-family="Arial Black, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF">g</text></svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#211832"/><circle cx="17" cy="42" r="5" fill="#FFC300"/><text x="24" y="45" font-family="Arial Black, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF">g</text></svg>`
       );
 
     const applyFavicon = (href) => {
@@ -1103,7 +1124,6 @@ export default function App() {
     title: '', category: 'Logo Design & Identity', subtitle: '', description: '',
     tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
   });
-  // State input kategori kustom baru
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategoryInput, setCustomCategoryInput] = useState('');
 
@@ -1297,13 +1317,11 @@ export default function App() {
     }
   }, []);
 
-  // Showcase Carousel items (prioritize featured projects, fallback to all projects)
   const showcaseItems = useMemo(() => {
     const featuredList = projects.filter(p => p.featured);
     return featuredList.length > 0 ? featuredList : projects;
   }, [projects]);
 
-  // Auto-advance Brand Showcase carousel every 10 seconds
   useEffect(() => {
     if (showcaseItems.length <= 1) return;
     const timer = setInterval(() => {
@@ -1318,19 +1336,16 @@ export default function App() {
     }
   }, [showcaseItems.length, showcaseIndex]);
 
-  // List kategori dinamis untuk filter publik: Hanya kategori yang SUDAH TERISI karya
   const publicCategories = useMemo(() => {
     const populatedCats = new Set(projects.map(p => p.category).filter(Boolean));
     return ['Semua', ...Array.from(populatedCats)];
   }, [projects]);
 
-  // List kategori untuk opsi dropdown di CMS (default + kategori custom yang pernah dibuat)
   const cmsProjectCategories = useMemo(() => {
     const allCats = new Set([...DEFAULT_CATEGORIES, ...projects.map(p => p.category).filter(Boolean)]);
     return Array.from(allCats);
   }, [projects]);
 
-  // Reset selectedCategory ke 'Semua' jika kategori aktif sudah tidak memiliki item
   useEffect(() => {
     if (selectedCategory !== 'Semua' && !publicCategories.includes(selectedCategory)) {
       setSelectedCategory('Semua');
@@ -1410,10 +1425,10 @@ export default function App() {
       const match = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
       if (match) {
         return (
-          <figure key={idx} className="my-5 rounded-2xl overflow-hidden border border-slate-700/40 shadow-lg">
+          <figure key={idx} className="my-5 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
             <img src={match[2]} alt={match[1] || 'Blog illustration'} className="w-full max-h-[420px] object-cover" />
             {match[1] && match[1] !== 'Gambar Artikel' && (
-              <figcaption className="text-center text-xs text-slate-400 py-2 bg-slate-950/40">{match[1]}</figcaption>
+              <figcaption className="text-center text-xs text-slate-400 py-2 bg-[#211832]/80">{match[1]}</figcaption>
             )}
           </figure>
         );
@@ -1430,7 +1445,6 @@ export default function App() {
     e.preventDefault();
     if (!projectForm.title.trim()) return;
 
-    // Tentukan kategori final (apakah dari input kustom atau dropdown)
     const finalCategory = isCustomCategory 
       ? (customCategoryInput.trim() || 'Logo Design & Identity')
       : projectForm.category;
@@ -1503,7 +1517,6 @@ export default function App() {
       image: proj.image || '',
       tools: Array.isArray(proj.tools) ? proj.tools.join(', ') : proj.tools
     });
-    // Jika kategorinya bukan bawaan baku, aktifkan input kustom
     const isStandard = DEFAULT_CATEGORIES.includes(proj.category);
     if (!isStandard) {
       setIsCustomCategory(true);
@@ -1758,18 +1771,18 @@ export default function App() {
 
   const getCategoryIcon = (cat) => {
     switch (cat) {
-      case 'Brand Strategy': return <Sparkles className="w-4 h-4" />;
-      case 'Logo Design & Identity': return <PenTool className="w-4 h-4" />;
-      case 'Social Media Management': return <MessageSquare className="w-4 h-4" />;
-      case 'UI/UX Design': return <Layers className="w-4 h-4" />;
-      default: return <Sparkles className="w-4 h-4" />;
+      case 'Brand Strategy': return <Sparkles className="w-4 h-4 shrink-0" />;
+      case 'Logo Design & Identity': return <PenTool className="w-4 h-4 shrink-0" />;
+      case 'Social Media Management': return <MessageSquare className="w-4 h-4 shrink-0" />;
+      case 'UI/UX Design': return <Layers className="w-4 h-4 shrink-0" />;
+      default: return <Sparkles className="w-4 h-4 shrink-0" />;
     }
   };
 
   return (
     <div 
       className={`min-h-screen font-sans transition-colors duration-300 ${
-        isDark ? 'bg-slate-950 text-slate-100' : 'text-[#000000]'
+        isDark ? 'bg-[#211832] text-slate-100' : 'text-[#000000]'
       }`}
       style={!isDark ? { backgroundColor: BRAND_LIGHT.bg, color: BRAND_LIGHT.textPrimary } : undefined}
     >
@@ -1811,11 +1824,11 @@ export default function App() {
 
       {/* TOAST NOTIFICATION */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-slate-900/95 border-slate-700 text-white animate-fade-up">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-[#412B6B]/95 border-white/10 text-white animate-fade-up">
           {toast.type === 'error' ? (
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
           ) : (
-            <CheckCircle2 className="w-5 h-5 text-[#FE7F2D] shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-[#FFC300] shrink-0" />
           )}
           <span className="text-sm font-medium">{toast.message}</span>
         </div>
@@ -1828,7 +1841,7 @@ export default function App() {
         <div 
           dir={lang === 'ar' ? 'rtl' : 'ltr'}
           style={{ fontFamily: "'Poppins', 'Plus Jakarta Sans', sans-serif" }}
-          className={isDark ? 'bg-[#0D0D12] text-white selection:bg-[#D6F83B] selection:text-black' : 'bg-[#EAECF0] text-[#000000] selection:bg-[#FE7F2D] selection:text-white'}
+          className={isDark ? 'bg-[#211832] text-white selection:bg-[#FFC300] selection:text-[#211832]' : 'bg-[#EAECF0] text-[#000000] selection:bg-[#FFC300] selection:text-[#211832]'}
         >
           <style>{`
             @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap');
@@ -1839,29 +1852,43 @@ export default function App() {
 
           {/* TOP NAVBAR */}
           <header className={`sticky top-0 z-40 backdrop-blur-xl transition-colors ${
-            isDark ? 'bg-[#0D0D12]/90 border-b border-white/5' : 'bg-white/95 border-b border-[#D0D5DD]'
+            isDark ? 'bg-[#211832]/90 border-b border-white/5' : 'bg-white/95 border-b border-[#D0D5DD]'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2 relative z-10">
-              <a href="#" className="flex items-center gap-2.5 group min-w-0">
+              <a href="#" onClick={() => setActiveSection('home')} className="flex items-center gap-2.5 group min-w-0">
                 <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow transition-colors ${
-                  isDark ? 'text-[#8B5CF6]' : 'text-[#000000]'
+                  isDark ? 'text-white' : 'text-[#000000]'
                 }`}>
-                  <span className="text-[#D6F83B]">.</span>gudelz
+                  <span className="text-[#FFC300]">.</span>gudelz
                 </span>
               </a>
 
               <nav className={`hidden lg:flex items-center gap-8 text-sm font-bold ${
                 isDark ? 'text-slate-300' : 'text-[#233D4D]'
               }`}>
-                <a href="#" className={`relative py-1 ${isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'}`}>
-                  Home
-                  <span className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full ${isDark ? 'bg-[#D6F83B]' : 'bg-[#FE7F2D]'}`} />
-                </a>
-                <a href="#karya" className="hover:text-[#D6F83B] transition-colors">{t.navWorks}</a>
-                <a href="#tentang" className="hover:text-[#D6F83B] transition-colors">{t.navAbout}</a>
-                <a href="#pengalaman" className="hover:text-[#D6F83B] transition-colors">{t.navResume}</a>
-                <a href="#blog" className="hover:text-[#D6F83B] transition-colors">{t.navBlog}</a>
-                <a href="#kontak" className="hover:text-[#D6F83B] transition-colors">{t.navContact}</a>
+                {[
+                  { id: 'home', label: 'Home', href: '#' },
+                  { id: 'karya', label: t.navWorks, href: '#karya' },
+                  { id: 'tentang', label: t.navAbout, href: '#tentang' },
+                  {id: 'kontak', label: t.navContact, href: '#kontak'}
+                ].map(navItem => {
+                  const isActive = activeSection === navItem.id;
+                  return (
+                    <a
+                      key={navItem.id}
+                      href={navItem.href}
+                      onClick={() => setActiveSection(navItem.id)}
+                      className={`relative py-1 transition-colors ${
+                        isActive ? (isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]') : (isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]')
+                      }`}
+                    >
+                      {navItem.label}
+                      {isActive && (
+                        <span className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`} />
+                      )}
+                    </a>
+                  );
+                })}
               </nav>
 
               <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
@@ -1872,11 +1899,11 @@ export default function App() {
                     onClick={() => setLangDropdownOpen(!langDropdownOpen)}
                     className={`px-3 py-2 rounded-full border text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                       isDark
-                        ? 'bg-[#181822] border-white/10 text-slate-200 hover:border-[#D6F83B]'
+                        ? 'bg-[#412B6B] border-white/10 text-slate-200 hover:border-[#FFC300]'
                         : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
                     }`}
                   >
-                    <Languages className="w-3.5 h-3.5 text-[#D6F83B] shrink-0" />
+                    <Languages className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>{activeLangObj.label}</span>
                     <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -1885,7 +1912,7 @@ export default function App() {
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
                       <div className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-fade-up ${
-                        isDark ? 'bg-[#181822]/95 border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                        isDark ? 'bg-[#412B6B]/95 border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
                       }`}>
                         {SUPPORTED_LANGUAGES.map((l) => {
                           const isSelected = lang === l.code;
@@ -1896,7 +1923,7 @@ export default function App() {
                               onClick={() => { setLang(l.code); setLangDropdownOpen(false); }}
                               className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
                                 isSelected
-                                  ? 'bg-[#D6F83B] text-black shadow-sm'
+                                  ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-sm' : 'bg-[#5C3E94] text-white shadow-sm')
                                   : isDark
                                     ? 'text-slate-300 hover:bg-white/10 hover:text-white'
                                     : 'text-[#233D4D] hover:bg-[#EAECF0] hover:text-[#000000]'
@@ -1907,7 +1934,7 @@ export default function App() {
                                 <span>{l.name}</span>
                               </span>
                               <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
-                                isSelected ? 'bg-black/15 text-black' : 'opacity-60'
+                                isSelected ? (isDark ? 'bg-black/15 text-[#211832]' : 'bg-white/20 text-white') : 'opacity-60'
                               }`}>
                                 {l.label}
                               </span>
@@ -1925,8 +1952,8 @@ export default function App() {
                   title={isDark ? t.dayMode : t.nightMode}
                   className={`p-2.5 rounded-full border transition-all flex items-center gap-1.5 text-xs font-bold ${
                     isDark 
-                      ? 'bg-[#181822] border-white/10 text-[#D6F83B] hover:border-[#D6F83B]' 
-                      : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
+                      ? 'bg-[#412B6B] border-white/10 text-[#FFC300] hover:border-[#FFC300]' 
+                      : 'bg-white border-[#D0D5DD] text-[#5C3E94] hover:bg-[#EAECF0]'
                   }`}
                 >
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -1937,7 +1964,9 @@ export default function App() {
                   href={`https://wa.me/${profile.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D6F83B] hover:bg-[#c5ea25] text-black font-extrabold text-xs shadow-md transition-transform hover:scale-105"
+                  className={`hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-extrabold text-xs shadow-md transition-transform hover:scale-105 ${
+                    isDark ? 'bg-[#FFC300] hover:bg-[#E6B000] text-[#211832]' : 'bg-[#5C3E94] hover:bg-[#412B6B] text-white'
+                  }`}
                 >
                   <span>{t.hireMe}</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1947,7 +1976,7 @@ export default function App() {
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   aria-label="Menu"
-                  className="lg:hidden w-10 h-10 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white flex items-center justify-center shadow-lg shadow-[#6D28D9]/30 transition-transform hover:scale-105"
+                  className="lg:hidden w-10 h-10 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white flex items-center justify-center shadow-lg shadow-[#5C3E94]/30 transition-transform hover:scale-105"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
@@ -1957,19 +1986,19 @@ export default function App() {
             {/* Mobile & Tablet Drawer Menu */}
             {mobileMenuOpen && (
               <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fade-up ${
-                isDark ? 'bg-[#14141D]/95 border-white/10 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                isDark ? 'bg-[#412B6B]/95 border-white/10 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div className="max-w-7xl mx-auto grid sm:grid-cols-2 gap-2">
-                  <a href="#tentang" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navAbout}</a>
-                  <a href="#karya" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navWorks}</a>
-                  <a href="#pengalaman" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navResume}</a>
-                  <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navBlog}</a>
-                  <a href="#kontak" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 rounded-xl font-bold hover:bg-[#D6F83B] hover:text-black transition-colors">{t.navContact}</a>
+                  <a href="#tentang" onClick={() => { setMobileMenuOpen(false); setActiveSection('tentang'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'tentang' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navAbout}</a>
+                  <a href="#karya" onClick={() => { setMobileMenuOpen(false); setActiveSection('karya'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'karya' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navWorks}</a>
+                  <a href="#pengalaman" onClick={() => { setMobileMenuOpen(false); setActiveSection('pengalaman'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'pengalaman' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navResume}</a>
+                  <a href="#blog" onClick={() => { setMobileMenuOpen(false); setActiveSection('blog'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'blog' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navBlog}</a>
+                  <a href="#kontak" onClick={() => { setMobileMenuOpen(false); setActiveSection('kontak'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'kontak' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navContact}</a>
                   <a
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-4 py-2.5 rounded-xl font-extrabold bg-[#D6F83B] text-black flex items-center justify-center gap-1.5"
+                    className={`px-4 py-2.5 rounded-xl font-extrabold flex items-center justify-center gap-1.5 ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}
                   >
                     <span>{t.hireMe}</span>
                     <ArrowUpRight className="w-4 h-4" />
@@ -1984,18 +2013,21 @@ export default function App() {
              ================================================================= */}
           <section className="relative overflow-hidden pt-8 pb-10 sm:pt-12 sm:pb-14 md:pt-14 md:pb-16">
             {/* Organic Background Blobs & Doodles */}
-            <svg className="pointer-events-none absolute -bottom-12 -left-16 w-48 h-48 md:w-64 md:h-64 text-[#38BDF8] opacity-90" viewBox="0 0 200 200" fill="currentColor">
-              <path d="M38,-56C51,-48,64,-39,71,-26C78,-13,79,4,73,19C67,34,54,47,39,56C24,65,7,70,-9,71C-25,72,-40,69,-52,59C-64,49,-73,32,-76,14C-79,-4,-76,-23,-66,-38C-56,-53,-39,-64,-23,-68C-7,-72,8,-69,23,-63Z" transform="translate(90 105)" />
+            <svg className="pointer-events-none absolute bottom-0 -left-6 md:left-2 w-20 h-20 md:w-24 md:h-24 text-[#5C3E94] opacity-70 -rotate-12 animate-float-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="50" cy="50" r="35" />
+              <path d="M 35 45 Q 40 38 45 45 M 55 45 Q 60 38 65 45" />
+              <path d="M 38 60 C 45 70 55 70 62 60" />
+              <path d="M 10 30 L 20 40 M 90 30 L 80 40" strokeWidth="3" />
             </svg>
-            <svg className="pointer-events-none absolute top-10 -right-24 w-72 h-72 md:w-96 md:h-96 text-[#F97316] opacity-90" viewBox="0 0 200 200" fill="currentColor">
+            <svg className="pointer-events-none absolute top-10 -right-24 w-72 h-72 md:w-96 md:h-96 text-[#FFC300] opacity-90" viewBox="0 0 200 200" fill="currentColor">
               <path d="M44,-66C57,-57,68,-44,74,-29C80,-14,81,3,76,19C71,35,60,50,46,60C32,70,15,75,-2,77C-19,79,-36,78,-49,69C-62,60,-71,43,-75,25C-79,7,-78,-12,-70,-28C-62,-44,-47,-57,-32,-66C-17,-75,-2,-80,13,-79C28,-78,31,-75,44,-66Z" transform="translate(105 95)" />
             </svg>
 
             {/* Floating Hand-drawn Doodles */}
-            <svg className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#FACC15] animate-float-slow hidden sm:block" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#5C3E94] animate-float-slow hidden sm:block" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
             </svg>
-            <svg className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#D6F83B] animate-float-reverse hidden md:block" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#FFC300] animate-float-reverse hidden md:block" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
 
@@ -2010,7 +2042,7 @@ export default function App() {
                       <span className={`font-marker text-lg sm:text-xl md:text-2xl -rotate-6 ${isDark ? 'text-slate-200' : 'text-[#233D4D]'}`}>
                         Hey,
                       </span>
-                      <svg className={`w-6 h-6 md:w-7 md:h-7 ml-3 md:ml-4 -mt-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <svg className={`w-6 h-6 md:w-7 md:h-7 ml-3 md:ml-4 -mt-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                         <path d="M6 6 C 6 20, 16 26, 28 24 M23 19 L29 24 L23 29" />
                       </svg>
                     </div>
@@ -2020,23 +2052,19 @@ export default function App() {
                     </span>
 
                     {/* Little Neon Crown Doodle */}
-                    <svg className="w-8 h-8 md:w-10 md:h-10 text-[#D6F83B] -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow" viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className={`w-8 h-8 md:w-10 md:h-10 -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 28 L8 10 L18 20 L24 6 L30 20 L40 10 L44 28 Z" />
                       <line x1="6" y1="33" x2="42" y2="33" />
                     </svg>
                   </div>
 
-                  {/* GIANT BRUSH NAME + NEON UNDERLINE (Responsive Tablet Scale) */}
+                  {/* GIANT BRUSH NAME (Enlarged Responsive Scale & Removed Underline) */}
                   <div className="relative inline-block">
-                    <h1 className={`font-marker text-4xl sm:text-5xl md:text-[54px] lg:text-[78px] leading-[0.98] uppercase tracking-tight ${
-                      isDark ? 'text-white' : 'text-[#000000]'
+                    <h1 className={`font-marker text-5xl sm:text-6xl md:text-[72px] lg:text-[96px] leading-[0.95] uppercase tracking-tight ${
+                      isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
                     }`}>
                       {profile.name}
                     </h1>
-                    {/* Hand-drawn Lime Brush Underline */}
-                    <svg className="w-full max-w-xs sm:max-w-sm md:max-w-md h-4 md:h-5 mt-1 text-[#D6F83B]" viewBox="0 0 320 18" fill="none">
-                      <path d="M4 12 C 95 4, 210 4, 316 11" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
-                    </svg>
                   </div>
 
                   {/* Dot-separated Roles */}
@@ -2047,13 +2075,13 @@ export default function App() {
                       <React.Fragment key={i}>
                         <span>{role}</span>
                         {i < profile.roles.length - 1 && (
-                          <span className="text-[#D6F83B] font-black">•</span>
+                          <span className={`font-black ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>•</span>
                         )}
                       </React.Fragment>
                     ))}
                   </p>
 
-                  {/* Pill CTA Buttons (Lime Filled + Outlined) */}
+                  {/* Pill CTA Buttons */}
                   <div className="flex flex-wrap items-center gap-3 md:gap-3.5 pt-2 relative">
                     <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 4 C 4 16, 4 34, 28 38 M22 32 L30 38 L22 44" />
@@ -2061,9 +2089,9 @@ export default function App() {
 
                     <a
                       href="#karya"
-                      className="px-5 py-3 md:px-7 md:py-3.5 rounded-full bg-[#D6F83B] hover:bg-[#c5ea25] text-black font-extrabold text-xs md:text-sm shadow-xl shadow-[#D6F83B]/20 hover:scale-105 flex items-center gap-2 md:gap-2.5 transition-all"
+                      className="px-5 py-3 md:px-7 md:py-3.5 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white font-extrabold text-xs md:text-sm shadow-xl shadow-[#5C3E94]/20 hover:scale-105 flex items-center gap-2 md:gap-2.5 transition-all"
                     >
-                      <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-black" />
+                      <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-white" />
                       <span>{t.exploreWorks}</span>
                     </a>
 
@@ -2073,7 +2101,7 @@ export default function App() {
                       rel="noreferrer"
                       className={`px-5 py-3 md:px-7 md:py-3.5 rounded-full border font-extrabold text-xs md:text-sm flex items-center gap-2 hover:scale-105 transition-all ${
                         isDark 
-                          ? 'bg-transparent border-white/25 text-white hover:border-[#D6F83B] hover:text-[#D6F83B]' 
+                          ? 'bg-transparent border-white/25 text-white hover:border-[#FFC300] hover:text-[#FFC300]' 
                           : 'bg-white border-[#233D4D] text-[#000000] hover:bg-[#233D4D] hover:text-white'
                       }`}
                     >
@@ -2087,17 +2115,17 @@ export default function App() {
                 <div className="md:col-span-5 relative flex flex-col items-center justify-center animate-fade-up mt-2 md:mt-0">
                   {/* Comic Speech Bubble positioned closer to character */}
                   <div className="self-center md:self-start md:ml-0 lg:ml-4 -mb-4 sm:-mb-5 lg:-mb-7 relative z-20 animate-float-slow">
-                    <div className="bg-[#38BDF8] text-black font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-xl border-2 border-black leading-tight text-center -rotate-6">
+                    <div className="bg-[#5C3E94] text-white font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-xl border-2 border-[#211832] leading-tight text-center -rotate-6">
                       LET&apos;S CREATE <br /> SOMETHING <br /> AWESOME!
                     </div>
-                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#38BDF8] border-r-2 border-b-2 border-black rotate-45 mx-auto -mt-2" />
+                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#5C3E94] border-r-2 border-b-2 border-[#211832] rotate-45 mx-auto -mt-2" />
                   </div>
 
                   {/* Enlarged Clean Character Illustration */}
                   <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[440px] lg:h-[440px] flex items-center justify-center">
                     {/* Organic Multi-layered Blob Behind Character */}
                     <svg
-                      className="pointer-events-none absolute inset-0 w-full h-full text-[#6D28D9] opacity-90 scale-110 animate-float-reverse z-0"
+                      className="pointer-events-none absolute inset-0 w-full h-full text-[#5C3E94] opacity-90 scale-110 animate-float-reverse z-0"
                       viewBox="0 0 200 200"
                       fill="currentColor"
                     >
@@ -2107,7 +2135,7 @@ export default function App() {
                       />
                     </svg>
                     <svg
-                      className="pointer-events-none absolute inset-0 w-full h-full text-[#FE7F2D] opacity-35 scale-95 rotate-45 animate-float-slow z-0"
+                      className="pointer-events-none absolute inset-0 w-full h-full text-[#FFC300] opacity-35 scale-95 rotate-45 animate-float-slow z-0"
                       viewBox="0 0 200 200"
                       fill="currentColor"
                     >
@@ -2124,7 +2152,7 @@ export default function App() {
                     />
 
                     {/* Smiley Doodle */}
-                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#D6F83B] animate-float-reverse z-20" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#FFC300] animate-float-reverse z-20" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                       <circle cx="20" cy="20" r="16" />
                       <circle cx="14" cy="15" r="1.5" fill="currentColor" />
                       <circle cx="26" cy="15" r="1.5" fill="currentColor" />
@@ -2144,16 +2172,17 @@ export default function App() {
 
           {/* =================================================================
               SHOWREEL / FEATURED SHOWCASE CARD (2-COLUMN + MINI CAROUSEL TABS)
+              (Diberikan margin top lebih besar di mobile/tablet)
              ================================================================= */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 pt-8 sm:pt-12 md:pt-0 mt-6 sm:mt-10 md:mt-0">
             {(() => {
               const currentSlide = showcaseItems[showcaseIndex] || projects[0];
               return (
                 <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center relative ${
-                  isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+                  isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
                 }`}>
                   {/* Decorative Purple Spark Lines on Right Edge */}
-                  <svg className="pointer-events-none absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-14 text-[#7C3AED] hidden md:block" viewBox="0 0 32 56" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                  <svg className="pointer-events-none absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-14 text-[#FFC300] hidden md:block" viewBox="0 0 32 56" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
                     <line x1="4" y1="16" x2="24" y2="8" />
                     <line x1="6" y1="28" x2="28" y2="28" />
                     <line x1="4" y1="40" x2="24" y2="48" />
@@ -2163,7 +2192,7 @@ export default function App() {
                   <div className="md:col-span-5 lg:col-span-4 space-y-4 flex flex-col justify-between">
                     <div className="space-y-3">
                       <div className="flex items-center gap-2.5">
-                        <svg className="w-6 h-6 text-[#7C3AED] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg className={`w-6 h-6 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                         </svg>
                         <h2 className="font-marker text-2xl sm:text-3xl uppercase tracking-wide">
@@ -2171,7 +2200,7 @@ export default function App() {
                         </h2>
                       </div>
 
-                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
                         {currentSlide
                           ? getLocalized(currentSlide, 'subtitle') || getLocalized(currentSlide, 'description')
                           : 'Sekilas karya terbaik dan dedikasi saya dalam membangun identitas visual & cerita brand.'}
@@ -2182,12 +2211,12 @@ export default function App() {
                           type="button"
                           onClick={() => setActiveProjectModal(currentSlide)}
                           className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 transition-all group ${
-                            isDark ? 'text-[#D6F83B] hover:opacity-90' : 'text-[#FE7F2D] hover:opacity-90'
+                            isDark ? 'text-[#FFC300] hover:opacity-90' : 'text-[#5C3E94] hover:opacity-90'
                           }`}
                         >
                           <span>Watch Now</span>
                           <span className={`w-6 h-6 rounded-full border flex items-center justify-center transition-transform group-hover:scale-110 ${
-                            isDark ? 'border-[#D6F83B]' : 'border-[#FE7F2D]'
+                            isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]'
                           }`}>
                             <Play className="w-3 h-3 fill-current ml-0.5" />
                           </span>
@@ -2209,7 +2238,7 @@ export default function App() {
                                 title={getLocalized(item, 'title')}
                                 className={`h-2 rounded-full transition-all duration-300 ${
                                   isActive
-                                    ? (isDark ? 'w-7 bg-[#D6F83B]' : 'w-7 bg-[#FE7F2D]')
+                                    ? (isDark ? 'w-7 bg-[#FFC300]' : 'w-7 bg-[#5C3E94]')
                                     : (isDark ? 'w-2 bg-white/25 hover:bg-white/50' : 'w-2 bg-[#233D4D]/30 hover:bg-[#233D4D]/60')
                                 }`}
                               />
@@ -2223,7 +2252,7 @@ export default function App() {
                             onClick={() => setShowcaseIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length)}
                             aria-label="Sebelumnya"
                             className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
-                              isDark ? 'border-white/15 hover:border-[#D6F83B] text-slate-300' : 'border-[#D0D5DD] hover:border-[#FE7F2D] text-[#233D4D]'
+                              isDark ? 'border-white/15 hover:border-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] text-[#233D4D]'
                             }`}
                           >
                             <ChevronLeft className="w-3.5 h-3.5" />
@@ -2233,7 +2262,7 @@ export default function App() {
                             onClick={() => setShowcaseIndex((prev) => (prev + 1) % showcaseItems.length)}
                             aria-label="Berikutnya"
                             className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
-                              isDark ? 'border-white/15 hover:border-[#D6F83B] text-slate-300' : 'border-[#D0D5DD] hover:border-[#FE7F2D] text-[#233D4D]'
+                              isDark ? 'border-white/15 hover:border-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] text-[#233D4D]'
                             }`}
                           >
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -2254,16 +2283,16 @@ export default function App() {
                       alt={currentSlide?.title || "Showreel Preview"}
                       className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 animate-fade-up"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#3B0764]/75 via-purple-900/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#211832]/75 via-[#412B6B]/30 to-transparent" />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#D6F83B] text-black flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                        <Play className="w-6 h-6 md:w-7 md:h-7 fill-black ml-0.5" />
+                      <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full text-[#211832] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform ${isDark ? 'bg-[#FFC300]' : 'bg-white'}`}>
+                        <Play className="w-6 h-6 md:w-7 md:h-7 fill-[#211832] ml-0.5" />
                       </div>
                     </div>
                     {currentSlide && (
                       <div className="absolute bottom-3.5 left-4 right-4 flex items-end justify-between gap-3 text-white">
                         <div className="min-w-0">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur inline-block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#211832]/60 backdrop-blur inline-block">
                             {currentSlide.category}
                           </span>
                           <h3 className="font-card-title font-extrabold text-sm sm:text-base lg:text-lg mt-1 drop-shadow truncate">
@@ -2283,7 +2312,7 @@ export default function App() {
              ================================================================= */}
           <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
             <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative space-y-6 ${
-              isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+              isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
             }`}>
               {/* Header: FEATURED PROJECT + Brush Underline + Search Bar */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -2292,11 +2321,11 @@ export default function App() {
                     <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase tracking-wide">
                       FEATURED PROJECT
                     </h2>
-                    <svg className="w-full h-3.5 mt-0.5 text-[#D6F83B]" viewBox="0 0 280 14" fill="none">
+                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 280 14" fill="none">
                       <path d="M4 10 C 85 3, 195 3, 276 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                     </svg>
                   </div>
-                  <svg className="w-10 h-5 text-[#7C3AED] hidden sm:block" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                  <svg className="w-10 h-5 text-[#5C3E94] hidden sm:block" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
                     <path d="M2 12 Q 12 2, 22 12 T 42 12" />
                   </svg>
                 </div>
@@ -2304,7 +2333,7 @@ export default function App() {
                 {/* Search Box */}
                 <div className="relative w-full md:w-72">
                   <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${
-                    isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                    isDark ? 'text-white/60' : 'text-[#233D4D]'
                   }`} />
                   <input
                     type="text"
@@ -2313,8 +2342,8 @@ export default function App() {
                     placeholder={t.searchPlaceholder}
                     className={`w-full pl-10 pr-4 py-2.5 rounded-full border text-xs font-medium focus:outline-none transition-colors ${
                       isDark
-                        ? 'bg-[#0D0D12] border-white/15 text-white placeholder:text-slate-500 focus:border-[#D6F83B]'
-                        : 'bg-[#EAECF0]/60 border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60 focus:border-[#FE7F2D]'
+                        ? 'bg-[#211832] border-white/15 text-white placeholder:text-white/60 focus:border-[#FFC300]'
+                        : 'bg-[#EAECF0]/60 border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60 focus:border-[#5C3E94]'
                     }`}
                   />
                 </div>
@@ -2331,8 +2360,8 @@ export default function App() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                         isActive
-                          ? (isDark ? 'bg-[#D6F83B] text-black shadow-lg shadow-[#D6F83B]/20' : 'bg-[#FE7F2D] text-white shadow-md')
-                          : (isDark ? 'bg-[#0D0D12] text-slate-300 border border-white/10 hover:border-[#D6F83B]' : 'bg-[#EAECF0]/70 text-[#233D4D] border border-[#D0D5DD] hover:border-[#FE7F2D]')
+                          ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/20' : 'bg-[#5C3E94] text-white shadow-md')
+                          : (isDark ? 'bg-[#211832] text-slate-300 border border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/70 text-[#233D4D] border border-[#D0D5DD] hover:border-[#5C3E94]')
                       }`}
                     >
                       {cat !== 'Semua' && getCategoryIcon(cat)}
@@ -2350,8 +2379,8 @@ export default function App() {
                     onClick={() => setActiveProjectModal(proj)}
                     className={`rounded-2xl border overflow-hidden cursor-pointer card-hover-3d group flex flex-col justify-between ${
                       isDark
-                        ? 'bg-[#0D0D12] border-white/10 hover:border-[#D6F83B]'
-                        : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#FE7F2D]'
+                        ? 'bg-[#211832] border-white/10 hover:border-[#FFC300]'
+                        : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#FFC300]'
                     }`}
                   >
                     {/* Thumbnail Image */}
@@ -2363,7 +2392,7 @@ export default function App() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       )}
-                      <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur text-[10px] font-extrabold text-white">
+                      <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#211832]/65 backdrop-blur text-[10px] font-extrabold text-white">
                         {proj.year}
                       </span>
                     </div>
@@ -2372,18 +2401,18 @@ export default function App() {
                     <div className="p-4 flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
-                          isDark ? 'text-white group-hover:text-[#D6F83B]' : 'text-[#000000] group-hover:text-[#FE7F2D]'
+                          isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
                         }`}>
                           {getLocalized(proj, 'title')}
                         </h3>
                         <p className={`text-xs truncate mt-0.5 font-medium ${
-                          isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                          isDark ? 'text-white/60' : 'text-[#233D4D]'
                         }`}>
                           {proj.category}
                         </p>
                       </div>
                       <ArrowUpRight className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
-                        isDark ? 'text-slate-300 group-hover:text-[#D6F83B]' : 'text-[#233D4D] group-hover:text-[#FE7F2D]'
+                        isDark ? 'text-slate-300 group-hover:text-[#FFC300]' : 'text-[#233D4D] group-hover:text-[#5C3E94]'
                       }`} />
                     </div>
                   </div>
@@ -2397,7 +2426,7 @@ export default function App() {
              ================================================================= */}
           <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12">
             <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative overflow-hidden space-y-8 ${
-              isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+              isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
             }`}>
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
                 <div className="shrink-0">
@@ -2405,11 +2434,11 @@ export default function App() {
                     <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
                       SKILL
                     </h2>
-                    <svg className="w-full h-3.5 mt-0.5 text-[#D6F83B]" viewBox="0 0 120 14" fill="none">
+                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 120 14" fill="none">
                       <path d="M3 10 C 35 3, 85 3, 117 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
                     </svg>
                   </div>
-                  <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                  <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
                     {t.pillarsTitle}
                   </p>
                 </div>
@@ -2421,14 +2450,14 @@ export default function App() {
                     { code: 'Ps', name: 'Adobe Photoshop', bg: 'bg-[#001E36]', border: 'border-[#31A8FF]', text: 'text-[#31A8FF]' },
                     { code: 'Fig', name: 'Figma UI/UX', bg: 'bg-[#1E1E1E]', border: 'border-[#A259FF]', text: 'text-[#0ACF83]' },
                     { code: 'Id', name: 'Brand Guideline', bg: 'bg-[#49021F]', border: 'border-[#FF3366]', text: 'text-[#FF3366]' },
-                    { code: 'Sm', name: 'Social Media', bg: 'bg-[#1A103C]', border: 'border-[#8B5CF6]', text: 'text-[#C4B5FD]' },
-                    { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#0B2E1E]', border: 'border-[#D6F83B]', text: 'text-[#D6F83B]' }
+                    { code: 'Sm', name: 'Social Media', bg: 'bg-[#211832]', border: 'border-[#5C3E94]', text: 'text-[#5C3E94]' },
+                    { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#211832]', border: isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]', text: isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]' }
                   ].map((app, i) => (
                     <div key={i} className="flex flex-col items-center text-center gap-2 group">
                       <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${app.bg} border-2 ${app.border} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
                         <span className={`font-black text-lg sm:text-xl ${app.text}`}>{app.code}</span>
                       </div>
-                      <span className={`text-[11px] font-bold leading-tight ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+                      <span className={`text-[11px] font-bold leading-tight ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
                         {app.name}
                       </span>
                     </div>
@@ -2443,13 +2472,13 @@ export default function App() {
                     key={idx}
                     className={`p-5 md:p-6 rounded-2xl border flex flex-col justify-between card-hover-3d transition-all ${
                       isDark
-                        ? 'bg-[#0D0D12] border-white/10 hover:border-[#D6F83B]'
-                        : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#FE7F2D]'
+                        ? 'bg-[#211832] border-white/10 hover:border-[#FFC300]'
+                        : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#FFC300]'
                     }`}
                   >
                     <div className="space-y-3">
                       <span className={`font-card-title text-2xl font-black block ${
-                        isDark ? 'text-slate-600' : 'text-[#233D4D]/35'
+                        isDark ? 'text-white/40' : 'text-[#233D4D]/35'
                       }`}>
                         {pillar.num}
                       </span>
@@ -2459,14 +2488,14 @@ export default function App() {
                         {pillar.title}
                       </h3>
                       <p className={`text-xs leading-relaxed ${
-                        isDark ? 'text-slate-400' : 'text-[#233D4D]'
+                        isDark ? 'text-white/60' : 'text-[#233D4D]'
                       }`}>
                         {pillar.desc}
                       </p>
                     </div>
 
                     <div className={`mt-5 pt-3.5 border-t text-[11px] font-extrabold ${
-                      isDark ? 'border-white/10 text-[#FE7F2D]' : 'border-[#D0D5DD] text-[#FE7F2D]'
+                      isDark ? 'border-white/10 text-[#FFC300]' : 'border-[#D0D5DD] text-[#5C3E94]'
                     }`}>
                       {pillar.tools}
                     </div>
@@ -2481,10 +2510,10 @@ export default function App() {
              ================================================================= */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-16">
             <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center ${
-              isDark ? 'bg-[#15151E] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
+              isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
             }`}>
-              {/* Left Neon-Lime Charcoal Sketch Cover */}
-              <div className="md:col-span-5 relative rounded-3xl bg-[#D6F83B] text-black overflow-hidden flex items-center justify-center min-h-[225px] md:min-h-[250px] border-2 border-black shadow-xl group">
+              {/* Left Sketch Cover */}
+              <div className={`md:col-span-5 relative rounded-3xl overflow-hidden flex items-center justify-center min-h-[225px] md:min-h-[250px] border-2 shadow-xl group ${isDark ? 'bg-[#5C3E94] border-[#211832] text-white' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'}`}>
                 <img
                   src={profile.aboutCover || "/about-cover.png"}
                   alt="Focus Discipline Consistency Cover"
@@ -2498,22 +2527,22 @@ export default function App() {
                   <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
                     ABOUT ME
                   </h2>
-                  <svg className="w-full h-3.5 mt-0.5 text-[#D6F83B]" viewBox="0 0 180 14" fill="none">
+                  <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 180 14" fill="none">
                     <path d="M3 10 C 55 3, 125 3, 177 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
                   </svg>
                 </div>
-                <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+                <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
                   {getLocalized(profile, 'bio')}
                 </p>
                 <a
                   href="#pengalaman"
                   className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold ${
-                    isDark ? 'text-[#D6F83B] hover:underline' : 'text-[#FE7F2D] hover:underline'
+                    isDark ? 'text-[#FFC300] hover:underline' : 'text-[#5C3E94] hover:underline'
                   }`}
                 >
                   <span>EXPERIENCE</span>
                   <span className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-                    isDark ? 'border-[#D6F83B]' : 'border-[#FE7F2D]'
+                    isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]'
                   }`}>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
@@ -2526,13 +2555,13 @@ export default function App() {
               EXPERIENCE SECTION (EXPERIENCE & EDUCATION)
              ================================================================= */}
           <section id="pengalaman" className={`py-14 md:py-16 border-y ${
-            isDark ? 'bg-[#12121A] border-white/10' : 'bg-white border-[#D0D5DD]'
+            isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-10 md:space-y-12">
               <div className="text-center max-w-2xl mx-auto">
                 <div className="inline-block">
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">EXPERIENCE</h2>
-                  <svg className="w-full h-3.5 mt-1 text-[#D6F83B]" viewBox="0 0 220 14" fill="none">
+                  <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 220 14" fill="none">
                     <path d="M4 10 C 65 3, 155 3, 216 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                   </svg>
                 </div>
@@ -2541,30 +2570,30 @@ export default function App() {
               <div className="grid md:grid-cols-12 gap-8 lg:gap-10">
                 <div className="md:col-span-7 space-y-5 md:space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#D6F83B] text-black">
+                    <div className={`p-2.5 rounded-xl ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
                       <Briefcase className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.expTitle}</h3>
                   </div>
 
-                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-[#6D28D9]/40">
+                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-[#5C3E94]/40">
                     {experience.map((exp) => (
                       <div key={exp.id} className="relative pl-9 md:pl-10">
-                        <div className="w-3.5 h-3.5 rounded-full bg-[#D6F83B] border-2 border-black absolute left-[9px] top-5" />
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 absolute left-[9px] top-5 ${isDark ? 'bg-[#FFC300] border-[#211832]' : 'bg-[#5C3E94] border-white'}`} />
                         <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d ${
-                          isDark ? 'bg-[#181822] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
+                          isDark ? 'bg-[#412B6B] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className={`text-xs font-extrabold ${isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'}`}>{exp.period}</span>
+                            <span className={`text-xs font-extrabold ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{exp.period}</span>
                             <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
-                              isDark ? 'bg-[#0D0D12] border-white/10 text-slate-300' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                              isDark ? 'bg-[#211832] border-white/10 text-white/80' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                             }`}>
                               {getLocalized(exp, 'type')}
                             </span>
                           </div>
                           <h4 className="text-sm md:text-base font-bold mt-1">{getLocalized(exp, 'role')}</h4>
-                          <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{exp.company}</div>
-                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
+                          <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{exp.company}</div>
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
                         </div>
                       </div>
                     ))}
@@ -2573,7 +2602,7 @@ export default function App() {
 
                 <div className="md:col-span-5 space-y-5 md:space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#6D28D9] text-white">
+                    <div className="p-2.5 rounded-xl bg-[#5C3E94] text-white">
                       <GraduationCap className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.eduTitle}</h3>
@@ -2582,21 +2611,21 @@ export default function App() {
                   <div className="space-y-4">
                     {education.map((edu) => (
                       <div key={edu.id} className={`p-4 md:p-5 rounded-2xl border card-hover-3d ${
-                        isDark ? 'bg-[#181822] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
+                        isDark ? 'bg-[#412B6B] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
                       }`}>
                         <div className="flex items-center justify-between">
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                             edu.type === 'Formal'
-                              ? 'bg-[#6D28D9]/20 text-[#A855F7] border border-[#6D28D9]/30'
-                              : 'bg-[#D6F83B]/15 text-[#D6F83B] border border-[#D6F83B]/30'
+                              ? 'bg-[#5C3E94]/20 text-[#5C3E94] border border-[#5C3E94]/30'
+                              : (isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border border-[#5C3E94]/30')
                           }`}>
                             {t.eduPrefix} {edu.type}
                           </span>
-                          <span className={`text-xs font-semibold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{edu.period}</span>
+                          <span className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{edu.period}</span>
                         </div>
                         <h4 className="text-sm md:text-base font-bold mt-2">{edu.institution}</h4>
-                        <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'}`}>{getLocalized(edu, 'major')}</div>
-                        <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
+                        <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{getLocalized(edu, 'major')}</div>
+                        <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
                       </div>
                     ))}
                   </div>
@@ -2612,7 +2641,7 @@ export default function App() {
             <div>
               <div className="inline-block">
                 <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">MY LITTLE NOTES</h2>
-                <svg className="w-full h-3.5 mt-1 text-[#D6F83B]" viewBox="0 0 260 14" fill="none">
+                <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 260 14" fill="none">
                   <path d="M4 10 C 80 3, 180 3, 256 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                 </svg>
               </div>
@@ -2624,12 +2653,12 @@ export default function App() {
                   key={blog.id}
                   onClick={() => setActiveBlogModal(blog)}
                   className={`rounded-3xl border overflow-hidden flex flex-col justify-between card-hover-3d cursor-pointer group ${
-                    isDark ? 'bg-[#15151E] border-white/10 hover:border-[#D6F83B]' : 'bg-white border-[#D0D5DD] hover:border-[#FE7F2D] shadow-sm'
+                    isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300]' : 'bg-white border-[#D0D5DD] hover:border-[#5C3E94] shadow-sm'
                   }`}
                 >
                   <div>
                     {(blog.image || blog.translations?._coverImage) && (
-                      <div className="h-44 w-full overflow-hidden relative bg-slate-950">
+                      <div className="h-44 w-full overflow-hidden relative bg-[#211832]">
                         <img
                           src={blog.image || blog.translations?._coverImage}
                           alt={getLocalized(blog, 'title')}
@@ -2638,8 +2667,10 @@ export default function App() {
                       </div>
                     )}
                     <div className="p-5 md:p-6 space-y-4">
-                      <div className={`flex items-center justify-between text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
-                        <span className="px-3 py-1 rounded-full bg-[#6D28D9]/20 text-[#A855F7] font-bold border border-[#6D28D9]/30">
+                      <div className={`flex items-center justify-between text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
+                          isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
+                        }`}>
                           {blog.category}
                         </span>
                         <span className="flex items-center gap-1 font-medium">
@@ -2649,11 +2680,11 @@ export default function App() {
                       </div>
 
                       <h3 className={`text-lg md:text-xl font-bold leading-snug transition-colors ${
-                        isDark ? 'text-white group-hover:text-[#D6F83B]' : 'text-[#000000] group-hover:text-[#FE7F2D]'
+                        isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
                       }`}>
                         {getLocalized(blog, 'title')}
                       </h3>
-                      <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                      <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
                         {getLocalized(blog, 'excerpt')}
                       </p>
                     </div>
@@ -2662,14 +2693,14 @@ export default function App() {
                   <div className={`px-5 md:px-6 py-4 border-t flex items-center justify-between ${
                     isDark ? 'border-white/10' : 'border-[#E4E7EC]'
                   }`}>
-                    <span className={`text-[11px] font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                    <span className={`text-[11px] font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
                       {t.readTimeLabel} {blog.readTime}
                     </span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
                       className={`text-xs font-extrabold hover:underline flex items-center gap-1 ${
-                        isDark ? 'text-[#D6F83B]' : 'text-[#FE7F2D]'
+                        isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
                       }`}
                     >
                       <span>{t.readMore}</span>
@@ -2685,14 +2716,14 @@ export default function App() {
               FOOTER ("LET'S MAKE SOMETHING DOPE!" STYLE WITH CORNER BLOB)
              ================================================================= */}
           <footer id="kontak" className={`relative overflow-hidden border-t py-12 md:py-14 ${
-            isDark ? 'border-white/10 bg-[#0A0A0F]' : 'border-[#D0D5DD] bg-white'
+            isDark ? 'border-white/10 bg-[#211832]' : 'border-[#D0D5DD] bg-white'
           }`}>
             {/* Cute Blue Corner Character Blob */}
-            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#38BDF8] opacity-90" viewBox="0 0 160 160" fill="currentColor">
+            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#5C3E94] opacity-90" viewBox="0 0 160 160" fill="currentColor">
               <path d="M45,160 C25,115 45,55 95,40 C130,30 155,45 160,75 L160,160 Z" />
-              <circle cx="95" cy="92" r="5" fill="#0A0A0F" />
-              <circle cx="122" cy="86" r="5" fill="#0A0A0F" />
-              <path d="M98,108 Q112,122 124,104" stroke="#0A0A0F" strokeWidth="4" fill="none" strokeLinecap="round" />
+              <circle cx="95" cy="92" r="5" fill={isDark ? "#211832" : "#FFFFFF"} />
+              <circle cx="122" cy="86" r="5" fill={isDark ? "#211832" : "#FFFFFF"} />
+              <path d="M98,108 Q112,122 124,104" stroke={isDark ? "#211832" : "#FFFFFF"} strokeWidth="4" fill="none" strokeLinecap="round" />
             </svg>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10">
@@ -2702,7 +2733,7 @@ export default function App() {
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase leading-tight">
                     LET&apos;S MAKE <br />
                     SOMETHING{' '}
-                    <span className="inline-block px-3 py-0.5 rounded-full border-2 border-[#6D28D9] text-[#D6F83B] bg-[#6D28D9]/20 -rotate-2">
+                    <span className={`inline-block px-3 py-0.5 rounded-full border-2 -rotate-2 ${isDark ? 'border-[#5C3E94] text-[#FFC300] bg-[#5C3E94]/20' : 'border-[#5C3E94] text-[#5C3E94] bg-[#5C3E94]/10'}`}>
                       DOPE!
                     </span>
                   </h2>
@@ -2710,16 +2741,16 @@ export default function App() {
 
                 {/* Middle Contact Details */}
                 <div className="space-y-2.5 text-xs sm:text-sm">
-                  <a href={`mailto:${profile.email}`} className="flex items-center gap-3 font-bold hover:text-[#D6F83B] transition-colors">
-                    <Mail className="w-4 h-4 text-[#D6F83B] shrink-0" />
+                  <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 font-bold transition-colors ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
+                    <Mail className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>{profile.email}</span>
                   </a>
-                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 font-bold hover:text-[#D6F83B] transition-colors">
-                    <Phone className="w-4 h-4 text-[#D6F83B] shrink-0" />
+                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`flex items-center gap-3 font-bold transition-colors ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
+                    <Phone className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>{profile.phone}</span>
                   </a>
                   <div className="flex items-center gap-3 font-medium opacity-80">
-                    <MapPin className="w-4 h-4 text-[#D6F83B] shrink-0" />
+                    <MapPin className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>Prigen, Pasuruan, Jawa Timur</span>
                   </div>
                 </div>
@@ -2731,7 +2762,7 @@ export default function App() {
                     target="_blank"
                     rel="noreferrer"
                     className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#D6F83B] hover:text-black' : 'border-[#D0D5DD] hover:bg-[#FE7F2D] hover:text-white'
+                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:text-white text-[#233D4D]'
                     }`}
                   >
                     IG
@@ -2741,7 +2772,7 @@ export default function App() {
                     target="_blank"
                     rel="noreferrer"
                     className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#D6F83B] hover:text-black' : 'border-[#D0D5DD] hover:bg-[#FE7F2D] hover:text-white'
+                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:text-white text-[#233D4D]'
                     }`}
                   >
                     IN
@@ -2751,7 +2782,7 @@ export default function App() {
                     target="_blank"
                     rel="noreferrer"
                     className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#D6F83B] hover:text-black' : 'border-[#D0D5DD] hover:bg-[#FE7F2D] hover:text-white'
+                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:text-white text-[#233D4D]'
                     }`}
                   >
                     WA
@@ -2760,7 +2791,7 @@ export default function App() {
               </div>
 
               <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs font-medium ${
-                isDark ? 'border-white/10 text-slate-400' : 'border-[#D0D5DD] text-[#233D4D]'
+                isDark ? 'border-white/10 text-white/60' : 'border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div>© {new Date().getFullYear()} {profile.name}. All Rights Reserved.</div>
                 <div className="flex items-center gap-4">
@@ -2786,15 +2817,15 @@ export default function App() {
         <>
           {!isAuthenticated ? (
             <div className={`min-h-[calc(100vh-42px)] flex items-center justify-center p-4 ${
-              isDark ? 'bg-[#12121A]' : 'bg-[#EAECF0]'
+              isDark ? 'bg-[#211832]' : 'bg-[#EAECF0]'
             }`}>
               <div className={`w-full max-w-md rounded-3xl p-8 shadow-2xl border space-y-6 animate-fade-up ${
-                isDark ? 'bg-[#181824] border-slate-800 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-2xl overflow-hidden border shadow shrink-0 flex items-center justify-center ${
-                      isDark ? 'border-slate-700/80 bg-slate-900' : 'border-[#D0D5DD] bg-[#EAECF0]'
+                      isDark ? 'border-white/20 bg-[#211832]' : 'border-[#D0D5DD] bg-[#EAECF0]'
                     }`}>
                       <CleanCharacterAvatar
                         src={profile.avatar || "/avatar.png"}
@@ -2804,12 +2835,12 @@ export default function App() {
                     </div>
                     <div>
                       <h2 className="text-lg font-black">CMS Login Portal</h2>
-                      <p className={`text-xs font-mono ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>dashboard.html</p>
+                      <p className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>dashboard.html</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setCurrentRoute('landingpage.html')}
-                    className="text-xs text-[#233D4D] hover:text-[#FE7F2D] flex items-center gap-1 font-bold"
+                    className="text-xs text-[#233D4D] hover:text-[#FFC300] flex items-center gap-1 font-bold"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Kembali</span>
@@ -2825,34 +2856,34 @@ export default function App() {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Username</label>
+                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Username</label>
                     <input
                       type="text"
                       required
                       value={loginInput.username}
                       onChange={(e) => setLoginInput({ ...loginInput, username: e.target.value })}
                       placeholder="Masukkan username..."
-                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FE7F2D] ${
-                        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
+                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FFC300] ${
+                        isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
                       }`}
                     />
                   </div>
                   <div>
-                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Password</label>
+                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Password</label>
                     <input
                       type="password"
                       required
                       value={loginInput.password}
                       onChange={(e) => setLoginInput({ ...loginInput, password: e.target.value })}
                       placeholder="••••••••"
-                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FE7F2D] ${
-                        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
+                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FFC300] ${
+                        isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
                       }`}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-2xl bg-[#FE7F2D] hover:bg-[#E86E20] text-white font-black text-sm shadow-lg shadow-[#FE7F2D]/20 transition-all"
+                    className="w-full py-3.5 rounded-2xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-sm shadow-lg shadow-[#FFC300]/20 transition-all"
                   >
                     Masuk ke Dashboard CMS
                   </button>
@@ -2861,17 +2892,17 @@ export default function App() {
             </div>
           ) : (
             <div className={`min-h-[calc(100vh-42px)] p-2 sm:p-4 lg:p-6 transition-colors ${
-              isDark ? 'bg-[#0F0F17]' : 'bg-[#EAECF0]'
+              isDark ? 'bg-[#211832]' : 'bg-[#EAECF0]'
             }`}>
               <div className={`max-w-[1440px] mx-auto rounded-[24px] sm:rounded-[34px] shadow-2xl border overflow-hidden flex flex-col lg:flex-row min-h-[820px] relative ${
-                isDark ? 'bg-[#171723] border-slate-800/80 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                isDark ? 'bg-[#412B6B] border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
               }`}>
                 {/* SIDEBAR */}
-                <aside className="w-full lg:w-64 bg-[#181824] text-white p-5 flex flex-col justify-between shrink-0">
+                <aside className="w-full lg:w-64 bg-[#211832] text-white p-5 flex flex-col justify-between shrink-0">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#FE7F2D] flex items-center justify-center text-white font-black text-base">
+                        <div className="w-9 h-9 rounded-xl bg-[#FFC300] flex items-center justify-center text-[#211832] font-black text-base">
                           <Sparkles className="w-5 h-5" />
                         </div>
                         <div>
@@ -2899,7 +2930,7 @@ export default function App() {
                             onClick={() => setCmsMenu(item.id)}
                             className={`px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all whitespace-nowrap ${
                               active
-                                ? 'bg-[#FE7F2D] text-white shadow-lg shadow-[#FE7F2D]/20'
+                                ? 'bg-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/20'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`}
                           >
@@ -2909,7 +2940,7 @@ export default function App() {
                             </div>
                             {item.badge !== undefined && (
                               <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                                active ? 'bg-black/20 text-white' : 'bg-orange-500/20 text-orange-400'
+                                active ? 'bg-[#211832] text-white' : 'bg-[#FFC300]/20 text-[#FFC300]'
                               }`}>
                                 {item.badge}
                               </span>
@@ -2946,7 +2977,7 @@ export default function App() {
                       <h1 className="text-xl sm:text-2xl font-black tracking-tight">
                         Welcome back {profile.name.split(' ')[1] || profile.name} 👋
                       </h1>
-                      <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                      <p className={`text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
                         Setiap perubahan karya, blog, dan resume otomatis tersimpan ke Cloud Supabase.
                       </p>
                     </div>
@@ -2955,7 +2986,7 @@ export default function App() {
                       <button
                         onClick={() => setTheme(isDark ? 'light' : 'dark')}
                         className={`p-2.5 rounded-2xl border ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-amber-400' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                          isDark ? 'bg-[#211832] border-white/10 text-[#FFC300]' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                         }`}
                       >
                         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -2964,14 +2995,14 @@ export default function App() {
                         onClick={() => fetchFromSupabase()}
                         title="Muat Ulang dari Cloud"
                         className={`p-2.5 rounded-2xl border ${
-                          isDark ? 'bg-[#1F1F2E] border-slate-800 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                          isDark ? 'bg-[#211832] border-white/10 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
                         }`}
                       >
                         <RefreshCw className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => pushAllToSupabase()}
-                        className="px-4 py-2.5 rounded-2xl bg-[#FE7F2D] hover:bg-[#E86E20] text-white font-extrabold text-xs flex items-center gap-2 shadow"
+                        className="px-4 py-2.5 rounded-2xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-extrabold text-xs flex items-center gap-2 shadow"
                       >
                         <UploadCloud className="w-4 h-4" />
                         <span>Sync Cloud</span>
@@ -2984,7 +3015,7 @@ export default function App() {
                       syncStatus.type === 'error'
                         ? 'bg-rose-500/10 border-rose-500/20 text-rose-500'
                         : syncStatus.type === 'success'
-                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
+                          ? 'bg-[#5C3E94]/20 border-[#5C3E94]/30 text-[#5C3E94]'
                           : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600'
                     }`}>
                       <div className="flex items-center gap-2">
@@ -3007,40 +3038,40 @@ export default function App() {
                   {cmsMenu === 'overview' && (
                     <div className="space-y-6 animate-fade-up">
                       <div className="grid sm:grid-cols-3 gap-4">
-                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
-                          <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Total Karya Portofolio</div>
-                          <div className="text-3xl font-black mt-2 text-[#FE7F2D]">{projects.length}</div>
-                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Klik untuk kelola karya →</div>
+                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#211832] border-white/10' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Total Karya Portofolio</div>
+                          <div className="text-3xl font-black mt-2 text-[#FFC300]">{projects.length}</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Klik untuk kelola karya →</div>
                         </div>
-                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
-                          <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Total Artikel Blog</div>
-                          <div className="text-3xl font-black mt-2 text-emerald-500">{blogs.length}</div>
-                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Klik untuk tulis artikel →</div>
+                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#211832] border-white/10' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Total Artikel Blog</div>
+                          <div className="text-3xl font-black mt-2 text-[#5C3E94]">{blogs.length}</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Klik untuk tulis artikel →</div>
                         </div>
-                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
-                          <div className={`text-xs font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Pengalaman & Pendidikan</div>
-                          <div className="text-3xl font-black mt-2 text-[#FE7F2D]">
+                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#211832] border-white/10' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Pengalaman & Pendidikan</div>
+                          <div className="text-3xl font-black mt-2 text-[#FFC300]">
                             {experience.length + education.length}
                           </div>
-                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Klik untuk edit resume →</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Klik untuk edit resume →</div>
                         </div>
                       </div>
 
-                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                         <div className="flex items-center justify-between">
                           <h3 className={`font-black text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>Karya Terbaru</h3>
-                          <button onClick={() => setCmsMenu('projects')} className="text-xs font-bold text-[#FE7F2D] hover:underline">
+                          <button onClick={() => setCmsMenu('projects')} className="text-xs font-bold text-[#FFC300] hover:underline">
                              + Tambah Karya
                           </button>
                         </div>
                         <div className="grid sm:grid-cols-2 gap-3">
                           {projects.slice(0, 4).map((p) => (
-                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'}`}>
+                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-[#412B6B] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'}`}>
                               <div className="min-w-0">
-                                <div className="text-[11px] font-bold text-[#FE7F2D] truncate">{p.category}</div>
+                                <div className="text-[11px] font-bold text-[#FFC300] truncate">{p.category}</div>
                                 <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{p.title}</div>
                               </div>
-                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200 shrink-0">
+                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-[#211832] text-slate-200 shrink-0">
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -3053,7 +3084,7 @@ export default function App() {
                   {/* TAB 2: PROJECTS CRUD */}
                   {cmsMenu === 'projects' && (
                     <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
-                      <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                      <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                         <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingProject ? 'Edit Karya' : 'Tambah Karya Baru'}</h3>
                         <input
                           type="text"
@@ -3061,7 +3092,7 @@ export default function App() {
                           placeholder="Judul Karya"
                           value={projectForm.title}
                           onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
                           {/* Kategori Fleksibel: Dropdown + Opsi Kustom */}
@@ -3077,12 +3108,12 @@ export default function App() {
                                     setProjectForm({ ...projectForm, category: e.target.value });
                                   }
                                 }}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               >
                                 {cmsProjectCategories.map(cat => (
                                   <option key={cat} value={cat}>{cat}</option>
                                 ))}
-                                <option value="__NEW__" className="font-bold text-[#FE7F2D]">+ Tambah Kategori Baru...</option>
+                                <option value="__NEW__" className="font-bold text-[#FFC300]">+ Tambah Kategori Baru...</option>
                               </select>
                             ) : (
                               <div className="flex items-center gap-1.5">
@@ -3093,7 +3124,7 @@ export default function App() {
                                   placeholder="Ketik Kategori Baru..."
                                   value={customCategoryInput}
                                   onChange={(e) => setCustomCategoryInput(e.target.value)}
-                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FE7F2D] ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FFC300] ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                                 />
                                 <button
                                   type="button"
@@ -3102,7 +3133,7 @@ export default function App() {
                                     setCustomCategoryInput('');
                                   }}
                                   title="Kembali ke pilihan"
-                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
+                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] text-slate-300 border-white/10' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -3115,7 +3146,7 @@ export default function App() {
                             placeholder="Tahun (misal: 2026)"
                             value={projectForm.year}
                             onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <input
@@ -3123,26 +3154,26 @@ export default function App() {
                           placeholder="Subjudul Singkat"
                           value={projectForm.subtitle}
                           onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <textarea
                           rows={3}
                           placeholder="Deskripsi Karya"
                           value={projectForm.description}
                           onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
 
                         {/* Upload Gambar */}
                         <div className="space-y-2">
-                          <label className={`block text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                          <label className={`block text-[11px] font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
                             Gambar Preview Karya
                           </label>
                           {projectForm.image ? (
                             <div className="relative rounded-2xl overflow-hidden border border-[#D0D5DD] h-36 bg-[#EAECF0] group">
                               <img src={projectForm.image} alt="Preview Karya" className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <label className="px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer">
                                   Ganti Gambar
                                   <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
                                 </label>
@@ -3157,13 +3188,13 @@ export default function App() {
                             </div>
                           ) : (
                             <label className={`flex flex-col items-center justify-center h-28 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
-                              isDark ? 'border-slate-700 hover:border-[#FE7F2D] bg-slate-900/60' : 'border-[#D0D5DD] hover:border-[#FE7F2D] bg-[#EAECF0]/40'
+                              isDark ? 'border-white/10 hover:border-[#FFC300] bg-[#412B6B]' : 'border-[#D0D5DD] hover:border-[#FFC300] bg-[#EAECF0]/40'
                             }`}>
-                              <UploadCloud className="w-6 h-6 text-[#FE7F2D] mb-1" />
+                              <UploadCloud className="w-6 h-6 text-[#FFC300] mb-1" />
                               <span className="text-xs font-bold">
                                 {isUploadingImage ? 'Mengoptimalkan Gambar...' : 'Klik untuk Upload Gambar Karya'}
                               </span>
-                              <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>PNG, JPG, WEBP (Otomatis dikompres)</span>
+                              <span className={`text-[10px] ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>PNG, JPG, WEBP (Otomatis dikompres)</span>
                               <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
                             </label>
                           )}
@@ -3174,14 +3205,14 @@ export default function App() {
                           placeholder="Tools (pisahkan koma: Adobe Illustrator, Figma)"
                           value={projectForm.tools}
                           onChange={(e) => setProjectForm({ ...projectForm, tools: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <input
                           type="url"
                           placeholder="Link Proyek (https://s.id/...)"
                           value={projectForm.link}
                           onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="flex gap-2">
                           {editingProject && (
@@ -3196,7 +3227,7 @@ export default function App() {
                                   tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
                                 });
                               }}
-                              className="px-4 py-3 rounded-xl bg-slate-200 text-[#233D4D] font-bold text-xs"
+                              className={`px-4 py-3 rounded-xl font-bold text-xs ${isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]'}`}
                             >
                               Batal
                             </button>
@@ -3204,7 +3235,7 @@ export default function App() {
                           <button
                             type="submit"
                             disabled={isTranslating}
-                            className="flex-1 py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs"
+                            className="flex-1 py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs"
                           >
                             {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingProject ? 'Update Karya' : 'Simpan Karya ke Cloud')}
                           </button>
@@ -3213,14 +3244,14 @@ export default function App() {
 
                       <div className="lg:col-span-7 space-y-3">
                         {projects.map((p) => (
-                          <div key={p.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                          <div key={p.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                             <div>
-                              <div className="text-xs font-bold text-[#FE7F2D]">{p.category} • {p.year}</div>
+                              <div className="text-xs font-bold text-[#FFC300]">{p.category} • {p.year}</div>
                               <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{p.title}</div>
-                              <div className={`text-xs line-clamp-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{p.subtitle}</div>
+                              <div className={`text-xs line-clamp-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{p.subtitle}</div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700"><Edit3 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
                               <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
@@ -3232,7 +3263,7 @@ export default function App() {
                   {/* TAB 3: BLOGS CRUD */}
                   {cmsMenu === 'blogs' && (
                     <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
-                      <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                      <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                         <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingBlog ? 'Edit Artikel Blog' : 'Tulis Artikel Blog'}</h3>
                         <input
                           type="text"
@@ -3240,7 +3271,7 @@ export default function App() {
                           placeholder="Judul Artikel"
                           value={blogForm.title}
                           onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
                           {/* Kategori Fleksibel Blog */}
@@ -3256,12 +3287,12 @@ export default function App() {
                                     setBlogForm({ ...blogForm, category: e.target.value });
                                   }
                                 }}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               >
                                 {blogCategories.map(cat => (
                                   <option key={cat} value={cat}>{cat}</option>
                                 ))}
-                                <option value="__NEW__" className="font-bold text-[#FE7F2D]">+ Tambah Kategori Baru...</option>
+                                <option value="__NEW__" className="font-bold text-[#FFC300]">+ Tambah Kategori Baru...</option>
                               </select>
                             ) : (
                               <div className="flex items-center gap-1.5">
@@ -3272,7 +3303,7 @@ export default function App() {
                                   placeholder="Ketik Kategori Baru..."
                                   value={blogCustomCategoryInput}
                                   onChange={(e) => setBlogCustomCategoryInput(e.target.value)}
-                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FE7F2D] ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FFC300] ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                                 />
                                 <button
                                   type="button"
@@ -3281,7 +3312,7 @@ export default function App() {
                                     setBlogCustomCategoryInput('');
                                   }}
                                   title="Kembali ke pilihan"
-                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
+                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] text-slate-300 border-white/10' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -3294,20 +3325,20 @@ export default function App() {
                             placeholder="Waktu Baca (5 Menit)"
                             value={blogForm.readTime}
                             onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
 
                         {/* Upload Cover Blog */}
                         <div className="space-y-1.5">
-                          <label className={`block text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>
+                          <label className={`block text-[11px] font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
                             Gambar Sampul Blog (Cover)
                           </label>
                           {blogForm.image ? (
                             <div className="relative rounded-2xl overflow-hidden border border-[#D0D5DD] h-32 bg-[#EAECF0] group">
                               <img src={blogForm.image} alt="Cover Blog" className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <label className="px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer">
                                   Ganti Sampul
                                   <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
                                 </label>
@@ -3322,9 +3353,9 @@ export default function App() {
                             </div>
                           ) : (
                             <label className={`flex flex-col items-center justify-center h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
-                              isDark ? 'border-slate-700 hover:border-[#FE7F2D] bg-slate-900/60' : 'border-[#D0D5DD] hover:border-[#FE7F2D] bg-[#EAECF0]/40'
+                              isDark ? 'border-white/10 hover:border-[#FFC300] bg-[#412B6B]' : 'border-[#D0D5DD] hover:border-[#FFC300] bg-[#EAECF0]/40'
                             }`}>
-                              <UploadCloud className="w-5 h-5 text-[#FE7F2D] mb-1" />
+                              <UploadCloud className="w-5 h-5 text-[#FFC300] mb-1" />
                               <span className="text-xs font-bold">Upload Gambar Sampul Blog</span>
                               <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
                             </label>
@@ -3336,14 +3367,14 @@ export default function App() {
                           placeholder="Ringkasan (Excerpt)"
                           value={blogForm.excerpt}
                           onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
 
                         {/* Isi Artikel */}
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
-                            <label className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Isi Lengkap Artikel</label>
-                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FE7F2D]/15 text-[#FE7F2D] hover:bg-[#FE7F2D]/25 text-[11px] font-bold cursor-pointer transition-colors">
+                            <label className={`text-[11px] font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Isi Lengkap Artikel</label>
+                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FFC300]/15 text-[#FFC300] hover:bg-[#FFC300]/25 text-[11px] font-bold cursor-pointer transition-colors">
                               <ImageIcon className="w-3.5 h-3.5" />
                               <span>+ Sisipkan Gambar di Isi</span>
                               <input type="file" accept="image/*" onChange={handleBlogInlineImageUpload} className="hidden" />
@@ -3354,7 +3385,7 @@ export default function App() {
                             placeholder="Tulis isi artikel di sini..."
                             value={blogForm.content}
                             onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
 
@@ -3371,19 +3402,19 @@ export default function App() {
                                   readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
                                 });
                               }}
-                              className="px-4 py-3 rounded-xl bg-slate-200 text-[#233D4D] font-bold text-xs"
+                              className={`px-4 py-3 rounded-xl font-bold text-xs ${isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]'}`}
                             >
                               Batal
                             </button>
                           )}
-                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs">
+                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs">
                             {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingBlog ? 'Update Artikel' : 'Terbitkan ke Cloud')}
                           </button>
                         </div>
                       </form>
                       <div className="lg:col-span-7 space-y-3">
                         {blogs.map((b) => (
-                          <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                          <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                             <div className="flex items-center gap-3 min-w-0">
                               {(b.image || b.translations?._coverImage) && (
                                 <img
@@ -3393,13 +3424,13 @@ export default function App() {
                                 />
                               )}
                               <div className="min-w-0">
-                                <div className="text-xs text-emerald-500 font-bold">{b.category} • {b.date}</div>
+                                <div className="text-xs text-[#5C3E94] font-bold">{b.category} • {b.date}</div>
                                 <div className={`font-bold text-sm truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{b.title}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -3414,7 +3445,7 @@ export default function App() {
                         <button
                           onClick={() => setResumeSubTab('experience')}
                           className={`px-4 py-2 rounded-xl text-xs font-black ${
-                            resumeSubTab === 'experience' ? 'bg-[#FE7F2D] text-white' : 'bg-slate-800 text-slate-300'
+                            resumeSubTab === 'experience' ? 'bg-[#FFC300] text-[#211832]' : (isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]')
                           }`}
                         >
                           Pengalaman Kerja ({experience.length})
@@ -3422,7 +3453,7 @@ export default function App() {
                         <button
                           onClick={() => setResumeSubTab('education')}
                           className={`px-4 py-2 rounded-xl text-xs font-black ${
-                            resumeSubTab === 'education' ? 'bg-[#FE7F2D] text-white' : 'bg-slate-800 text-slate-300'
+                            resumeSubTab === 'education' ? 'bg-[#FFC300] text-[#211832]' : (isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]')
                           }`}
                         >
                           Pendidikan ({education.length})
@@ -3431,7 +3462,7 @@ export default function App() {
 
                       {resumeSubTab === 'experience' ? (
                         <div className="grid lg:grid-cols-12 gap-6">
-                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                             <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
                             <input
                               type="text"
@@ -3439,7 +3470,7 @@ export default function App() {
                               placeholder="Posisi / Jabatan"
                               value={expForm.role}
                               onChange={(e) => setExpForm({ ...expForm, role: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <input
                               type="text"
@@ -3447,7 +3478,7 @@ export default function App() {
                               placeholder="Nama Instansi / Perusahaan"
                               value={expForm.company}
                               onChange={(e) => setExpForm({ ...expForm, company: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <div className="grid grid-cols-2 gap-2.5">
                               <input
@@ -3455,14 +3486,14 @@ export default function App() {
                                 placeholder="Jenis (Penuh Waktu / Magang)"
                                 value={expForm.type}
                                 onChange={(e) => setExpForm({ ...expForm, type: e.target.value })}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               />
                               <input
                                 type="text"
                                 placeholder="Periode (2022 - 2023)"
                                 value={expForm.period}
                                 onChange={(e) => setExpForm({ ...expForm, period: e.target.value })}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                               />
                             </div>
                             <textarea
@@ -3470,22 +3501,22 @@ export default function App() {
                               placeholder="Deskripsi Tugas"
                               value={expForm.description}
                               onChange={(e) => setExpForm({ ...expForm, description: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
-                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs">
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs">
                               Simpan Pengalaman ke Cloud
                             </button>
                           </form>
                           <div className="lg:col-span-7 space-y-3">
                             {experience.map((exp) => (
-                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                                 <div>
-                                  <div className="text-xs text-[#FE7F2D] font-bold">{exp.period} • {exp.company}</div>
+                                  <div className="text-xs text-[#FFC300] font-bold">{exp.period} • {exp.company}</div>
                                   <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{exp.role}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
                             ))}
@@ -3493,12 +3524,12 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="grid lg:grid-cols-12 gap-6">
-                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                             <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingEdu ? 'Edit Pendidikan' : 'Tambah Pendidikan'}</h3>
                             <select
                               value={eduForm.type}
                               onChange={(e) => setEduForm({ ...eduForm, type: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             >
                               <option value="Formal">Formal</option>
                               <option value="Non-Formal">Non-Formal</option>
@@ -3509,7 +3540,7 @@ export default function App() {
                               placeholder="Nama Institusi / Kampus"
                               value={eduForm.institution}
                               onChange={(e) => setEduForm({ ...eduForm, institution: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <input
                               type="text"
@@ -3517,37 +3548,37 @@ export default function App() {
                               placeholder="Jurusan / Program"
                               value={eduForm.major}
                               onChange={(e) => setEduForm({ ...eduForm, major: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <input
                               type="text"
                               placeholder="Periode (2020 - 2024)"
                               value={eduForm.period}
                               onChange={(e) => setEduForm({ ...eduForm, period: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
                             <textarea
                               rows={3}
                               placeholder="Deskripsi"
                               value={eduForm.description}
                               onChange={(e) => setEduForm({ ...eduForm, description: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                             />
-                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs">
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs">
                               Simpan Pendidikan ke Cloud
                             </button>
                           </form>
                           <div className="lg:col-span-7 space-y-3">
                             {education.map((edu) => (
-                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                                 <div>
-                                  <div className="text-xs text-indigo-500 font-bold">{edu.type} • {edu.period}</div>
+                                  <div className="text-xs text-[#5C3E94] font-bold">{edu.type} • {edu.period}</div>
                                   <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{edu.institution}</div>
-                                  <div className={`text-xs ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{edu.major}</div>
+                                  <div className={`text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{edu.major}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <button onClick={() => handleEditEducation(edu)} className="p-2 rounded-lg bg-slate-800 text-slate-200"><Edit3 className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleEditEducation(edu)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
                             ))}
@@ -3559,12 +3590,12 @@ export default function App() {
 
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
-                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#1F1F2E] border-slate-800' : 'bg-white border-[#D0D5DD]'}`}>
+                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
                       <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil, Avatar Hero, Sampul & Favicon Tab Browser</h3>
                       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Avatar Hero Upload */}
-                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-slate-600 bg-slate-950' : 'border-[#D0D5DD] bg-white'}`}>
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-white/20 bg-[#211832]' : 'border-[#D0D5DD] bg-white'}`}>
                             <CleanCharacterAvatar
                               src={profile.avatar || "/avatar.png"}
                               alt="Preview Avatar Hero"
@@ -3573,7 +3604,7 @@ export default function App() {
                           </div>
                           <div className="space-y-1.5">
                             <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Karakter Hero (Utama)</span>
-                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
                               <span>Upload Karakter Hero</span>
                               <input
@@ -3597,17 +3628,17 @@ export default function App() {
                         </div>
 
                         {/* About Me Cover Upload */}
-                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                          <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#D6F83B] ${isDark ? 'border-slate-600' : 'border-[#D0D5DD]'}`}>
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                          <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#5C3E94] ${isDark ? 'border-white/20' : 'border-[#D0D5DD]'}`}>
                             {profile.aboutCover && !aboutCoverFailed ? (
                               <img src={profile.aboutCover} alt="Sampul About Me" className="w-full h-full object-cover" />
                             ) : (
-                              <span className="font-marker text-[10px] text-black text-center leading-tight px-1">FOCUS<br/>SKETCH</span>
+                              <span className="font-marker text-[10px] text-white text-center leading-tight px-1">FOCUS<br/>SKETCH</span>
                             )}
                           </div>
                           <div className="space-y-1.5">
                             <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Sampul About Me</span>
-                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
                               <span>Upload Sampul About</span>
                               <input
@@ -3632,17 +3663,17 @@ export default function App() {
                         </div>
 
                         {/* Favicon / Tab Icon Upload */}
-                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-slate-700/60 bg-slate-900/40' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#0D0D12] ${isDark ? 'border-slate-600' : 'border-[#D0D5DD]'}`}>
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#211832] ${isDark ? 'border-white/20' : 'border-[#D0D5DD]'}`}>
                             {profile.favicon && profile.favicon.startsWith('data:') ? (
                               <img src={profile.favicon} alt="Favicon Tab" className="w-10 h-10 object-contain" />
                             ) : (
-                              <span className="font-marker text-xl text-white"><span className="text-[#D6F83B]">.</span>g</span>
+                              <span className="font-marker text-xl text-white"><span className="text-[#FFC300]">.</span>g</span>
                             )}
                           </div>
                           <div className="space-y-1.5">
                             <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Ikon Tab Browser (Favicon)</span>
-                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold cursor-pointer hover:bg-[#E86E20] transition-colors">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
                               <span>Upload Ikon Tab</span>
                               <input
@@ -3667,62 +3698,62 @@ export default function App() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Judul Tab Browser (Title)</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Judul Tab Browser (Title)</label>
                           <input
                             type="text"
                             value={profile.siteTitle || ''}
                             onChange={(e) => setProfile({ ...profile, siteTitle: e.target.value })}
                             placeholder=".gudelz — Akhmad Aldi Portfolio"
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Nama Lengkap</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Nama Lengkap</label>
                           <input
                             type="text"
                             value={profile.name}
                             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Email Resmi</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Email Resmi</label>
                           <input
                             type="email"
                             value={profile.email}
                             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Nomor Telepon / WhatsApp</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Nomor Telepon / WhatsApp</label>
                           <input
                             type="text"
                             value={profile.phone}
                             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Alamat Domisili (Footer)</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Alamat Domisili (Footer)</label>
                           <input
                             type="text"
                             value={profile.address}
                             onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                           />
                         </div>
                       </div>
                       <div>
-                        <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>Bio Singkat</label>
+                        <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Bio Singkat</label>
                         <textarea
                           rows={4}
                           value={profile.bio}
                           onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
                         />
                       </div>
-                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#FE7F2D] text-white font-black text-xs shadow-md">
+                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs shadow-md">
                         {isTranslating ? 'Menyimpan...' : 'Simpan Profil ke Cloud Supabase'}
                       </button>
                     </form>
@@ -3738,7 +3769,7 @@ export default function App() {
       {activeProjectModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
           <div className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-up ${
-            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+            isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
           }`}>
             <div className={`h-48 sm:h-52 bg-gradient-to-br ${activeProjectModal.accentColor} p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden`}>
               {activeProjectModal.image && (
@@ -3748,37 +3779,39 @@ export default function App() {
                   className="absolute inset-0 w-full h-full object-cover object-center opacity-75"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#211832]/95 via-[#211832]/40 to-transparent" />
               <button
                 onClick={() => setActiveProjectModal(null)}
-                className="relative z-10 self-end p-2 rounded-full bg-black/60 text-white hover:bg-black"
+                className="relative z-10 self-end p-2 rounded-full bg-[#211832]/60 text-white hover:bg-black"
               >
                 <X className="w-4 h-4" />
               </button>
               <div className="relative z-10">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white/90 bg-black/60 border border-white/15 px-2.5 py-1 rounded-full">
+                <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+                  isDark ? 'text-[#FFC300] bg-[#FFC300]/15 border-[#FFC300]/30' : 'text-white/90 bg-[#211832]/60 border-white/15'
+                }`}>
                   {activeProjectModal.category} • {activeProjectModal.year}
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-white mt-1.5 drop-shadow">
+                <h3 className="text-xl sm:text-2xl font-black text-white mt-2.5 drop-shadow">
                   {getLocalized(activeProjectModal, 'title')}
                 </h3>
               </div>
             </div>
 
             <div className="p-5 sm:p-6 space-y-4">
-              <div className="text-xs font-bold text-[#FE7F2D]">
+              <div className={`text-xs font-bold ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>
                 {getLocalized(activeProjectModal, 'subtitle')}
               </div>
-              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`}>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
                 {getLocalized(activeProjectModal, 'description')}
               </p>
 
               <div>
-                <div className={`text-xs font-bold mb-2 ${isDark ? 'text-slate-400' : 'text-[#233D4D]'}`}>{t.toolsTech}</div>
+                <div className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{t.toolsTech}</div>
                 <div className="flex flex-wrap gap-2">
                   {activeProjectModal.tools.map((tool, i) => (
                     <span key={i} className={`px-3 py-1 rounded-lg border text-xs font-semibold ${
-                      isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
+                      isDark ? 'bg-[#412B6B] border-white/10 text-slate-200' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
                     }`}>
                       {tool}
                     </span>
@@ -3786,11 +3819,11 @@ export default function App() {
                 </div>
               </div>
 
-              <div className={`pt-4 border-t flex justify-end gap-3 ${isDark ? 'border-slate-800' : 'border-[#D0D5DD]'}`}>
+              <div className={`pt-4 border-t flex justify-end gap-3 ${isDark ? 'border-white/10' : 'border-[#D0D5DD]'}`}>
                 <button
                   onClick={() => setActiveProjectModal(null)}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold ${
-                    isDark ? 'bg-slate-800 text-white' : 'bg-[#EAECF0] text-[#233D4D]'
+                    isDark ? 'bg-[#412B6B] text-white' : 'bg-[#EAECF0] text-[#233D4D]'
                   }`}
                 >
                   {t.closeBtn}
@@ -3800,7 +3833,9 @@ export default function App() {
                     href={activeProjectModal.link}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-5 py-2.5 rounded-xl bg-[#FE7F2D] text-white text-xs font-bold flex items-center gap-1.5 hover:bg-[#E86E20]"
+                    className={`px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 text-xs transition-colors ${
+                      isDark ? 'bg-[#FFC300] hover:bg-[#E6B000] text-[#211832]' : 'bg-[#5C3E94] hover:bg-[#412B6B] text-white'
+                    }`}
                   >
                     <span>{t.openProjectLink}</span>
                     <ExternalLink className="w-4 h-4" />
@@ -3816,15 +3851,17 @@ export default function App() {
       {activeBlogModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-fade-up ${
-            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+            isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
           }`}>
             <div className="flex items-center justify-between">
-              <span className="px-3 py-1 rounded-full bg-[#FE7F2D]/10 text-[#FE7F2D] text-xs font-bold border border-[#FE7F2D]/20">
+              <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
+                isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
+              }`}>
                 {activeBlogModal.category}
               </span>
               <button
                 onClick={() => setActiveBlogModal(null)}
-                className={`p-2 rounded-full ${isDark ? 'bg-slate-800 text-white' : 'bg-[#EAECF0] text-[#233D4D]'}`}
+                className={`p-2 rounded-full ${isDark ? 'bg-[#412B6B] text-white' : 'bg-[#EAECF0] text-[#233D4D]'}`}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -3832,7 +3869,7 @@ export default function App() {
 
             <h2 className="text-2xl font-black leading-snug">{getLocalized(activeBlogModal, 'title')}</h2>
             <div className={`text-xs flex items-center gap-4 border-b pb-4 font-semibold ${
-              isDark ? 'border-slate-800 text-slate-400' : 'border-[#D0D5DD] text-[#233D4D]'
+              isDark ? 'border-white/10 text-white/60' : 'border-[#D0D5DD] text-[#233D4D]'
             }`}>
               <span>{t.byAuthor} {profile.name}</span>
               <span>•</span>
