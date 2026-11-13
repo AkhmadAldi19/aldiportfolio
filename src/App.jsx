@@ -351,12 +351,15 @@ async function autoTranslateFields(fieldsObject) {
           continue;
         }
         try {
-          const res = await fetch(
-            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=id&tl=${target}&dt=t&q=${encodeURIComponent(val)}`
-          );
-          const data = await res.json();
-          translations[target][key] = data[0].map((segment) => segment[0]).join('');
-        } catch {
+          const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=id&tl=${target}&dt=t&q=${encodeURIComponent(val)}`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            translations[target][key] = data?.[0]?.map(item => item?.[0]).join('') || val;
+          } else {
+            translations[target][key] = val;
+          }
+        } catch (err) {
           translations[target][key] = val;
         }
       }
@@ -366,30 +369,46 @@ async function autoTranslateFields(fieldsObject) {
   return translations;
 }
 
-// Client-Side Image Compressor (Converts uploaded file to lightweight WebP Data URL)
+// Client-Side Image Compressor (Converts uploaded file to lightweight WebP Data URL with JPEG fallback)
 function compressImageToDataUrl(file, maxWidth = 1000, quality = 0.8) {
   return new Promise((resolve, reject) => {
     if (!file) return reject(new Error("File tidak ditemukan"));
     const reader = new FileReader();
     reader.onload = (event) => {
+      const rawDataUrl = event.target?.result;
+      if (!rawDataUrl) return reject(new Error("Data gambar kosong"));
+
+      // Jika file SVG atau GIF, langsung kembalikan tanpa menggambar ulang ke canvas
+      if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+        return resolve(rawDataUrl);
+      }
+
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
+        try {
+          const canvas = document.createElement('canvas');
+          let width = img.naturalWidth || img.width || maxWidth;
+          let height = img.naturalHeight || img.height || maxWidth;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          let compressed = canvas.toDataURL('image/webp', quality);
+          if (!compressed || compressed === 'data:,') {
+            compressed = canvas.toDataURL('image/jpeg', quality);
+          }
+          resolve(compressed || rawDataUrl);
+        } catch (err) {
+          // Fallback ke rawDataUrl jika canvas bermasalah
+          resolve(rawDataUrl);
         }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressed = canvas.toDataURL('image/webp', quality);
-        resolve(compressed);
       };
-      img.onerror = () => reject(new Error("Gagal memuat gambar"));
-      img.src = event.target.result;
+      img.onerror = () => resolve(rawDataUrl);
+      img.src = rawDataUrl;
     };
     reader.onerror = () => reject(new Error("Gagal membaca file"));
     reader.readAsDataURL(file);
@@ -1055,7 +1074,19 @@ export default function App() {
 
   const [aboutCoverFailed, setAboutCoverFailed] = useState(false);
 
-  const [profile, setProfile] = useState(INITIAL_PROFILE);
+  const [profile, setProfile] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gudelz_profile_backup');
+      if (cached) return { ...INITIAL_PROFILE, ...JSON.parse(cached) };
+    } catch (e) {}
+    return INITIAL_PROFILE;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gudelz_profile_backup', JSON.stringify(profile));
+    } catch (e) {}
+  }, [profile]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -1272,13 +1303,20 @@ export default function App() {
         (!projData || projData.length === 0) &&
         (!blogData || blogData.length === 0)
       ) {
-        await pushAllToSupabase(INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_EDUCATION, INITIAL_EXPERIENCE, true);
-        setIsSupabaseConnected(true);
-        setSyncStatus({ type: 'success', message: 'Database di-seed otomatis ke Supabase!' });
+        await pushAllToSupabase(profile, projects, blogs, education, experience, true);
         return;
       }
 
-      if (profData?.length > 0 && profData[0].data) setProfile(profData[0].data);
+      if (profData?.length > 0 && profData[0].data) {
+        setProfile(prev => {
+          const remote = profData[0].data;
+          return {
+            ...remote,
+            aboutCover: remote.aboutCover || prev.aboutCover || INITIAL_PROFILE.aboutCover,
+            avatar: remote.avatar || prev.avatar || INITIAL_PROFILE.avatar
+          };
+        });
+      }
       if (projData?.length > 0) {
         setProjects(projData.map(p => ({
           id: p.id, title: p.title, category: p.category, subtitle: p.subtitle,
@@ -1780,15 +1818,22 @@ export default function App() {
       }
       const nextProfile = { ...profile, [fieldKey]: compressed };
       setProfile(nextProfile);
+      try {
+        localStorage.setItem('gudelz_profile_backup', JSON.stringify(nextProfile));
+      } catch (storageErr) {}
       
-      // Langsung sinkronkan ke Supabase agar perubahan gambar tidak hilang saat reload
+      // Langsung sinkronkan ke Supabase dan cek apakah berhasil
       if (supabaseUrl && supabaseKey) {
         const base = cleanUrl(supabaseUrl);
-        await fetch(`${base}/rest/v1/portfolio_profile`, {
+        const res = await fetch(`${base}/rest/v1/portfolio_profile`, {
           method: 'POST',
           headers: getSupabaseHeaders(supabaseKey, true),
           body: JSON.stringify({ id: 1, data: nextProfile, updated_at: new Date().toISOString() })
         });
+        if (!res.ok) {
+          showToast("Gambar terpasang di browser, namun Supabase menolak ukuran file (coba gambar < 2MB).", "info");
+          return;
+        }
       }
       showToast(successMessage);
     } catch (err) {
@@ -3781,19 +3826,25 @@ export default function App() {
                           <div className="space-y-1.5">
                             <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Sampul About Me</span>
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
+                              <input
+                                id="upload-about-cover-input"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleProfileAssetUpload(file, 'aboutCover', 800, 0.75, "Sampul About Me berhasil diunggah & tersimpan!");
+                                  }
+                                  e.target.value = '';
+                                }}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="upload-about-cover-input"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors"
+                              >
                                 <UploadCloud className="w-3.5 h-3.5" />
                                 <span>{isUploadingImage ? 'Mengunggah...' : 'Upload Sampul'}</span>
-                                <input
-                                  type="file"
-                                  accept="image/png, image/jpeg, image/webp, image/gif"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    handleProfileAssetUpload(file, 'aboutCover', 900, 0.82, "Sampul About Me berhasil diunggah & tersimpan!");
-                                    e.target.value = '';
-                                  }}
-                                  className="hidden"
-                                />
                               </label>
                               {profile.aboutCover && (
                                 <button
