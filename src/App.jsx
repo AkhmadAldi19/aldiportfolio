@@ -1781,17 +1781,39 @@ export default function App() {
 
   return (
     <div 
-      className={`min-h-screen font-sans transition-colors duration-300 ${
+      className={`min-h-screen transition-colors duration-300 ${
         isDark ? 'bg-[#211832] text-slate-100' : 'text-[#000000]'
       }`}
-      style={!isDark ? { backgroundColor: BRAND_LIGHT.bg, color: BRAND_LIGHT.textPrimary } : undefined}
+      style={{
+        fontFamily: "'Poppins', sans-serif",
+        ...(!isDark ? { backgroundColor: BRAND_LIGHT.bg, color: BRAND_LIGHT.textPrimary } : {})
+      }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@400;500;600;700;800;900&display=swap');
         
-        .font-marker {
-          font-family: 'Permanent Marker', cursive;
+        /* Strict 2-Font Typography Hierarchy: Good Brush (Display) & Poppins (Body/UI) */
+        html {
+          scroll-behavior: smooth;
+        }
+        body, button, input, select, textarea, p, span, a, div, h3, h4, h5, h6 {
+          font-family: 'Poppins', sans-serif;
+          -webkit-font-smoothing: antialiased;
+        }
+        .font-marker, .font-brush {
+          font-family: 'Good Brush', 'GoodBrush', 'Permanent Marker', cursive !important;
           letter-spacing: 0.02em;
+        }
+        .font-card-title {
+          font-family: 'Poppins', sans-serif !important;
+        }
+        /* Hide scrollbar for clean horizontal pills */
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
         @keyframes floatSlow {
           0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
@@ -1848,19 +1870,13 @@ export default function App() {
       {currentRoute === 'landingpage.html' && (
         <div 
           dir={lang === 'ar' ? 'rtl' : 'ltr'}
-          style={{ fontFamily: "'Poppins', 'Plus Jakarta Sans', sans-serif" }}
+          style={{ fontFamily: "'Poppins', sans-serif" }}
           className={isDark ? 'bg-[#211832] text-white selection:bg-[#FFC300] selection:text-[#211832]' : 'bg-[#EAECF0] text-[#000000] selection:bg-[#FFC300] selection:text-[#211832]'}
         >
-          <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap');
-            .font-card-title {
-              font-family: 'Poppins', 'Montserrat', sans-serif;
-            }
-          `}</style>
 
           {/* TOP NAVBAR */}
-          <header className={`sticky top-0 z-40 backdrop-blur-xl transition-colors ${
-            isDark ? 'bg-[#211832]/90 border-b border-white/5' : 'bg-white/95 border-b border-[#D0D5DD]'
+          <header className={`sticky top-0 z-40 backdrop-blur-xl transition-all duration-300 ${
+            isDark ? 'bg-[#211832]/85 border-b border-white/10 shadow-lg shadow-black/20' : 'bg-white/90 border-b border-[#D0D5DD] shadow-sm'
           }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2 relative z-10">
               <a href="#" onClick={() => setActiveSection('home')} className="flex items-center gap-2.5 group min-w-0">
@@ -1995,12 +2011,13 @@ export default function App() {
 
             {/* Mobile & Tablet Drawer Menu */}
             {mobileMenuOpen && (
-              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fade-up ${
-                isDark ? 'bg-[#412B6B]/95 border-white/10 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fade-up backdrop-blur-xl ${
+                isDark ? 'bg-[#211832]/95 border-white/10 text-slate-200' : 'bg-white/95 border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div className="max-w-7xl mx-auto grid sm:grid-cols-2 gap-2">
-                  <a href="#tentang" onClick={() => { setMobileMenuOpen(false); setActiveSection('tentang'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'tentang' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navAbout}</a>
+                  <a href="#" onClick={() => { setMobileMenuOpen(false); setActiveSection('home'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'home' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>Home</a>
                   <a href="#karya" onClick={() => { setMobileMenuOpen(false); setActiveSection('karya'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'karya' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navWorks}</a>
+                  <a href="#tentang" onClick={() => { setMobileMenuOpen(false); setActiveSection('tentang'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'tentang' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navAbout}</a>
                   <a href="#pengalaman" onClick={() => { setMobileMenuOpen(false); setActiveSection('pengalaman'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'pengalaman' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navResume}</a>
                   <a href="#blog" onClick={() => { setMobileMenuOpen(false); setActiveSection('blog'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'blog' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navBlog}</a>
                   <a href="#kontak" onClick={() => { setMobileMenuOpen(false); setActiveSection('kontak'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'kontak' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navContact}</a>
@@ -2008,7 +2025,7 @@ export default function App() {
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`px-4 py-2.5 rounded-xl font-extrabold flex items-center justify-center gap-1.5 ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}
+                    className={`sm:col-span-2 px-4 py-3 rounded-xl font-extrabold flex items-center justify-center gap-1.5 shadow-md ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}
                   >
                     <span>{t.hireMe}</span>
                     <ArrowUpRight className="w-4 h-4" />
@@ -2074,13 +2091,13 @@ export default function App() {
                       isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
                     }`}>
                       {profile.name.split(' ').map((word, wordIdx) => (
-                        <span key={wordIdx} className="inline-flex">
+                        <span key={wordIdx} className="inline-flex font-marker">
                           {word.split('').map((char, charIdx) => {
                             const delay = (wordIdx * 6 + charIdx) * 0.05;
                             return (
                               <span 
                                 key={charIdx} 
-                                className="inline-block animate-pop-letter" 
+                                className="inline-block font-marker animate-pop-letter" 
                                 style={{ animationDelay: `${delay}s` }}
                               >
                                 {char}
@@ -2385,7 +2402,7 @@ export default function App() {
               </div>
 
               {/* Dynamic Category Tabs (Only populated categories appear) */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                 {publicCategories.map((cat) => {
                   const isActive = selectedCategory === cat;
                   return (
@@ -2407,52 +2424,74 @@ export default function App() {
               </div>
 
               {/* 4-Column Project Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                {filteredProjects.map((proj) => (
-                  <div
-                    key={proj.id}
-                    onClick={() => setActiveProjectModal(proj)}
-                    className={`rounded-2xl border overflow-hidden cursor-pointer card-hover-3d group flex flex-col justify-between ${
-                      isDark
-                        ? 'bg-[#211832] border-white/10 hover:border-[#FFC300]'
-                        : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#FFC300]'
+              {filteredProjects.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                  {filteredProjects.map((proj) => (
+                    <div
+                      key={proj.id}
+                      onClick={() => setActiveProjectModal(proj)}
+                      className={`rounded-2xl border overflow-hidden cursor-pointer card-hover-3d group flex flex-col justify-between ${
+                        isDark
+                          ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30'
+                          : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
+                      }`}
+                    >
+                      {/* Thumbnail Image */}
+                      <div className={`h-44 sm:h-44 w-full relative overflow-hidden bg-gradient-to-br ${proj.accentColor}`}>
+                        {proj.image && (
+                          <img
+                            src={proj.image}
+                            alt={getLocalized(proj, 'title')}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        )}
+                        <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#211832]/75 backdrop-blur-md text-[10px] font-extrabold text-white border border-white/10">
+                          {proj.year}
+                        </span>
+                      </div>
+
+                      {/* Card Footer Info */}
+                      <div className="p-4 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
+                            isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
+                          }`}>
+                            {getLocalized(proj, 'title')}
+                          </h3>
+                          <p className={`text-xs truncate mt-0.5 font-medium ${
+                            isDark ? 'text-white/60' : 'text-[#233D4D]'
+                          }`}>
+                            {proj.category}
+                          </p>
+                        </div>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                          isDark
+                            ? 'bg-white/5 text-slate-300 group-hover:bg-[#FFC300] group-hover:text-[#211832]'
+                            : 'bg-[#EAECF0] text-[#233D4D] group-hover:bg-[#5C3E94] group-hover:text-white'
+                        }`}>
+                          <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={`py-14 px-6 rounded-2xl border border-dashed text-center space-y-3 ${
+                  isDark ? 'bg-[#211832]/60 border-white/15 text-slate-300' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#233D4D]'
+                }`}>
+                  <Search className="w-8 h-8 mx-auto opacity-50" />
+                  <p className="text-sm font-bold">Karya tidak ditemukan untuk kata kunci &ldquo;{searchQuery}&rdquo;</p>
+                  <button
+                    type="button"
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('Semua'); }}
+                    className={`px-4 py-2 rounded-full text-xs font-extrabold ${
+                      isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'
                     }`}
                   >
-                    {/* Thumbnail Image */}
-                    <div className={`h-40 sm:h-44 w-full relative overflow-hidden bg-gradient-to-br ${proj.accentColor}`}>
-                      {proj.image && (
-                        <img
-                          src={proj.image}
-                          alt={getLocalized(proj, 'title')}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      )}
-                      <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#211832]/65 backdrop-blur text-[10px] font-extrabold text-white">
-                        {proj.year}
-                      </span>
-                    </div>
-
-                    {/* Card Footer Info (Poppins/Montserrat Title + Category + Arrow) */}
-                    <div className="p-4 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
-                          isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
-                        }`}>
-                          {getLocalized(proj, 'title')}
-                        </h3>
-                        <p className={`text-xs truncate mt-0.5 font-medium ${
-                          isDark ? 'text-white/60' : 'text-[#233D4D]'
-                        }`}>
-                          {proj.category}
-                        </p>
-                      </div>
-                      <ArrowUpRight className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
-                        isDark ? 'text-slate-300 group-hover:text-[#FFC300]' : 'text-[#233D4D] group-hover:text-[#5C3E94]'
-                      }`} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    Reset Pencarian
+                  </button>
+                </div>
+              )}
             </div>
           </section>
 
@@ -2512,8 +2551,8 @@ export default function App() {
                     key={idx}
                     className={`p-5 md:p-6 rounded-2xl border flex flex-col justify-between card-hover-3d transition-all ${
                       isDark
-                        ? 'bg-[#211832] border-white/10 hover:border-[#FFC300]'
-                        : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#FFC300]'
+                        ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30'
+                        : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
                     }`}
                   >
                     <div className="space-y-3">
@@ -2559,11 +2598,19 @@ export default function App() {
             }`}>
               {/* Left Sketch Cover */}
               <div className={`md:col-span-5 relative rounded-3xl overflow-hidden flex items-center justify-center min-h-[225px] md:min-h-[250px] border-2 shadow-xl group ${isDark ? 'bg-[#5C3E94] border-[#211832] text-white' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'}`}>
-                <img
-                  src={profile.aboutCover || "/about-cover.png"}
-                  alt="Focus Discipline Consistency Cover"
-                  className="w-full h-full min-h-[225px] md:min-h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {profile.aboutCover && !aboutCoverFailed ? (
+                  <img
+                    src={profile.aboutCover}
+                    alt="Focus Discipline Consistency Cover"
+                    onError={() => setAboutCoverFailed(true)}
+                    className="w-full h-full min-h-[225px] md:min-h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="p-6 text-center space-y-1">
+                    <span className="font-marker text-2xl block tracking-wider">FOCUS • DISCIPLINE</span>
+                    <span className="font-marker text-2xl block text-[#FFC300] tracking-wider">CONSISTENCY</span>
+                  </div>
+                )}
               </div>
 
               {/* Right Bio Info */}
@@ -2634,8 +2681,8 @@ export default function App() {
                     {experience.map((exp) => (
                       <div key={exp.id} className="relative pl-9 md:pl-10">
                         <div className={`w-3.5 h-3.5 rounded-full border-2 absolute left-[9px] top-5 ${isDark ? 'bg-[#FFC300] border-[#211832]' : 'bg-[#5C3E94] border-white'}`} />
-                        <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d ${
-                          isDark ? 'bg-[#412B6B] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
+                        <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
+                          isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/50 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-md'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className={`text-xs font-extrabold ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{exp.period}</span>
@@ -2664,8 +2711,8 @@ export default function App() {
 
                   <div className="space-y-4">
                     {education.map((edu) => (
-                      <div key={edu.id} className={`p-4 md:p-5 rounded-2xl border card-hover-3d ${
-                        isDark ? 'bg-[#412B6B] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'
+                      <div key={edu.id} className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
+                        isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/50 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-md'
                       }`}>
                         <div className="flex items-center justify-between">
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
@@ -2824,8 +2871,9 @@ export default function App() {
                     href={`https://instagram.com/${profile.socials.instagram}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:text-white text-[#233D4D]'
+                    aria-label="Instagram"
+                    className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
+                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D]'
                     }`}
                   >
                     IG
@@ -2834,8 +2882,9 @@ export default function App() {
                     href={`https://linkedin.com/in/${profile.socials.linkedin}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:text-white text-[#233D4D]'
+                    aria-label="LinkedIn"
+                    className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
+                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D]'
                     }`}
                   >
                     IN
@@ -2844,8 +2893,9 @@ export default function App() {
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`w-10 h-10 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:text-white text-[#233D4D]'
+                    aria-label="WhatsApp"
+                    className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
+                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D]'
                     }`}
                   >
                     WA
