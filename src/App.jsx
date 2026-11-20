@@ -8,7 +8,8 @@ import {
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
   FolderGit2, FileText, RefreshCw, UploadCloud,
   Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown, Image as ImageIcon,
-  Plus, Play, Mouse, ArrowUp, Zap, Star
+  Plus, Play, ArrowUp, Zap, Star,
+  Volume2, VolumeX, Music, Pause
 } from 'lucide-react';
 
 // ============================================================================
@@ -555,6 +556,8 @@ const INITIAL_PROFILE = {
   aboutCover: "/about-cover.png",
   favicon: "/logo.png",
   siteTitle: ".gudelz — Akhmad Aldi Portfolio",
+  bgMusicUrl: "/music.mp3",
+  bgMusicTitle: "Canvas Bloom — Theme",
   roles: [
     "Brand Strategy",
     "Logo Design & Identity",
@@ -1148,6 +1151,131 @@ function KineticMarquee({ items, isDark }) {
 }
 
 // ============================================================================
+// BUILT-IN WEB AUDIO SYNTH ENGINE (FALLBACK JIKA /music.mp3 BELUM TERSEDIA)
+// ============================================================================
+function createSynthMusicEngine() {
+  let ctx = null;
+  let masterGain = null;
+  let timerId = null;
+  let step = 0;
+  let currentVolume = 0.35;
+
+  // Progresi akor Future Bass / Synth-Pop 120 BPM yang ceria & modern
+  const chords = [
+    [174.61, 220.00, 261.63, 329.63], // Fmaj7
+    [196.00, 246.94, 293.66, 329.63], // G6
+    [164.81, 196.00, 246.94, 293.66], // Em7
+    [220.00, 261.63, 329.63, 392.00]  // Am7
+  ];
+  const arpNotes = [523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33];
+
+  const playTone = (freq, duration, type, gainPeak, startTime) => {
+    if (!ctx || !masterGain) return;
+    try {
+      const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const env = ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(type === 'triangle' ? 1600 : 1100, startTime);
+
+      env.gain.setValueAtTime(0.0001, startTime);
+      env.gain.exponentialRampToValueAtTime(gainPeak, startTime + 0.03);
+      env.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      osc.connect(filter);
+      filter.connect(env);
+      env.connect(masterGain);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.05);
+    } catch (e) {}
+  };
+
+  const tick = () => {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const chordIdx = Math.floor(step / 8) % chords.length;
+    const chord = chords[chordIdx];
+
+    // Warm Pad Chord setiap awal bar (8 ketukan eighth-note)
+    if (step % 8 === 0) {
+      chord.forEach((freq) => playTone(freq, 1.95, 'sine', 0.09, now));
+      // Sub-bass lembut
+      playTone(chord[0] / 2, 0.9, 'triangle', 0.14, now);
+    } else if (step % 8 === 4) {
+      // Bounce bass ringan di tengah bar
+      playTone(chord[0] / 2, 0.45, 'triangle', 0.1, now);
+    }
+
+    // Sparkly Synth Pluck Arpeggio
+    if (step % 2 === 0 || step % 8 === 5) {
+      const note = arpNotes[step % arpNotes.length];
+      playTone(note, 0.24, 'triangle', 0.07, now);
+    }
+
+    step = (step + 1) % 32;
+  };
+
+  return {
+    start(volume = 0.35) {
+      try {
+        currentVolume = volume;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return false;
+        if (!ctx) {
+          ctx = new AudioCtx();
+          masterGain = ctx.createGain();
+          masterGain.gain.setValueAtTime(currentVolume, ctx.currentTime);
+          masterGain.connect(ctx.destination);
+        }
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        masterGain.gain.setTargetAtTime(currentVolume, ctx.currentTime, 0.08);
+        if (!timerId) {
+          tick();
+          timerId = setInterval(tick, 250); // 120 BPM (eighth notes)
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    setVolume(volume) {
+      currentVolume = volume;
+      if (ctx && masterGain) {
+        masterGain.gain.setTargetAtTime(volume, ctx.currentTime, 0.05);
+      }
+    },
+    stop() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+      if (ctx && masterGain) {
+        try {
+          masterGain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.08);
+        } catch (e) {}
+      }
+    },
+    destroy() {
+      this.stop();
+      if (ctx) {
+        try {
+          ctx.close();
+        } catch (e) {}
+        ctx = null;
+        masterGain = null;
+      }
+    }
+  };
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 export default function App() {
@@ -1162,9 +1290,11 @@ export default function App() {
   const activeLangObj = SUPPORTED_LANGUAGES.find(l => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
   const getLocalized = (item, field) => {
-    if (!item) return '';
-    if (lang === 'id') return item[field];
-    return item.translations?.[lang]?.[field] || item.translations?.en?.[field] || item[field];
+    if (!item || typeof item !== 'object') return '';
+    const value = lang === 'id'
+      ? item[field]
+      : (item.translations?.[lang]?.[field] || item.translations?.en?.[field] || item[field]);
+    return (typeof value === 'string' || typeof value === 'number') ? value : '';
   };
 
   const [currentRoute, setCurrentRoute] = useState(() => {
@@ -1183,6 +1313,129 @@ export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
+
+  const [aboutCoverFailed, setAboutCoverFailed] = useState(false);
+
+  const [profile, setProfile] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gudelz_profile_backup');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') {
+          return { ...INITIAL_PROFILE, ...parsed };
+        }
+      }
+    } catch (e) {}
+    return INITIAL_PROFILE;
+  });
+
+  // Background Music Player State & Refs (ditempatkan setelah state profile terinisialisasi)
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(0.35);
+  const [musicSourceMode, setMusicSourceMode] = useState('file'); // 'file' | 'synth'
+  const [musicPanelExpanded, setMusicPanelExpanded] = useState(false);
+  const [audioFileFailed, setAudioFileFailed] = useState(false);
+  const audioRef = useRef(null);
+  const synthEngineRef = useRef(null);
+
+  useEffect(() => {
+    synthEngineRef.current = createSynthMusicEngine();
+    return () => {
+      synthEngineRef.current?.destroy();
+    };
+  }, []);
+
+  // Reset status audio file saat URL musik diubah di CMS
+  useEffect(() => {
+    setAudioFileFailed(false);
+    setMusicSourceMode('file');
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
+  }, [profile.bgMusicUrl]);
+
+  // Sinkronkan volume ke elemen <audio> maupun Synth Engine
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = musicVolume;
+    }
+    synthEngineRef.current?.setVolume(musicVolume);
+  }, [musicVolume]);
+
+  const toggleMusic = async () => {
+    if (isMusicPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      synthEngineRef.current?.stop();
+      setIsMusicPlaying(false);
+      return;
+    }
+
+    const hasAudioUrl = Boolean(profile.bgMusicUrl && profile.bgMusicUrl.trim());
+    if (hasAudioUrl && !audioFileFailed && audioRef.current) {
+      try {
+        audioRef.current.volume = musicVolume;
+        await audioRef.current.play();
+        setMusicSourceMode('file');
+        setIsMusicPlaying(true);
+        return;
+      } catch (err) {
+        // Jika file /music.mp3 belum ada di folder public, otomatis jalankan Web Audio Synth
+        setAudioFileFailed(true);
+      }
+    }
+
+    const started = synthEngineRef.current?.start(musicVolume);
+    if (started) {
+      setMusicSourceMode('synth');
+      setIsMusicPlaying(true);
+      showToast("Memutar musik latar bawaan (Upload file MP3 di CMS atau letakkan di public/music.mp3).", "info");
+    } else {
+      showToast("Browser memblokir pemutaran audio.", "error");
+    }
+  };
+
+  const handleAudioFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) {
+      showToast("Pilih file audio yang valid (MP3, WAV, OGG).", "error");
+      e.target.value = '';
+      return;
+    }
+
+    const fileNameClean = file.name.replace(/\.[^/.]+$/, '');
+    const objectUrl = URL.createObjectURL(file);
+
+    // Jika file kecil (< 1.5MB), simpan sebagai Data URL agar tersimpan di browser/cloud
+    if (file.size <= 1.5 * 1024 * 1024) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result;
+        if (dataUrl) {
+          setProfile(prev => ({
+            ...prev,
+            bgMusicUrl: dataUrl,
+            bgMusicTitle: fileNameClean
+          }));
+          setAudioFileFailed(false);
+          showToast(`Audio "${fileNameClean}" berhasil dimuat & siap disimpan!`);
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // File besar tetap bisa langsung diputar di sesi ini
+      setProfile(prev => ({
+        ...prev,
+        bgMusicUrl: objectUrl,
+        bgMusicTitle: fileNameClean
+      }));
+      setAudioFileFailed(false);
+      showToast(`Audio "${fileNameClean}" aktif untuk preview! Untuk permanen di website live, simpan file ke folder public/music.mp3.`, "info");
+    }
+    e.target.value = '';
+  };
 
   const handleHeroMouseMove = (e) => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) return;
@@ -1249,16 +1502,6 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const [aboutCoverFailed, setAboutCoverFailed] = useState(false);
-
-  const [profile, setProfile] = useState(() => {
-    try {
-      const cached = localStorage.getItem('gudelz_profile_backup');
-      if (cached) return { ...INITIAL_PROFILE, ...JSON.parse(cached) };
-    } catch (e) {}
-    return INITIAL_PROFILE;
-  });
 
   useEffect(() => {
     try {
@@ -2212,6 +2455,13 @@ export default function App() {
         .btn-shimmer:hover::after {
           animation: shimmerSweep 0.75s ease-in-out;
         }
+        @keyframes eqBar {
+          0%, 100% { transform: scaleY(0.28); }
+          50% { transform: scaleY(1); }
+        }
+        .animate-eq-1 { animation: eqBar 0.62s ease-in-out infinite; transform-origin: bottom; }
+        .animate-eq-2 { animation: eqBar 0.48s ease-in-out infinite 0.15s; transform-origin: bottom; }
+        .animate-eq-3 { animation: eqBar 0.72s ease-in-out infinite 0.08s; transform-origin: bottom; }
         .card-hover-3d {
           transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.3s ease;
         }
@@ -2231,6 +2481,21 @@ export default function App() {
           <span className="text-sm font-medium">{toast.message}</span>
         </div>
       )}
+
+      {/* HIDDEN HTML5 BACKGROUND AUDIO ELEMENT */}
+      <audio
+        ref={audioRef}
+        src={profile.bgMusicUrl || '/music.mp3'}
+        loop
+        preload="none"
+        onError={() => {
+          setAudioFileFailed(true);
+          if (isMusicPlaying && musicSourceMode === 'file') {
+            const started = synthEngineRef.current?.start(musicVolume);
+            if (started) setMusicSourceMode('synth');
+          }
+        }}
+      />
 
       {/* =====================================================================
           LANDINGPAGE.HTML (REDESIGNED MOTION & INTERACTIVE CREATIVE PORTFOLIO)
@@ -2375,6 +2640,33 @@ export default function App() {
                   }`}
                 >
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+
+                {/* Navbar Music Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleMusic}
+                  title={isMusicPlaying ? 'Matikan Musik Latar' : 'Putar Musik Latar'}
+                  aria-label={isMusicPlaying ? 'Matikan Musik Latar' : 'Putar Musik Latar'}
+                  className={`p-2.5 rounded-full border transition-all duration-300 hover:scale-110 flex items-center justify-center gap-1.5 text-xs font-bold ${
+                    isMusicPlaying
+                      ? (isDark
+                          ? 'bg-[#FFC300] border-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/30'
+                          : 'bg-[#5C3E94] border-[#5C3E94] text-white shadow-lg shadow-[#5C3E94]/30')
+                      : (isDark
+                          ? 'bg-[#412B6B] border-white/10 text-slate-200 hover:border-[#FFC300] hover:text-[#FFC300]'
+                          : 'bg-white border-[#D0D5DD] text-[#5C3E94] hover:bg-[#EAECF0]')
+                  }`}
+                >
+                  {isMusicPlaying ? (
+                    <div className="flex items-end gap-[2.5px] h-4 w-4 justify-center">
+                      <span className="w-[3px] h-full rounded-full bg-current animate-eq-1" />
+                      <span className="w-[3px] h-full rounded-full bg-current animate-eq-2" />
+                      <span className="w-[3px] h-full rounded-full bg-current animate-eq-3" />
+                    </div>
+                  ) : (
+                    <Music className="w-4 h-4" />
+                  )}
                 </button>
 
                 {/* Desktop Hire Me Button */}
@@ -3466,6 +3758,98 @@ export default function App() {
             </Reveal>
           </footer>
 
+          {/* FLOATING MINI MUSIC PLAYER DOCK (BOTTOM-LEFT) */}
+          <div className="fixed bottom-6 left-4 sm:left-6 z-40 flex items-center">
+            <div
+              className={`flex items-center gap-2.5 p-1.5 pr-3 rounded-full border shadow-2xl backdrop-blur-xl transition-all duration-300 ${
+                isDark
+                  ? 'bg-[#211832]/90 border-white/15 text-white shadow-black/40'
+                  : 'bg-white/95 border-[#D0D5DD] text-[#211832] shadow-slate-400/30'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={toggleMusic}
+                aria-label={isMusicPlaying ? 'Jeda Musik' : 'Putar Musik'}
+                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-105 active:scale-95 ${
+                  isMusicPlaying
+                    ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-md shadow-[#FFC300]/30' : 'bg-[#5C3E94] text-white shadow-md shadow-[#5C3E94]/30')
+                    : (isDark ? 'bg-[#412B6B] text-[#FFC300]' : 'bg-[#EAECF0] text-[#5C3E94]')
+                }`}
+              >
+                {isMusicPlaying ? (
+                  <Pause className="w-4 h-4 fill-current" />
+                ) : (
+                  <Play className="w-4 h-4 fill-current ml-0.5" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMusicPanelExpanded(!musicPanelExpanded)}
+                className="flex items-center gap-2 text-left min-w-0 pr-1"
+              >
+                <svg
+                  className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'} ${
+                    isMusicPlaying ? 'animate-spin' : 'opacity-70'
+                  }`}
+                  style={{ animationDuration: '4s' }}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M6 12c0-1.7.7-3.2 1.8-4.2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <path d="M18 12c0 1.7-.7 3.2-1.8 4.2" />
+                </svg>
+                <div className="min-w-0 max-w-[115px] sm:max-w-[150px]">
+                  <div className="text-[11px] font-extrabold truncate leading-tight">
+                    {profile.bgMusicTitle || 'Canvas Bloom'}
+                  </div>
+                  <div className={`text-[9px] font-bold uppercase tracking-wider leading-tight ${
+                    isDark ? 'text-white/60' : 'text-[#233D4D]/75'
+                  }`}>
+                    {isMusicPlaying
+                      ? (musicSourceMode === 'file' ? 'Playing Audio' : 'Live Synth')
+                      : 'Tap to Play'}
+                  </div>
+                </div>
+              </button>
+
+              {/* Volume Controls (Expandable) */}
+              {musicPanelExpanded && (
+                <div className={`flex items-center gap-2 pl-2 border-l animate-fade-up ${
+                  isDark ? 'border-white/15' : 'border-[#D0D5DD]'
+                }`}>
+                  <button
+                    type="button"
+                    onClick={() => setMusicVolume(musicVolume > 0 ? 0 : 0.35)}
+                    className={`p-1 rounded-full transition-colors ${
+                      isDark ? 'text-white/80 hover:text-[#FFC300]' : 'text-[#233D4D] hover:text-[#5C3E94]'
+                    }`}
+                    aria-label="Mute / Unmute"
+                  >
+                    {musicVolume === 0 ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={musicVolume}
+                    onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
+                    aria-label="Volume Musik"
+                    className="w-16 sm:w-20 h-1.5 rounded-full accent-[#FFC300] cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* FLOATING BACK-TO-TOP BUTTON WITH CIRCULAR SCROLL PROGRESS RING */}
           <button
             type="button"
@@ -4401,6 +4785,73 @@ export default function App() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Background Music Manager in CMS */}
+                      <div className={`p-4 rounded-2xl border space-y-3 ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-xl bg-[#FFC300] text-[#211832] flex items-center justify-center shrink-0">
+                              <Music className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <span className={`text-xs font-bold block ${isDark ? 'text-white' : 'text-[#000000]'}`}>
+                                Musik Latar Website (Background Audio)
+                              </span>
+                              <span className={`text-[10px] ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                                Unduh musik dari chat, lalu simpan sebagai <code className="font-mono font-bold">/music.mp3</code> di folder <code className="font-mono">public/</code> atau unggah langsung di sini.
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={toggleMusic}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-colors ${
+                              isMusicPlaying
+                                ? 'bg-rose-500 text-white'
+                                : 'bg-[#FFC300] text-[#211832] hover:bg-[#E6B000]'
+                            }`}
+                          >
+                            {isMusicPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                            <span>{isMusicPlaying ? 'Hentikan Test' : 'Tes Putar Audio'}</span>
+                          </button>
+                        </div>
+
+                        <div className="grid sm:grid-cols-3 gap-3 items-end">
+                          <div>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-white/70' : 'text-[#233D4D]'}`}>Judul Lagu</label>
+                            <input
+                              type="text"
+                              value={profile.bgMusicTitle || ''}
+                              onChange={(e) => setProfile({ ...profile, bgMusicTitle: e.target.value })}
+                              placeholder="Canvas Bloom — Theme"
+                              className={`w-full px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'}`}
+                            />
+                          </div>
+                          <div>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-white/70' : 'text-[#233D4D]'}`}>Path / URL Audio (.mp3 / .wav)</label>
+                            <input
+                              type="text"
+                              value={profile.bgMusicUrl?.startsWith('data:') ? 'File Audio Terunggah (Embedded)' : (profile.bgMusicUrl || '')}
+                              onChange={(e) => setProfile({ ...profile, bgMusicUrl: e.target.value })}
+                              placeholder="/music.mp3 atau https://..."
+                              className={`w-full px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'}`}
+                            />
+                          </div>
+                          <div>
+                            <label className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              <span>Upload File Audio (MP3/WAV)</span>
+                              <input
+                                type="file"
+                                accept="audio/*"
+                                onChange={handleAudioFileUpload}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
                           <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Judul Tab Browser (Title)</label>
