@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Briefcase, GraduationCap, Layers, 
   PenTool, ExternalLink, Mail, Phone, MapPin, 
@@ -8,7 +8,7 @@ import {
   LayoutDashboard, LogOut, ChevronRight, ChevronLeft, Menu, X, Calendar,
   FolderGit2, FileText, RefreshCw, UploadCloud,
   Sun, Moon, MessageSquare, Languages, Loader2, ChevronDown, Image as ImageIcon,
-  Plus, Play, Mouse
+  Plus, Play, Mouse, ArrowUp, Zap, Star
 } from 'lucide-react';
 
 // ============================================================================
@@ -992,6 +992,162 @@ const INITIAL_BLOGS = [
 ];
 
 // ============================================================================
+// MOTION ENGINE COMPONENTS (SCROLL REVEAL, 3D TILT CARD, KINETIC MARQUEE)
+// ============================================================================
+
+/**
+ * Reveal: Scroll-triggered entrance animation using IntersectionObserver.
+ * Supports presets: 'fade-up', 'zoom-in', 'slide-left', 'slide-right', 'flip-up'.
+ */
+function Reveal({ children, preset = 'fade-up', delay = 0, className = '' }) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const hiddenStyles = {
+    'fade-up': 'opacity-0 translate-y-10',
+    'zoom-in': 'opacity-0 scale-95 translate-y-4',
+    'slide-left': 'opacity-0 -translate-x-10',
+    'slide-right': 'opacity-0 translate-x-10',
+    'flip-up': 'opacity-0 translate-y-8 rotate-1 scale-[0.98]'
+  };
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        transitionDelay: `${delay}ms`,
+        transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      }}
+      className={`transition-all duration-700 will-change-transform ${
+        isVisible ? 'opacity-100 translate-y-0 translate-x-0 scale-100 rotate-0' : (hiddenStyles[preset] || hiddenStyles['fade-up'])
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * TiltCard: Interactive 3D perspective card with cursor-tracking spotlight glare.
+ * Gracefully stays flat on touch screens to maintain smooth mobile scrolling.
+ */
+function TiltCard({ children, className = '', onClick, maxTilt = 7, glareColor = 'rgba(255, 195, 0, 0.16)' }) {
+  const cardRef = useRef(null);
+  const [tiltStyle, setTiltStyle] = useState({
+    transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+    transition: 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)'
+  });
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+
+  const handleMouseMove = (e) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -maxTilt;
+    const rotateY = ((x - centerX) / centerX) * maxTilt;
+
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.015, 1.015, 1.015)`,
+      transition: 'transform 0.12s ease-out'
+    });
+    setGlare({
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+      opacity: 1
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTiltStyle({
+      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+      transition: 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)'
+    });
+    setGlare((prev) => ({ ...prev, opacity: 0 }));
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={tiltStyle}
+      className={`relative will-change-transform ${className}`}
+    >
+      {/* Dynamic Cursor Glare Layer */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-[inherit] z-20 transition-opacity duration-300"
+        style={{
+          opacity: glare.opacity,
+          background: `radial-gradient(circle 280px at ${glare.x}% ${glare.y}%, ${glareColor}, transparent 75%)`
+        }}
+      />
+      {children}
+    </div>
+  );
+}
+
+/**
+ * KineticMarquee: Infinite kinetic ribbon banner that pauses smoothly on hover.
+ */
+function KineticMarquee({ items, isDark }) {
+  const repeated = [...items, ...items, ...items];
+  return (
+    <div className="relative py-4 sm:py-5 overflow-hidden select-none">
+      <div
+        className={`-mx-4 py-3.5 sm:py-4 -rotate-1 border-y-2 shadow-xl marquee-wrapper ${
+          isDark
+            ? 'bg-[#FFC300] text-[#211832] border-[#211832]'
+            : 'bg-[#5C3E94] text-white border-[#211832]'
+        }`}
+      >
+        <div className="marquee-track flex items-center gap-6 sm:gap-10 whitespace-nowrap w-max">
+          {repeated.map((label, idx) => (
+            <div key={idx} className="flex items-center gap-6 sm:gap-10">
+              <span className="font-marker text-base sm:text-xl md:text-2xl uppercase tracking-wider">
+                {label}
+              </span>
+              <Star
+                className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 fill-current ${
+                  isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'
+                }`}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 export default function App() {
@@ -1024,17 +1180,39 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [activeSection, setActiveSection] = useState('home');
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [heroParallax, setHeroParallax] = useState({ x: 0, y: 0 });
+
+  const handleHeroMouseMove = (e) => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const normX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const normY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    setHeroParallax({ x: normX, y: normY });
+  };
+
+  const handleHeroMouseLeave = () => {
+    setHeroParallax({ x: 0, y: 0 });
+  };
 
   useEffect(() => {
     if (currentRoute !== 'landingpage.html') return;
     
     const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 28);
+
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? Math.min(100, Math.max(0, (scrollY / docHeight) * 100)) : 0;
+      setScrollProgress(pct);
+
       const sections = ['home', 'karya', 'tentang', 'pengalaman', 'blog', 'kontak'];
       let current = 'home';
       
       for (const section of sections) {
         if (section === 'home') {
-          if (window.scrollY < 250) current = 'home';
+          if (scrollY < 250) current = 'home';
           continue;
         }
         const el = document.getElementById(section);
@@ -1048,7 +1226,7 @@ export default function App() {
       setActiveSection(current);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [currentRoute]);
@@ -1882,6 +2060,18 @@ export default function App() {
         .font-card-title {
           font-family: 'Poppins', sans-serif !important;
         }
+        .overflow-x-clip-safe {
+          overflow-x: clip;
+        }
+        /* Subtle Editorial Dot Grid Background */
+        .bg-dot-grid-dark {
+          background-image: radial-gradient(rgba(255, 195, 0, 0.12) 1px, transparent 1px);
+          background-size: 28px 28px;
+        }
+        .bg-dot-grid-light {
+          background-image: radial-gradient(rgba(92, 62, 148, 0.14) 1px, transparent 1px);
+          background-size: 28px 28px;
+        }
         /* Hide scrollbar for clean horizontal pills */
         .no-scrollbar::-webkit-scrollbar {
           display: none;
@@ -1892,35 +2082,138 @@ export default function App() {
         }
         @keyframes floatSlow {
           0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
-          50% { transform: translate(8px, -12px) rotate(2deg); }
+          50% { transform: translate(8px, -14px) rotate(3deg); }
         }
         @keyframes floatReverse {
           0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
-          50% { transform: translate(-8px, 10px) rotate(-2deg); }
+          50% { transform: translate(-8px, 12px) rotate(-3deg); }
         }
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(22px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes popInLetter {
+          0% { opacity: 0; transform: translateY(24px) scale(0.65) rotate(-10deg); }
+          70% { opacity: 1; transform: translateY(-4px) scale(1.06) rotate(2deg); }
+          100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+        }
+        @keyframes rubberBand {
+          0% { transform: scale3d(1, 1, 1); }
+          30% { transform: scale3d(1.22, 0.78, 1); }
+          45% { transform: scale3d(0.82, 1.18, 1); }
+          60% { transform: scale3d(1.12, 0.88, 1); }
+          75% { transform: scale3d(0.96, 1.04, 1); }
+          100% { transform: scale3d(1, 1, 1); }
+        }
+        @keyframes marqueeMove {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-33.333%, 0, 0); }
+        }
+        @keyframes blobMorph {
+          0%, 100% { transform: scale(1) rotate(0deg); border-radius: 58% 42% 52% 48% / 44% 58% 42% 56%; }
+          50% { transform: scale(1.06) rotate(8deg); border-radius: 44% 56% 40% 60% / 56% 42% 58% 44%; }
+        }
+        @keyframes orbitSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes orbitCounterSpin {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        @keyframes pulseSonar {
+          0% { transform: scale(1); opacity: 0.75; }
+          100% { transform: scale(1.9); opacity: 0; }
+        }
+        @keyframes kenBurns {
+          0% { transform: scale(1.02); }
+          100% { transform: scale(1.1); }
+        }
+        @keyframes showreelTimer {
+          0% { transform: scaleX(0); }
+          100% { transform: scaleX(1); }
+        }
+        @keyframes modalSpring {
+          0% { opacity: 0; transform: scale(0.9) translateY(24px); }
+          70% { opacity: 1; transform: scale(1.015) translateY(-2px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes wiggleHover {
+          0%, 100% { transform: rotate(-2deg); }
+          25% { transform: rotate(-6deg) scale(1.05); }
+          75% { transform: rotate(4deg) scale(1.05); }
+        }
+        @keyframes shimmerSweep {
+          0% { transform: translateX(-140%) skewX(-20deg); }
+          100% { transform: translateX(240%) skewX(-20deg); }
+        }
         .animate-float-slow {
-          animation: floatSlow 7s ease-in-out infinite;
+          animation: floatSlow 6.5s ease-in-out infinite;
         }
         .animate-float-reverse {
-          animation: floatReverse 9s ease-in-out infinite;
+          animation: floatReverse 8.5s ease-in-out infinite;
         }
         .animate-fade-up {
           animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        @keyframes popInLetter {
-          0% { opacity: 0; transform: translateY(15px) scale(0.8) rotate(-8deg); }
-          100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-        }
         .animate-pop-letter {
-          animation: popInLetter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: popInLetter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           opacity: 0;
         }
+        .letter-jelly:hover {
+          animation: rubberBand 0.7s ease-in-out;
+          color: #FFFFFF;
+        }
+        .animate-blob-morph {
+          animation: blobMorph 10s ease-in-out infinite;
+        }
+        .animate-orbit {
+          animation: orbitSpin 24s linear infinite;
+        }
+        .animate-orbit-counter {
+          animation: orbitCounterSpin 24s linear infinite;
+        }
+        .animate-sonar {
+          animation: pulseSonar 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        .animate-ken-burns {
+          animation: kenBurns 10s ease-out forwards;
+        }
+        .animate-showreel-timer {
+          transform-origin: left;
+          animation: showreelTimer 10s linear forwards;
+        }
+        .animate-modal-spring {
+          animation: modalSpring 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hover-wiggle:hover {
+          animation: wiggleHover 0.45s ease-in-out;
+        }
+        .marquee-track {
+          animation: marqueeMove 24s linear infinite;
+        }
+        .marquee-wrapper:hover .marquee-track {
+          animation-play-state: paused;
+        }
+        .btn-shimmer {
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-shimmer::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 45%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+          transform: translateX(-140%) skewX(-20deg);
+        }
+        .btn-shimmer:hover::after {
+          animation: shimmerSweep 0.75s ease-in-out;
+        }
         .card-hover-3d {
-          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.3s ease;
         }
         .card-hover-3d:hover {
           transform: translateY(-6px);
@@ -1929,7 +2222,7 @@ export default function App() {
 
       {/* TOAST NOTIFICATION */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-[#412B6B]/95 border-white/10 text-white animate-fade-up">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-[#412B6B]/95 border-white/10 text-white animate-modal-spring">
           {toast.type === 'error' ? (
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
           ) : (
@@ -1940,30 +2233,55 @@ export default function App() {
       )}
 
       {/* =====================================================================
-          LANDINGPAGE.HTML (PUBLIC PORTFOLIO - CREATIVE DOODLE & ILLUSTRATION STYLE)
+          LANDINGPAGE.HTML (REDESIGNED MOTION & INTERACTIVE CREATIVE PORTFOLIO)
          ===================================================================== */}
       {currentRoute === 'landingpage.html' && (
         <div 
           dir={lang === 'ar' ? 'rtl' : 'ltr'}
           style={{ fontFamily: "'Poppins', sans-serif" }}
-          className={isDark ? 'bg-[#211832] text-white selection:bg-[#FFC300] selection:text-[#211832]' : 'bg-[#EAECF0] text-[#000000] selection:bg-[#FFC300] selection:text-[#211832]'}
+          className={`overflow-x-clip-safe relative ${
+            isDark
+              ? 'bg-[#211832] text-white selection:bg-[#FFC300] selection:text-[#211832]'
+              : 'bg-[#EAECF0] text-[#000000] selection:bg-[#5C3E94] selection:text-white'
+          }`}
         >
+          {/* TOP SCROLL READING PROGRESS BAR */}
+          <div className="fixed top-0 left-0 right-0 h-1 z-50 pointer-events-none bg-transparent">
+            <div
+              className={`h-full transition-all duration-150 ease-out ${
+                isDark
+                  ? 'bg-gradient-to-r from-[#5C3E94] via-[#FFC300] to-[#FFC300] shadow-[0_0_12px_rgba(255,195,0,0.85)]'
+                  : 'bg-gradient-to-r from-[#5C3E94] via-[#412B6B] to-[#FFC300]'
+              }`}
+              style={{ width: `${scrollProgress}%` }}
+            />
+          </div>
 
-          {/* TOP NAVBAR */}
-          <header className={`sticky top-0 z-40 backdrop-blur-xl transition-all duration-300 ${
-            isDark ? 'bg-[#211832]/85 border-b border-white/10 shadow-lg shadow-black/20' : 'bg-white/90 border-b border-[#D0D5DD] shadow-sm'
+          {/* TOP NAVBAR (DYNAMIC FLOATING GLASS MORPH ON SCROLL) */}
+          <header className={`sticky top-0 z-40 transition-all duration-300 ${
+            isScrolled
+              ? (isDark
+                  ? 'bg-[#211832]/85 backdrop-blur-2xl border-b border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.35)] py-0'
+                  : 'bg-white/90 backdrop-blur-2xl border-b border-[#D0D5DD] shadow-md py-0')
+              : (isDark
+                  ? 'bg-[#211832]/60 backdrop-blur-md border-b border-white/5 py-1'
+                  : 'bg-white/75 backdrop-blur-md border-b border-[#D0D5DD]/60 py-1')
           }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2 relative z-10">
+            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 relative z-10 transition-all duration-300 ${
+              isScrolled ? 'h-16 sm:h-[70px]' : 'h-20'
+            }`}>
               <a href="#" onClick={() => setActiveSection('home')} className="flex items-center gap-2.5 group min-w-0">
-                <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow transition-colors ${
+                <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2 ${
                   isDark ? 'text-white' : 'text-[#000000]'
                 }`}>
-                  <span className="text-[#FFC300]">.</span>gudelz
+                  <span className={`inline-block transition-transform duration-300 group-hover:scale-150 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>.</span>gudelz
                 </span>
               </a>
 
-              <nav className={`hidden lg:flex items-center gap-8 text-sm font-bold ${
-                isDark ? 'text-slate-300' : 'text-[#233D4D]'
+              <nav className={`hidden lg:flex items-center gap-1.5 p-1.5 rounded-full border text-xs font-bold transition-all ${
+                isDark
+                  ? 'bg-[#412B6B]/60 border-white/10 text-slate-300'
+                  : 'bg-[#EAECF0]/80 border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 {[
                   { id: 'home', label: 'Home', href: '#' },
@@ -1979,14 +2297,13 @@ export default function App() {
                       key={navItem.id}
                       href={navItem.href}
                       onClick={() => setActiveSection(navItem.id)}
-                      className={`relative py-1 transition-colors ${
-                        isActive ? (isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]') : (isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]')
+                      className={`relative px-4 py-2 rounded-full transition-all duration-300 ${
+                        isActive
+                          ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-md shadow-[#FFC300]/25' : 'bg-[#5C3E94] text-white shadow-md shadow-[#5C3E94]/25')
+                          : (isDark ? 'hover:text-white hover:bg-white/10' : 'hover:text-[#5C3E94] hover:bg-white')
                       }`}
                     >
                       {navItem.label}
-                      {isActive && (
-                        <span className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`} />
-                      )}
                     </a>
                   );
                 })}
@@ -1998,7 +2315,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                    className={`px-3 py-2 rounded-full border text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-2 rounded-full border text-xs font-extrabold transition-all flex items-center gap-1.5 hover:scale-105 ${
                       isDark
                         ? 'bg-[#412B6B] border-white/10 text-slate-200 hover:border-[#FFC300]'
                         : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
@@ -2012,7 +2329,7 @@ export default function App() {
                   {langDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
-                      <div className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-fade-up ${
+                      <div className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-modal-spring ${
                         isDark ? 'bg-[#412B6B]/95 border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
                       }`}>
                         {SUPPORTED_LANGUAGES.map((l) => {
@@ -2051,7 +2368,7 @@ export default function App() {
                 <button
                   onClick={() => setTheme(isDark ? 'light' : 'dark')}
                   title={isDark ? t.dayMode : t.nightMode}
-                  className={`p-2.5 rounded-full border transition-all flex items-center gap-1.5 text-xs font-bold ${
+                  className={`p-2.5 rounded-full border transition-all duration-300 hover:scale-110 hover:rotate-12 flex items-center gap-1.5 text-xs font-bold ${
                     isDark 
                       ? 'bg-[#412B6B] border-white/10 text-[#FFC300] hover:border-[#FFC300]' 
                       : 'bg-white border-[#D0D5DD] text-[#5C3E94] hover:bg-[#EAECF0]'
@@ -2065,8 +2382,8 @@ export default function App() {
                   href={`https://wa.me/${profile.whatsapp}`}
                   target="_blank"
                   rel="noreferrer"
-                  className={`hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-extrabold text-xs shadow-md transition-transform hover:scale-105 ${
-                    isDark ? 'bg-[#FFC300] hover:bg-[#E6B000] text-[#211832]' : 'bg-[#5C3E94] hover:bg-[#412B6B] text-white'
+                  className={`btn-shimmer hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-extrabold text-xs shadow-lg transition-all hover:scale-105 hover:-translate-y-0.5 ${
+                    isDark ? 'bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] shadow-[#FFC300]/25' : 'bg-[#5C3E94] hover:bg-[#412B6B] text-white shadow-[#5C3E94]/25'
                   }`}
                 >
                   <span>{t.hireMe}</span>
@@ -2077,7 +2394,7 @@ export default function App() {
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   aria-label="Menu"
-                  className="lg:hidden w-10 h-10 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white flex items-center justify-center shadow-lg shadow-[#5C3E94]/30 transition-transform hover:scale-105"
+                  className="lg:hidden w-10 h-10 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white flex items-center justify-center shadow-lg shadow-[#5C3E94]/30 transition-transform hover:scale-105 active:scale-95"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
@@ -2086,7 +2403,7 @@ export default function App() {
 
             {/* Mobile & Tablet Drawer Menu */}
             {mobileMenuOpen && (
-              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fade-up backdrop-blur-xl ${
+              <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-modal-spring backdrop-blur-xl ${
                 isDark ? 'bg-[#211832]/95 border-white/10 text-slate-200' : 'bg-white/95 border-[#D0D5DD] text-[#233D4D]'
               }`}>
                 <div className="max-w-7xl mx-auto grid sm:grid-cols-2 gap-2">
@@ -2111,33 +2428,90 @@ export default function App() {
           </header>
 
           {/* =================================================================
-              HERO SECTION: BRUSH TYPOGRAPHY, DOODLES, BLOBS & CHARACTER
+              HERO SECTION: INTERACTIVE PARALLAX, ORBITING BADGES & ELASTIC TYPE
              ================================================================= */}
-          <section className="relative overflow-hidden pt-8 pb-10 sm:pt-12 sm:pb-14 md:pt-14 md:pb-16">
-            {/* Organic Background Blobs & Doodles */}
-            <svg className="pointer-events-none absolute bottom-0 -left-6 md:left-2 w-20 h-20 md:w-24 md:h-24 text-[#5C3E94] opacity-70 -rotate-12 animate-float-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="50" cy="50" r="35" />
-              <path d="M 35 45 Q 40 38 45 45 M 55 45 Q 60 38 65 45" />
-              <path d="M 38 60 C 45 70 55 70 62 60" />
-              <path d="M 10 30 L 20 40 M 90 30 L 80 40" strokeWidth="3" />
-            </svg>
-            <svg className="pointer-events-none absolute top-10 -right-24 w-72 h-72 md:w-96 md:h-96 text-[#FFC300] opacity-90 hidden md:block" viewBox="0 0 200 200" fill="currentColor">
-              <path d="M44,-66C57,-57,68,-44,74,-29C80,-14,81,3,76,19C71,35,60,50,46,60C32,70,15,75,-2,77C-19,79,-36,78,-49,69C-62,60,-71,43,-75,25C-79,7,-78,-12,-70,-28C-62,-44,-47,-57,-32,-66C-17,-75,-2,-80,13,-79C28,-78,31,-75,44,-66Z" transform="translate(105 95)" />
-            </svg>
+          <section
+            onMouseMove={handleHeroMouseMove}
+            onMouseLeave={handleHeroMouseLeave}
+            className={`relative overflow-hidden pt-8 pb-10 sm:pt-12 sm:pb-14 md:pt-14 md:pb-16 ${
+              isDark ? 'bg-dot-grid-dark' : 'bg-dot-grid-light'
+            }`}
+          >
+            {/* Ambient Radial Glow Aura */}
+            <div
+              className="pointer-events-none absolute -top-24 left-1/4 w-[480px] h-[480px] rounded-full blur-[120px] opacity-30 transition-transform duration-700 ease-out"
+              style={{
+                background: isDark ? '#5C3E94' : '#5C3E94',
+                transform: `translate3d(${heroParallax.x * -24}px, ${heroParallax.y * -24}px, 0)`
+              }}
+            />
+            <div
+              className="pointer-events-none absolute bottom-0 right-1/4 w-[380px] h-[380px] rounded-full blur-[110px] opacity-20 transition-transform duration-700 ease-out hidden md:block"
+              style={{
+                background: '#FFC300',
+                transform: `translate3d(${heroParallax.x * 28}px, ${heroParallax.y * 28}px, 0)`
+              }}
+            />
 
-            {/* Floating Hand-drawn Doodles */}
-            <svg className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#5C3E94] animate-float-slow hidden sm:block" viewBox="0 0 24 24" fill="currentColor">
+            {/* Organic Parallax Doodles & Blobs */}
+            <div
+              className="pointer-events-none absolute bottom-4 -left-4 md:left-4 transition-transform duration-500 ease-out"
+              style={{ transform: `translate3d(${heroParallax.x * -18}px, ${heroParallax.y * -18}px, 0)` }}
+            >
+              <svg className="w-20 h-20 md:w-24 md:h-24 text-[#5C3E94] opacity-75 -rotate-12 animate-float-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="50" cy="50" r="35" />
+                <path d="M 35 45 Q 40 38 45 45 M 55 45 Q 60 38 65 45" />
+                <path d="M 38 60 C 45 70 55 70 62 60" />
+                <path d="M 10 30 L 20 40 M 90 30 L 80 40" strokeWidth="3" />
+              </svg>
+            </div>
+
+            <div
+              className="pointer-events-none absolute top-10 -right-24 hidden md:block transition-transform duration-700 ease-out"
+              style={{ transform: `translate3d(${heroParallax.x * 26}px, ${heroParallax.y * 18}px, 0)` }}
+            >
+              <svg className="w-72 h-72 md:w-96 md:h-96 text-[#FFC300] opacity-85 animate-float-reverse" viewBox="0 0 200 200" fill="currentColor">
+                <path d="M44,-66C57,-57,68,-44,74,-29C80,-14,81,3,76,19C71,35,60,50,46,60C32,70,15,75,-2,77C-19,79,-36,78,-49,69C-62,60,-71,43,-75,25C-79,7,-78,-12,-70,-28C-62,-44,-47,-57,-32,-66C-17,-75,-2,-80,13,-79C28,-78,31,-75,44,-66Z" transform="translate(105 95)" />
+              </svg>
+            </div>
+
+            {/* Floating Hand-drawn Parallax Doodles */}
+            <svg
+              className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#5C3E94] animate-float-slow hidden sm:block transition-transform duration-500"
+              style={{ transform: `translate3d(${heroParallax.x * 22}px, ${heroParallax.y * -22}px, 0)` }}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
               <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
             </svg>
-            <svg className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#FFC300] animate-float-reverse hidden md:block" viewBox="0 0 24 24" fill="currentColor">
+            <svg
+              className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#FFC300] animate-float-reverse hidden md:block transition-transform duration-500"
+              style={{ transform: `translate3d(${heroParallax.x * -16}px, ${heroParallax.y * 20}px, 0)` }}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
               <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 relative z-10">
-              <div className="grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-6 items-center">
+              <div className="grid md:grid-cols-12 gap-8 md:gap-8 lg:gap-6 items-center">
                 
-                {/* LEFT COLUMN: BRUSH DISPLAY NAME & CTA PILLS */}
-                <div className="md:col-span-7 space-y-4 md:space-y-5 text-center md:text-left flex flex-col items-center md:items-start animate-fade-up">
+                {/* LEFT COLUMN: STATUS PILL, ELASTIC BRUSH NAME & SHIMMER CTAS */}
+                <div className="md:col-span-7 space-y-5 text-center md:text-left flex flex-col items-center md:items-start animate-fade-up">
+                  {/* Live Availability Pulse Pill */}
+                  <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[11px] font-bold backdrop-blur-md shadow-sm ${
+                    isDark
+                      ? 'bg-[#412B6B]/80 border-[#FFC300]/30 text-slate-100'
+                      : 'bg-white/90 border-[#5C3E94]/25 text-[#233D4D]'
+                  }`}>
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <span>Open for Brand &amp; Creative Projects</span>
+                    <Zap className={`w-3.5 h-3.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
+                  </div>
+
                   {/* "Hey, I'm" + Hand-drawn arrow + Crown Doodle */}
                   <div className="relative inline-flex items-end justify-center md:justify-start gap-2.5 md:gap-3">
                     <div className="flex flex-col items-start">
@@ -2153,26 +2527,26 @@ export default function App() {
                       I&apos;m
                     </span>
 
-                    {/* Little Neon Crown Doodle */}
-                    <svg className={`w-8 h-8 md:w-10 md:h-10 -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    {/* Little Interactive Crown Doodle */}
+                    <svg className={`w-8 h-8 md:w-10 md:h-10 -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow hover-wiggle cursor-pointer ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 28 L8 10 L18 20 L24 6 L30 20 L40 10 L44 28 Z" />
                       <line x1="6" y1="33" x2="42" y2="33" />
                     </svg>
                   </div>
 
-                  {/* GIANT BRUSH NAME (Enlarged Responsive Scale & Word-Wrap Fix) */}
+                  {/* GIANT ELASTIC BRUSH NAME (Pop-In + Rubber-Band Hover per Letter) */}
                   <div className="relative flex justify-center md:justify-start w-full">
-                    <h1 className={`font-marker text-5xl sm:text-6xl md:text-[72px] lg:text-[96px] leading-[0.95] uppercase tracking-tight flex flex-wrap justify-center md:justify-start gap-x-3 sm:gap-x-4 lg:gap-x-6 ${
-                      isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
+                    <h1 className={`font-marker text-5xl sm:text-6xl md:text-[72px] lg:text-[96px] leading-[0.95] uppercase tracking-tight flex flex-wrap justify-center md:justify-start gap-x-3 sm:gap-x-4 lg:gap-x-6 select-none ${
+                      isDark ? 'text-[#FFC300] drop-shadow-[0_8px_24px_rgba(255,195,0,0.22)]' : 'text-[#5C3E94] drop-shadow-[0_6px_18px_rgba(92,62,148,0.18)]'
                     }`}>
                       {profile.name.split(' ').map((word, wordIdx) => (
                         <span key={wordIdx} className="inline-flex font-marker">
                           {word.split('').map((char, charIdx) => {
-                            const delay = (wordIdx * 6 + charIdx) * 0.05;
+                            const delay = (wordIdx * 6 + charIdx) * 0.055;
                             return (
                               <span 
                                 key={charIdx} 
-                                className="inline-block font-marker animate-pop-letter" 
+                                className="inline-block font-marker animate-pop-letter letter-jelly cursor-default transition-colors duration-200" 
                                 style={{ animationDelay: `${delay}s` }}
                               >
                                 {char}
@@ -2184,31 +2558,36 @@ export default function App() {
                     </h1>
                   </div>
 
-                  {/* Dot-separated Roles */}
-                  <p className={`text-xs sm:text-sm md:text-[15px] lg:text-lg font-bold tracking-wide flex flex-wrap items-center justify-center md:justify-start gap-x-2 md:gap-x-2.5 gap-y-1 ${
-                    isDark ? 'text-slate-200' : 'text-[#233D4D]'
-                  }`}>
+                  {/* Interactive Role Chips */}
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                     {profile.roles.map((role, i) => (
-                      <React.Fragment key={i}>
+                      <span
+                        key={i}
+                        className={`px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold border backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 cursor-default flex items-center gap-1.5 ${
+                          isDark
+                            ? 'bg-[#412B6B]/70 border-white/10 text-slate-100 hover:border-[#FFC300] hover:text-[#FFC300]'
+                            : 'bg-white/85 border-[#D0D5DD] text-[#233D4D] hover:border-[#5C3E94] hover:text-[#5C3E94] shadow-sm'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`} />
                         <span>{role}</span>
-                        {i < profile.roles.length - 1 && (
-                          <span className={`font-black ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>•</span>
-                        )}
-                      </React.Fragment>
+                      </span>
                     ))}
-                  </p>
+                  </div>
 
-                  {/* Pill CTA Buttons */}
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-3.5 pt-2 relative">
-                    <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  {/* Magnetic Shimmer Pill CTA Buttons */}
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 pt-2 relative">
+                    <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block animate-float-reverse ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 4 C 4 16, 4 34, 28 38 M22 32 L30 38 L22 44" />
                     </svg>
 
                     <a
                       href="#karya"
-                      className="px-5 py-3 md:px-7 md:py-3.5 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white font-extrabold text-xs md:text-sm shadow-xl shadow-[#5C3E94]/20 hover:scale-105 flex items-center gap-2 md:gap-2.5 transition-all"
+                      className="btn-shimmer px-6 py-3.5 md:px-7 md:py-3.5 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white font-extrabold text-xs md:text-sm shadow-xl shadow-[#5C3E94]/35 hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center gap-2.5 transition-all duration-300"
                     >
-                      <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-white" />
+                      <span className="w-6 h-6 rounded-full bg-[#FFC300] text-[#211832] flex items-center justify-center">
+                        <Play className="w-3 h-3 fill-[#211832] ml-0.5" />
+                      </span>
                       <span>{t.exploreWorks}</span>
                     </a>
 
@@ -2216,60 +2595,64 @@ export default function App() {
                       href={`https://wa.me/${profile.whatsapp}`}
                       target="_blank"
                       rel="noreferrer"
-                      className={`px-5 py-3 md:px-7 md:py-3.5 rounded-full border font-extrabold text-xs md:text-sm flex items-center gap-2 hover:scale-105 transition-all ${
+                      className={`btn-shimmer px-6 py-3.5 md:px-7 md:py-3.5 rounded-full border-2 font-extrabold text-xs md:text-sm flex items-center gap-2 hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 ${
                         isDark 
-                          ? 'bg-transparent border-white/25 text-white hover:border-[#FFC300] hover:text-[#FFC300]' 
-                          : 'bg-white border-[#233D4D] text-[#000000] hover:bg-[#233D4D] hover:text-white'
+                          ? 'bg-[#412B6B]/40 border-white/25 text-white hover:border-[#FFC300] hover:text-[#FFC300] hover:bg-[#FFC300]/10' 
+                          : 'bg-white border-[#233D4D] text-[#000000] hover:bg-[#233D4D] hover:text-white shadow-sm'
                       }`}
                     >
                       <span>{t.hireMe}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      <ArrowUpRight className="w-4 h-4" />
                     </a>
                   </div>
                 </div>
 
-                {/* RIGHT COLUMN: ENLARGED CHARACTER & CLOSE COMIC SPEECH BUBBLE */}
-                <div className="md:col-span-5 relative flex flex-col items-center justify-center animate-fade-up mt-2 md:mt-0">
-                  {/* Comic Speech Bubble positioned closer to character */}
-                  <div className="self-center md:self-start md:ml-0 lg:ml-4 -mb-4 sm:-mb-5 lg:-mb-7 relative z-20 animate-float-slow">
-                    <div className="bg-[#5C3E94] text-white font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-xl border-2 border-[#211832] leading-tight text-center -rotate-6">
+                {/* RIGHT COLUMN: ORBITING CREATIVE STAGE + PARALLAX CHARACTER */}
+                <div className="md:col-span-5 relative flex flex-col items-center justify-center animate-fade-up mt-4 md:mt-0">
+                  {/* Comic Speech Bubble */}
+                  <div
+                    className="self-center md:self-start md:ml-0 lg:ml-4 -mb-4 sm:-mb-5 lg:-mb-7 relative z-30 animate-float-slow hover-wiggle cursor-pointer transition-transform duration-300"
+                    style={{ transform: `translate3d(${heroParallax.x * -12}px, ${heroParallax.y * -10}px, 0)` }}
+                  >
+                    <div className="bg-[#5C3E94] text-white font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-2xl border-2 border-[#FFC300] leading-tight text-center -rotate-6">
                       LET&apos;S CREATE <br /> SOMETHING <br /> AWESOME!
                     </div>
-                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#5C3E94] border-r-2 border-b-2 border-[#211832] rotate-45 mx-auto -mt-2" />
+                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#5C3E94] border-r-2 border-b-2 border-[#FFC300] rotate-45 mx-auto -mt-2" />
                   </div>
 
-                  {/* Enlarged Clean Character Illustration */}
-                  <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[440px] lg:h-[440px] flex items-center justify-center">
-                    {/* Organic Multi-layered Blob Behind Character */}
-                    <svg
-                      className="pointer-events-none absolute inset-0 w-full h-full text-[#5C3E94] opacity-90 scale-110 animate-float-reverse z-0"
-                      viewBox="0 0 200 200"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M44.7,-67.1C57.6,-58.5,67.5,-45.2,73.4,-30.3C79.3,-15.4,81.2,1.1,76.8,15.8C72.4,30.5,61.7,43.4,48.9,53.4C36.1,63.4,21.2,70.5,5.1,72.9C-11,75.3,-28.3,73,-42.5,64.4C-56.7,55.8,-67.8,40.9,-73.3,24.4C-78.8,7.9,-78.7,-10.2,-71.8,-25.4C-64.9,-40.6,-51.2,-52.9,-36.6,-60.9C-22,-68.9,-6.5,-72.6,8.1,-73.7C22.7,-74.8,31.8,-75.7,44.7,-67.1Z"
-                        transform="translate(100 100)"
-                      />
-                    </svg>
-                    <svg
-                      className="pointer-events-none absolute inset-0 w-full h-full text-[#FFC300] opacity-35 scale-95 rotate-45 animate-float-slow z-0"
-                      viewBox="0 0 200 200"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M39.5,-61.6C51.4,-53.8,61.4,-43.1,67.9,-30.3C74.4,-17.5,77.4,-2.6,74.5,11.1C71.6,24.8,62.8,37.3,51.7,47.3C40.6,57.3,27.2,64.8,12.5,68.6C-2.2,72.4,-18.2,72.5,-32.1,66.6C-46,60.7,-57.8,48.8,-65.3,34.8C-72.8,20.8,-76,4.7,-73.1,-10.3C-70.2,-25.3,-61.2,-39.2,-49.2,-47.1C-37.2,-55,-22.2,-56.9,-7.8,-56.1C6.6,-55.3,27.6,-69.4,39.5,-61.6Z"
-                        transform="translate(100 100)"
-                      />
-                    </svg>
+                  {/* Interactive Character Stage with Orbiting Tool Badges */}
+                  <div
+                    className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[440px] lg:h-[440px] flex items-center justify-center transition-transform duration-300 ease-out"
+                    style={{ transform: `translate3d(${heroParallax.x * 14}px, ${heroParallax.y * 14}px, 0)` }}
+                  >
+                    {/* Dashed Orbiting Ring with Floating Creative Badges */}
+                    <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-full border-2 border-dashed border-[#FFC300]/30 animate-orbit z-20 hidden sm:block">
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-xl bg-[#330000] border-2 border-[#FF9A00] text-[#FF9A00] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
+                        Ai
+                      </div>
+                      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-xl bg-[#1E1E1E] border-2 border-[#A259FF] text-[#0ACF83] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
+                        Fig
+                      </div>
+                      <div className="absolute top-1/2 -right-4 -translate-y-1/2 w-9 h-9 rounded-xl bg-[#001E36] border-2 border-[#31A8FF] text-[#31A8FF] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
+                        Ps
+                      </div>
+                    </div>
+
+                    {/* Living Morphing Organic Blobs Behind Character */}
+                    <div className="pointer-events-none absolute inset-6 bg-[#5C3E94] opacity-90 animate-blob-morph shadow-[0_0_60px_rgba(92,62,148,0.5)] z-0" />
+                    <div
+                      className="pointer-events-none absolute inset-10 bg-[#FFC300] opacity-35 animate-blob-morph z-0"
+                      style={{ animationDelay: '-4s', animationDuration: '12s' }}
+                    />
 
                     <CleanCharacterAvatar
                       src={profile.avatar || "/avatar.png"}
                       alt={profile.name}
-                      className="relative z-10 w-full h-full object-contain scale-105 drop-shadow-[0_22px_30px_rgba(0,0,0,0.48)] hover:scale-110 transition-transform duration-500"
+                      className="relative z-10 w-full h-full object-contain scale-105 drop-shadow-[0_24px_34px_rgba(0,0,0,0.5)] hover:scale-110 transition-transform duration-500"
                     />
 
                     {/* Smiley Doodle */}
-                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#FFC300] animate-float-reverse z-20" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#FFC300] animate-float-reverse z-20 drop-shadow" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                       <circle cx="20" cy="20" r="16" />
                       <circle cx="14" cy="15" r="1.5" fill="currentColor" />
                       <circle cx="26" cy="15" r="1.5" fill="currentColor" />
@@ -2280,451 +2663,542 @@ export default function App() {
               </div>
 
               {/* Scroll Down Indicator */}
-              <div className="flex items-center justify-center gap-2 pt-6 pb-2 opacity-75">
-                <Mouse className="w-4 h-4 animate-bounce" />
-                <span className="text-xs font-bold tracking-wide">Scroll Down</span>
-              </div>
+              <a href="#karya" className="flex flex-col items-center justify-center gap-1 pt-6 pb-2 opacity-80 hover:opacity-100 transition-opacity group">
+                <div className={`w-7 h-11 rounded-full border-2 flex justify-center pt-2 ${
+                  isDark ? 'border-white/30 group-hover:border-[#FFC300]' : 'border-[#233D4D]/40 group-hover:border-[#5C3E94]'
+                }`}>
+                  <div className={`w-1.5 h-2.5 rounded-full animate-bounce ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`} />
+                </div>
+                <span className="text-[11px] font-bold tracking-widest uppercase mt-1">Scroll Down</span>
+              </a>
             </div>
           </section>
 
           {/* =================================================================
-              SHOWREEL / FEATURED SHOWCASE CARD (2-COLUMN + MINI CAROUSEL TABS)
-              (Diberikan margin top lebih besar di mobile/tablet)
+              KINETIC MARQUEE RIBBON (INFINITE MOTION TICKER)
              ================================================================= */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 pt-8 sm:pt-12 md:pt-0 mt-6 sm:mt-10 md:mt-0 relative">
-            {/* Doodle: Cross / Spark */}
-            <svg className={`pointer-events-none absolute top-6 -left-4 w-8 h-8 opacity-60 animate-float-reverse hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-            
-            {(() => {
-              const currentSlide = showcaseItems[showcaseIndex] || projects[0];
-              return (
-                <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center relative ${
-                  isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
-                }`}>
-                  {/* Decorative Purple Spark Lines on Right Edge */}
-                  <svg className="pointer-events-none absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-14 text-[#FFC300] hidden md:block" viewBox="0 0 32 56" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
-                    <line x1="4" y1="16" x2="24" y2="8" />
-                    <line x1="6" y1="28" x2="28" y2="28" />
-                    <line x1="4" y1="40" x2="24" y2="48" />
-                  </svg>
+          <KineticMarquee
+            isDark={isDark}
+            items={[
+              'Brand Strategy',
+              'Logo Design & Identity',
+              'Social Media Management',
+              'UI/UX Design',
+              'Visual Storytelling',
+              'Brand Guideline'
+            ]}
+          />
 
-                  {/* LEFT COLUMN: ★ SHOWREEL + DESCRIPTION + WATCH NOW + MINI CAROUSEL TABS */}
-                  <div className="md:col-span-5 lg:col-span-4 space-y-4 flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2.5">
-                        <svg className={`w-6 h-6 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                        <h2 className="font-marker text-2xl sm:text-3xl uppercase tracking-wide">
-                          SHOWREEL
-                        </h2>
+          {/* =================================================================
+              SHOWREEL / FEATURED SHOWCASE CARD (3D TILT + LIVE TIMER + SONAR PLAY)
+             ================================================================= */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 pt-8 sm:pt-10 relative">
+            <Reveal preset="zoom-in">
+              {(() => {
+                const currentSlide = showcaseItems[showcaseIndex] || projects[0];
+                return (
+                  <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center relative overflow-hidden ${
+                    isDark
+                      ? 'bg-gradient-to-br from-[#412B6B] via-[#342158] to-[#291A45] border-white/15 shadow-2xl shadow-black/30'
+                      : 'bg-white border-[#D0D5DD] shadow-xl'
+                  }`}>
+                    {/* Decorative Corner Glow */}
+                    <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FFC300]/10 blur-3xl" />
+
+                    {/* LEFT COLUMN: ★ SHOWREEL + DESCRIPTION + WATCH NOW + LIVE PROGRESS CAROUSEL */}
+                    <div className="md:col-span-5 lg:col-span-4 space-y-4 flex flex-col justify-between relative z-10">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`p-1.5 rounded-xl ${isDark ? 'bg-[#FFC300]/15 text-[#FFC300]' : 'bg-[#5C3E94]/15 text-[#5C3E94]'}`}>
+                            <Star className="w-5 h-5 fill-current animate-spin" style={{ animationDuration: '12s' }} />
+                          </div>
+                          <h2 className="font-marker text-2xl sm:text-3xl uppercase tracking-wide">
+                            SHOWREEL
+                          </h2>
+                        </div>
+
+                        <p key={`desc-${currentSlide?.id || showcaseIndex}`} className={`text-xs sm:text-sm leading-relaxed animate-fade-up ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
+                          {currentSlide
+                            ? getLocalized(currentSlide, 'subtitle') || getLocalized(currentSlide, 'description')
+                            : 'Sekilas karya terbaik dan dedikasi saya dalam membangun identitas visual & cerita brand.'}
+                        </p>
+
+                        {currentSlide && (
+                          <button
+                            type="button"
+                            onClick={() => setActiveProjectModal(currentSlide)}
+                            className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 transition-all group ${
+                              isDark ? 'text-[#FFC300] hover:opacity-90' : 'text-[#5C3E94] hover:opacity-90'
+                            }`}
+                          >
+                            <span>Watch Now</span>
+                            <span className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:translate-x-1 ${
+                              isDark ? 'border-[#FFC300] group-hover:bg-[#FFC300] group-hover:text-[#211832]' : 'border-[#5C3E94] group-hover:bg-[#5C3E94] group-hover:text-white'
+                            }`}>
+                              <Play className="w-3 h-3 fill-current ml-0.5" />
+                            </span>
+                          </button>
+                        )}
                       </div>
 
-                      <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
-                        {currentSlide
-                          ? getLocalized(currentSlide, 'subtitle') || getLocalized(currentSlide, 'description')
-                          : 'Sekilas karya terbaik dan dedikasi saya dalam membangun identitas visual & cerita brand.'}
-                      </p>
+                      {/* Mini Carousel Tabs + Auto-play Progress Bar */}
+                      {showcaseItems.length > 1 && (
+                        <div className="pt-4 border-t border-white/10 space-y-3">
+                          {/* Live 10s Timer Bar */}
+                          <div className={`w-full h-1 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-[#EAECF0]'}`}>
+                            <div
+                              key={`timer-${showcaseIndex}`}
+                              className={`h-full rounded-full animate-showreel-timer ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`}
+                            />
+                          </div>
 
-                      {currentSlide && (
-                        <button
-                          type="button"
-                          onClick={() => setActiveProjectModal(currentSlide)}
-                          className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 transition-all group ${
-                            isDark ? 'text-[#FFC300] hover:opacity-90' : 'text-[#5C3E94] hover:opacity-90'
-                          }`}
-                        >
-                          <span>Watch Now</span>
-                          <span className={`w-6 h-6 rounded-full border flex items-center justify-center transition-transform group-hover:scale-110 ${
-                            isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]'
-                          }`}>
-                            <Play className="w-3 h-3 fill-current ml-0.5" />
-                          </span>
-                        </button>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {showcaseItems.map((item, idx) => {
+                                const isActive = idx === showcaseIndex;
+                                return (
+                                  <button
+                                    key={item.id || idx}
+                                    type="button"
+                                    onClick={() => setShowcaseIndex(idx)}
+                                    title={getLocalized(item, 'title')}
+                                    className={`h-2 rounded-full transition-all duration-300 ${
+                                      isActive
+                                        ? (isDark ? 'w-7 bg-[#FFC300]' : 'w-7 bg-[#5C3E94]')
+                                        : (isDark ? 'w-2 bg-white/25 hover:bg-white/50' : 'w-2 bg-[#233D4D]/30 hover:bg-[#233D4D]/60')
+                                    }`}
+                                  />
+                                );
+                              })}
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setShowcaseIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length)}
+                                aria-label="Sebelumnya"
+                                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
+                                  isDark ? 'border-white/15 hover:border-[#FFC300] hover:text-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] hover:text-[#5C3E94] text-[#233D4D]'
+                                }`}
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowcaseIndex((prev) => (prev + 1) % showcaseItems.length)}
+                                aria-label="Berikutnya"
+                                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
+                                  isDark ? 'border-white/15 hover:border-[#FFC300] hover:text-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] hover:text-[#5C3E94] text-[#233D4D]'
+                                }`}
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
 
-                    {/* Mini Carousel Tabs Below */}
-                    {showcaseItems.length > 1 && (
-                      <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {showcaseItems.map((item, idx) => {
-                            const isActive = idx === showcaseIndex;
-                            return (
-                              <button
-                                key={item.id || idx}
-                                type="button"
-                                onClick={() => setShowcaseIndex(idx)}
-                                title={getLocalized(item, 'title')}
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                  isActive
-                                    ? (isDark ? 'w-7 bg-[#FFC300]' : 'w-7 bg-[#5C3E94]')
-                                    : (isDark ? 'w-2 bg-white/25 hover:bg-white/50' : 'w-2 bg-[#233D4D]/30 hover:bg-[#233D4D]/60')
-                                }`}
-                              />
-                            );
-                          })}
-                        </div>
+                    {/* RIGHT COLUMN: 3D TILT FEATURED BANNER WITH KEN BURNS & SONAR PLAY */}
+                    <TiltCard
+                      maxTilt={5}
+                      glareColor={isDark ? 'rgba(255, 195, 0, 0.2)' : 'rgba(92, 62, 148, 0.16)'}
+                      onClick={() => currentSlide && setActiveProjectModal(currentSlide)}
+                      className="md:col-span-7 lg:col-span-8 relative h-52 sm:h-60 md:h-64 lg:h-72 rounded-2xl overflow-hidden group cursor-pointer border border-white/15 shadow-2xl"
+                    >
+                      <img
+                        key={currentSlide?.id || showcaseIndex}
+                        src={currentSlide?.image || "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80"}
+                        alt={currentSlide?.title || "Showreel Preview"}
+                        className="w-full h-full object-cover animate-ken-burns transition-opacity duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-[#211832]/85 via-[#412B6B]/30 to-transparent" />
 
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setShowcaseIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length)}
-                            aria-label="Sebelumnya"
-                            className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
-                              isDark ? 'border-white/15 hover:border-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] text-[#233D4D]'
-                            }`}
-                          >
-                            <ChevronLeft className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setShowcaseIndex((prev) => (prev + 1) % showcaseItems.length)}
-                            aria-label="Berikutnya"
-                            className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors ${
-                              isDark ? 'border-white/15 hover:border-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] text-[#233D4D]'
-                            }`}
-                          >
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </button>
+                      {/* Sonar Pulsing Play Button */}
+                      <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <div className="relative flex items-center justify-center">
+                          <span className={`absolute w-14 h-14 md:w-16 md:h-16 rounded-full animate-sonar ${isDark ? 'bg-[#FFC300]' : 'bg-white'}`} />
+                          <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-full text-[#211832] flex items-center justify-center shadow-2xl group-hover:scale-115 transition-transform duration-300 ${isDark ? 'bg-[#FFC300]' : 'bg-white'}`}>
+                            <Play className="w-6 h-6 md:w-7 md:h-7 fill-[#211832] ml-0.5" />
+                          </div>
                         </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* RIGHT COLUMN: WIDE FEATURED BANNER */}
-                  <div
-                    onClick={() => currentSlide && setActiveProjectModal(currentSlide)}
-                    className="md:col-span-7 lg:col-span-8 relative h-48 sm:h-56 md:h-60 lg:h-64 rounded-2xl overflow-hidden group cursor-pointer border border-white/10"
-                  >
-                    <img
-                      key={currentSlide?.id || showcaseIndex}
-                      src={currentSlide?.image || "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80"}
-                      alt={currentSlide?.title || "Showreel Preview"}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 animate-fade-up"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#211832]/75 via-[#412B6B]/30 to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full text-[#211832] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform ${isDark ? 'bg-[#FFC300]' : 'bg-white'}`}>
-                        <Play className="w-6 h-6 md:w-7 md:h-7 fill-[#211832] ml-0.5" />
-                      </div>
-                    </div>
-                    {currentSlide && (
-                      <div className="absolute bottom-3.5 left-4 right-4 flex items-end justify-between gap-3 text-white">
-                        <div className="min-w-0">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#211832]/60 backdrop-blur inline-block">
-                            {currentSlide.category}
+                      {currentSlide && (
+                        <div key={`cap-${currentSlide.id}`} className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white z-10 animate-fade-up">
+                          <div className="min-w-0">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-[#211832]/75 border border-white/15 backdrop-blur-md inline-block">
+                              {currentSlide.category} • {currentSlide.year}
+                            </span>
+                            <h3 className="font-card-title font-extrabold text-sm sm:text-base lg:text-xl mt-1.5 drop-shadow truncate">
+                              {getLocalized(currentSlide, 'title')}
+                            </h3>
+                          </div>
+                          <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-[11px] font-bold border border-white/20 group-hover:bg-[#FFC300] group-hover:text-[#211832] transition-colors shrink-0">
+                            <span>{t.projectDetail}</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
                           </span>
-                          <h3 className="font-card-title font-extrabold text-sm sm:text-base lg:text-lg mt-1 drop-shadow truncate">
-                            {getLocalized(currentSlide, 'title')}
-                          </h3>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </TiltCard>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
+            </Reveal>
           </section>
 
           {/* =================================================================
-              FEATURED PROJECT SECTION (4-COLUMN GRID + DYNAMIC CATEGORY TABS)
+              FEATURED PROJECT SECTION (3D TILT CARDS + STAGGERED REVEAL)
              ================================================================= */}
-          <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 relative">
-            {/* Doodle: Lightning Bolt */}
+          <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-14 relative">
             <svg className={`pointer-events-none absolute top-20 -right-2 w-10 h-10 opacity-70 animate-float-slow hidden xl:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
 
-            <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative space-y-6 ${
-              isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
-            }`}>
-              {/* Header: FEATURED PROJECT + Brush Underline + Search Bar */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="inline-block">
-                    <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase tracking-wide">
-                      FEATURED PROJECT
-                    </h2>
-                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 280 14" fill="none">
-                      <path d="M4 10 C 85 3, 195 3, 276 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+            <Reveal preset="fade-up">
+              <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border relative space-y-6 ${
+                isDark ? 'bg-[#412B6B]/95 border-white/10 shadow-2xl shadow-black/20' : 'bg-white border-[#D0D5DD] shadow-xl'
+              }`}>
+                {/* Header: FEATURED PROJECT + Brush Underline + Search Bar */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="inline-block">
+                      <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase tracking-wide">
+                        FEATURED PROJECT
+                      </h2>
+                      <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 280 14" fill="none">
+                        <path d="M4 10 C 85 3, 195 3, 276 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <svg className="w-10 h-5 text-[#5C3E94] hidden sm:block animate-float-slow" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                      <path d="M2 12 Q 12 2, 22 12 T 42 12" />
                     </svg>
                   </div>
-                  <svg className="w-10 h-5 text-[#5C3E94] hidden sm:block" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
-                    <path d="M2 12 Q 12 2, 22 12 T 42 12" />
-                  </svg>
-                </div>
 
-                {/* Search Box */}
-                <div className="relative w-full md:w-72">
-                  <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${
-                    isDark ? 'text-white/60' : 'text-[#233D4D]'
-                  }`} />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t.searchPlaceholder}
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-full border text-xs font-medium focus:outline-none transition-colors ${
-                      isDark
-                        ? 'bg-[#211832] border-white/15 text-white placeholder:text-white/60 focus:border-[#FFC300]'
-                        : 'bg-[#EAECF0]/60 border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60 focus:border-[#5C3E94]'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              {/* Dynamic Category Tabs (Only populated categories appear) */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                {publicCategories.map((cat) => {
-                  const isActive = selectedCategory === cat;
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                        isActive
-                          ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/20' : 'bg-[#5C3E94] text-white shadow-md')
-                          : (isDark ? 'bg-[#211832] text-slate-300 border border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/70 text-[#233D4D] border border-[#D0D5DD] hover:border-[#5C3E94]')
-                      }`}
-                    >
-                      {cat !== 'Semua' && getCategoryIcon(cat)}
-                      <span>{cat === 'Semua' ? t.allCategory : cat}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* 4-Column Project Cards Grid */}
-              {filteredProjects.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                  {filteredProjects.map((proj) => (
-                    <div
-                      key={proj.id}
-                      onClick={() => setActiveProjectModal(proj)}
-                      className={`rounded-2xl border overflow-hidden cursor-pointer card-hover-3d group flex flex-col justify-between ${
+                  {/* Search Box */}
+                  <div className="relative w-full md:w-72 group">
+                    <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
+                      isDark ? 'text-white/60 group-focus-within:text-[#FFC300]' : 'text-[#233D4D] group-focus-within:text-[#5C3E94]'
+                    }`} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={t.searchPlaceholder}
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-full border text-xs font-medium focus:outline-none transition-all duration-300 ${
                         isDark
-                          ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30'
-                          : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
+                          ? 'bg-[#211832] border-white/15 text-white placeholder:text-white/60 focus:border-[#FFC300] focus:ring-2 focus:ring-[#FFC300]/20'
+                          : 'bg-[#EAECF0]/60 border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60 focus:border-[#5C3E94] focus:bg-white focus:ring-2 focus:ring-[#5C3E94]/15'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Dynamic Category Tabs */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {publicCategories.map((cat) => {
+                    const isActive = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 hover:scale-105 active:scale-95 ${
+                          isActive
+                            ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/25' : 'bg-[#5C3E94] text-white shadow-md shadow-[#5C3E94]/25')
+                            : (isDark ? 'bg-[#211832] text-slate-300 border border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/70 text-[#233D4D] border border-[#D0D5DD] hover:border-[#5C3E94]')
+                        }`}
+                      >
+                        {cat !== 'Semua' && getCategoryIcon(cat)}
+                        <span>{cat === 'Semua' ? t.allCategory : cat}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* 4-Column Interactive 3D Tilt Project Cards Grid */}
+                {filteredProjects.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                    {filteredProjects.map((proj, idx) => (
+                      <Reveal key={`${proj.id}-${selectedCategory}`} preset="fade-up" delay={Math.min(idx * 65, 320)}>
+                        <TiltCard
+                          maxTilt={8}
+                          glareColor={isDark ? 'rgba(255, 195, 0, 0.18)' : 'rgba(92, 62, 148, 0.14)'}
+                          onClick={() => setActiveProjectModal(proj)}
+                          className={`h-full rounded-2xl border overflow-hidden cursor-pointer group flex flex-col justify-between transition-all duration-300 ${
+                            isDark
+                              ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-2xl hover:shadow-black/40'
+                              : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
+                          }`}
+                        >
+                          {/* Thumbnail Image with Hover Reveal Action */}
+                          <div className={`h-44 sm:h-44 w-full relative overflow-hidden bg-gradient-to-br ${proj.accentColor}`}>
+                            {proj.image && (
+                              <img
+                                src={proj.image}
+                                alt={getLocalized(proj, 'title')}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#211832]/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFC300] text-[#211832] text-[10px] font-black uppercase tracking-wider transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                                <span>{t.projectDetail}</span>
+                                <ArrowUpRight className="w-3 h-3" />
+                              </span>
+                            </div>
+                            <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#211832]/75 backdrop-blur-md text-[10px] font-extrabold text-white border border-white/15">
+                              {proj.year}
+                            </span>
+                          </div>
+
+                          {/* Card Footer Info */}
+                          <div className="p-4 flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
+                                isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
+                              }`}>
+                                {getLocalized(proj, 'title')}
+                              </h3>
+                              <p className={`text-xs truncate mt-0.5 font-medium ${
+                                isDark ? 'text-white/60' : 'text-[#233D4D]'
+                              }`}>
+                                {proj.category}
+                              </p>
+                            </div>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110 ${
+                              isDark
+                                ? 'bg-white/5 text-slate-300 group-hover:bg-[#FFC300] group-hover:text-[#211832]'
+                                : 'bg-[#EAECF0] text-[#233D4D] group-hover:bg-[#5C3E94] group-hover:text-white'
+                            }`}>
+                              <ArrowUpRight className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </TiltCard>
+                      </Reveal>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`py-14 px-6 rounded-2xl border border-dashed text-center space-y-3 animate-fade-up ${
+                    isDark ? 'bg-[#211832]/60 border-white/15 text-slate-300' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#233D4D]'
+                  }`}>
+                    <Search className="w-8 h-8 mx-auto opacity-50" />
+                    <p className="text-sm font-bold">Karya tidak ditemukan untuk kata kunci &ldquo;{searchQuery}&rdquo;</p>
+                    <button
+                      type="button"
+                      onClick={() => { setSearchQuery(''); setSelectedCategory('Semua'); }}
+                      className={`px-4 py-2 rounded-full text-xs font-extrabold transition-transform hover:scale-105 ${
+                        isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'
                       }`}
                     >
-                      {/* Thumbnail Image */}
-                      <div className={`h-44 sm:h-44 w-full relative overflow-hidden bg-gradient-to-br ${proj.accentColor}`}>
-                        {proj.image && (
-                          <img
-                            src={proj.image}
-                            alt={getLocalized(proj, 'title')}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        )}
-                        <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#211832]/75 backdrop-blur-md text-[10px] font-extrabold text-white border border-white/10">
-                          {proj.year}
-                        </span>
-                      </div>
-
-                      {/* Card Footer Info */}
-                      <div className="p-4 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
-                            isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
-                          }`}>
-                            {getLocalized(proj, 'title')}
-                          </h3>
-                          <p className={`text-xs truncate mt-0.5 font-medium ${
-                            isDark ? 'text-white/60' : 'text-[#233D4D]'
-                          }`}>
-                            {proj.category}
-                          </p>
-                        </div>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                          isDark
-                            ? 'bg-white/5 text-slate-300 group-hover:bg-[#FFC300] group-hover:text-[#211832]'
-                            : 'bg-[#EAECF0] text-[#233D4D] group-hover:bg-[#5C3E94] group-hover:text-white'
-                        }`}>
-                          <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={`py-14 px-6 rounded-2xl border border-dashed text-center space-y-3 ${
-                  isDark ? 'bg-[#211832]/60 border-white/15 text-slate-300' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#233D4D]'
-                }`}>
-                  <Search className="w-8 h-8 mx-auto opacity-50" />
-                  <p className="text-sm font-bold">Karya tidak ditemukan untuk kata kunci &ldquo;{searchQuery}&rdquo;</p>
-                  <button
-                    type="button"
-                    onClick={() => { setSearchQuery(''); setSelectedCategory('Semua'); }}
-                    className={`px-4 py-2 rounded-full text-xs font-extrabold ${
-                      isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'
-                    }`}
-                  >
-                    Reset Pencarian
-                  </button>
-                </div>
-              )}
-            </div>
+                      Reset Pencarian
+                    </button>
+                  </div>
+                )}
+              </div>
+            </Reveal>
           </section>
 
           {/* =================================================================
-              SKILL & PILLARS SECTION (APP ICON BADGES + 4 PILLARS CARDS)
+              SKILL & PILLARS SECTION (DOCK-STYLE SPRING BADGES + TILT PILLARS)
              ================================================================= */}
-          <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-12 relative">
-            {/* Doodle: Squiggly Line */}
+          <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-14 relative">
             <svg className={`pointer-events-none absolute bottom-32 -left-6 w-14 h-14 opacity-50 animate-float-reverse hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round">
               <path d="M10 50 Q 30 20, 50 50 T 90 50" />
             </svg>
 
-            <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border relative overflow-hidden space-y-8 ${
-              isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
-            }`}>
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
-                <div className="shrink-0">
-                  <div className="inline-block">
-                    <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
-                      SKILL
-                    </h2>
-                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 120 14" fill="none">
-                      <path d="M3 10 C 35 3, 85 3, 117 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
-                    </svg>
+            <Reveal preset="fade-up">
+              <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border relative overflow-hidden space-y-8 ${
+                isDark ? 'bg-[#412B6B]/95 border-white/10 shadow-2xl shadow-black/20' : 'bg-white border-[#D0D5DD] shadow-xl'
+              }`}>
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
+                  <div className="shrink-0">
+                    <div className="inline-block">
+                      <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
+                        SKILL
+                      </h2>
+                      <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 120 14" fill="none">
+                        <path d="M3 10 C 35 3, 85 3, 117 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                      {t.pillarsTitle}
+                    </p>
                   </div>
-                  <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
-                    {t.pillarsTitle}
-                  </p>
+
+                  {/* Interactive Spring Dock App Badges */}
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4 flex-1 max-w-2xl">
+                    {[
+                      { code: 'Ai', name: 'Adobe Illustrator', bg: 'bg-[#330000]', border: 'border-[#FF9A00]', text: 'text-[#FF9A00]', glow: 'hover:shadow-[0_12px_25px_rgba(255,154,0,0.35)]' },
+                      { code: 'Ps', name: 'Adobe Photoshop', bg: 'bg-[#001E36]', border: 'border-[#31A8FF]', text: 'text-[#31A8FF]', glow: 'hover:shadow-[0_12px_25px_rgba(49,168,255,0.35)]' },
+                      { code: 'Fig', name: 'Figma UI/UX', bg: 'bg-[#1E1E1E]', border: 'border-[#A259FF]', text: 'text-[#0ACF83]', glow: 'hover:shadow-[0_12px_25px_rgba(162,89,255,0.35)]' },
+                      { code: 'Id', name: 'Brand Guideline', bg: 'bg-[#49021F]', border: 'border-[#FF3366]', text: 'text-[#FF3366]', glow: 'hover:shadow-[0_12px_25px_rgba(255,51,102,0.35)]' },
+                      { code: 'Sm', name: 'Social Media', bg: 'bg-[#211832]', border: 'border-[#5C3E94]', text: 'text-[#A78BFA]', glow: 'hover:shadow-[0_12px_25px_rgba(92,62,148,0.45)]' },
+                      { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#211832]', border: isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]', text: isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]', glow: 'hover:shadow-[0_12px_25px_rgba(255,195,0,0.35)]' }
+                    ].map((app, i) => (
+                      <Reveal key={i} preset="zoom-in" delay={i * 60} className="flex flex-col items-center text-center gap-2 group cursor-default">
+                        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${app.bg} border-2 ${app.border} ${app.glow} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:-translate-y-2.5 group-hover:scale-110 group-hover:rotate-3`}>
+                          <span className={`font-black text-lg sm:text-xl ${app.text}`}>{app.code}</span>
+                        </div>
+                        <span className={`text-[11px] font-bold leading-tight transition-colors ${isDark ? 'text-white/80 group-hover:text-[#FFC300]' : 'text-[#233D4D] group-hover:text-[#5C3E94]'}`}>
+                          {app.name}
+                        </span>
+                      </Reveal>
+                    ))}
+                  </div>
                 </div>
 
-                {/* App Badges Row (3 cols on Mobile, 6 cols on Tablet & Desktop) */}
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4 flex-1 max-w-2xl">
-                  {[
-                    { code: 'Ai', name: 'Adobe Illustrator', bg: 'bg-[#330000]', border: 'border-[#FF9A00]', text: 'text-[#FF9A00]' },
-                    { code: 'Ps', name: 'Adobe Photoshop', bg: 'bg-[#001E36]', border: 'border-[#31A8FF]', text: 'text-[#31A8FF]' },
-                    { code: 'Fig', name: 'Figma UI/UX', bg: 'bg-[#1E1E1E]', border: 'border-[#A259FF]', text: 'text-[#0ACF83]' },
-                    { code: 'Id', name: 'Brand Guideline', bg: 'bg-[#49021F]', border: 'border-[#FF3366]', text: 'text-[#FF3366]' },
-                    { code: 'Sm', name: 'Social Media', bg: 'bg-[#211832]', border: 'border-[#5C3E94]', text: 'text-[#5C3E94]' },
-                    { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#211832]', border: isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]', text: isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]' }
-                  ].map((app, i) => (
-                    <div key={i} className="flex flex-col items-center text-center gap-2 group">
-                      <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${app.bg} border-2 ${app.border} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                        <span className={`font-black text-lg sm:text-xl ${app.text}`}>{app.code}</span>
-                      </div>
-                      <span className={`text-[11px] font-bold leading-tight ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
-                        {app.name}
-                      </span>
-                    </div>
+                {/* 4 Core Expertise Pillar Cards (01 - 04) */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 pt-2">
+                  {t.pillars.map((pillar, idx) => (
+                    <Reveal key={idx} preset="fade-up" delay={idx * 90}>
+                      <TiltCard
+                        maxTilt={7}
+                        glareColor={isDark ? 'rgba(255, 195, 0, 0.14)' : 'rgba(92, 62, 148, 0.12)'}
+                        className={`h-full p-5 md:p-6 rounded-2xl border flex flex-col justify-between relative overflow-hidden group transition-all ${
+                          isDark
+                            ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/40'
+                            : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
+                        }`}
+                      >
+                        {/* Animated Top Accent Bar */}
+                        <div className={`absolute top-0 left-0 right-0 h-1 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ${
+                          isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'
+                        }`} />
+
+                        <div className="space-y-3">
+                          <span className={`font-card-title text-3xl font-black block transition-all duration-300 group-hover:translate-x-1 ${
+                            isDark ? 'text-white/25 group-hover:text-[#FFC300]' : 'text-[#233D4D]/25 group-hover:text-[#5C3E94]'
+                          }`}>
+                            {pillar.num}
+                          </span>
+                          <h3 className={`font-card-title font-extrabold text-base md:text-lg leading-snug ${
+                            isDark ? 'text-white' : 'text-[#000000]'
+                          }`}>
+                            {pillar.title}
+                          </h3>
+                          <p className={`text-xs leading-relaxed ${
+                            isDark ? 'text-white/65' : 'text-[#233D4D]'
+                          }`}>
+                            {pillar.desc}
+                          </p>
+                        </div>
+
+                        <div className={`mt-5 pt-3.5 border-t text-[11px] font-extrabold ${
+                          isDark ? 'border-white/10 text-[#FFC300]' : 'border-[#D0D5DD] text-[#5C3E94]'
+                        }`}>
+                          {pillar.tools}
+                        </div>
+                      </TiltCard>
+                    </Reveal>
                   ))}
                 </div>
               </div>
-
-              {/* 4 Core Expertise Pillar Cards (01 - 04) */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 pt-2">
-                {t.pillars.map((pillar, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-5 md:p-6 rounded-2xl border flex flex-col justify-between card-hover-3d transition-all ${
-                      isDark
-                        ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30'
-                        : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
-                    }`}
-                  >
-                    <div className="space-y-3">
-                      <span className={`font-card-title text-2xl font-black block ${
-                        isDark ? 'text-white/40' : 'text-[#233D4D]/35'
-                      }`}>
-                        {pillar.num}
-                      </span>
-                      <h3 className={`font-card-title font-extrabold text-base md:text-lg leading-snug ${
-                        isDark ? 'text-white' : 'text-[#000000]'
-                      }`}>
-                        {pillar.title}
-                      </h3>
-                      <p className={`text-xs leading-relaxed ${
-                        isDark ? 'text-white/60' : 'text-[#233D4D]'
-                      }`}>
-                        {pillar.desc}
-                      </p>
-                    </div>
-
-                    <div className={`mt-5 pt-3.5 border-t text-[11px] font-extrabold ${
-                      isDark ? 'border-white/10 text-[#FFC300]' : 'border-[#D0D5DD] text-[#5C3E94]'
-                    }`}>
-                      {pillar.tools}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </Reveal>
           </section>
 
           {/* =================================================================
-              ABOUT ME SECTION (NEON-LIME SKETCH COVER + BIO)
+              ABOUT ME SECTION (3D TILT COVER + INTERACTIVE STATS + BIO)
              ================================================================= */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-16 relative">
-            {/* Doodle: Sparkle Star */}
             <svg className={`pointer-events-none absolute -top-4 right-8 w-10 h-10 opacity-60 animate-float-slow hidden md:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
             </svg>
 
-            <div className={`rounded-[28px] md:rounded-[32px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center ${
-              isDark ? 'bg-[#412B6B] border-white/10' : 'bg-white border-[#D0D5DD] shadow-lg'
-            }`}>
-              {/* Left Sketch Cover */}
-              <div className={`md:col-span-5 relative rounded-3xl overflow-hidden flex items-center justify-center min-h-[225px] md:min-h-[250px] border-2 shadow-xl group ${isDark ? 'bg-[#5C3E94] border-[#211832] text-white' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'}`}>
-                {profile.aboutCover && !aboutCoverFailed ? (
-                  <img
-                    src={profile.aboutCover}
-                    alt="Focus Discipline Consistency Cover"
-                    onError={() => setAboutCoverFailed(true)}
-                    className="w-full h-full min-h-[225px] md:min-h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="p-6 text-center space-y-1">
-                    <span className="font-marker text-2xl block tracking-wider">FOCUS • DISCIPLINE</span>
-                    <span className="font-marker text-2xl block text-[#FFC300] tracking-wider">CONSISTENCY</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Bio Info */}
-              <div className="md:col-span-7 space-y-3 md:space-y-4">
-                <div className="inline-block">
-                  <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
-                    ABOUT ME
-                  </h2>
-                  <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 180 14" fill="none">
-                    <path d="M3 10 C 55 3, 125 3, 177 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
-                  </svg>
+            <Reveal preset="fade-up">
+              <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center ${
+                isDark ? 'bg-[#412B6B]/95 border-white/10 shadow-2xl shadow-black/20' : 'bg-white border-[#D0D5DD] shadow-xl'
+              }`}>
+                {/* Left Sketch Cover with 3D Tilt */}
+                <div className="md:col-span-5">
+                  <TiltCard
+                    maxTilt={7}
+                    className={`relative rounded-3xl overflow-hidden flex items-center justify-center min-h-[240px] md:min-h-[270px] border-2 shadow-xl group ${
+                      isDark ? 'bg-[#5C3E94] border-[#FFC300]/40 text-white' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
+                    }`}
+                  >
+                    {profile.aboutCover && !aboutCoverFailed ? (
+                      <img
+                        src={profile.aboutCover}
+                        alt="Focus Discipline Consistency Cover"
+                        onError={() => setAboutCoverFailed(true)}
+                        className="w-full h-full min-h-[240px] md:min-h-[270px] object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="p-6 text-center space-y-1">
+                        <span className="font-marker text-2xl block tracking-wider">FOCUS • DISCIPLINE</span>
+                        <span className="font-marker text-2xl block text-[#FFC300] tracking-wider">CONSISTENCY</span>
+                      </div>
+                    )}
+                    {/* Floating Sticker Badge */}
+                    <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-[#211832]/85 backdrop-blur-md border border-[#FFC300]/50 text-[#FFC300] text-[10px] font-black uppercase tracking-wider shadow-lg">
+                      ✦ Creative Designer
+                    </div>
+                  </TiltCard>
                 </div>
-                <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
-                  {getLocalized(profile, 'bio')}
-                </p>
-                <a
-                  href="#pengalaman"
-                  className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold ${
-                    isDark ? 'text-[#FFC300] hover:underline' : 'text-[#5C3E94] hover:underline'
-                  }`}
-                >
-                  <span>EXPERIENCE</span>
-                  <span className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-                    isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]'
-                  }`}>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </a>
+
+                {/* Right Bio Info + Mini Highlight Metrics */}
+                <div className="md:col-span-7 space-y-4">
+                  <div className="inline-block">
+                    <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
+                      ABOUT ME
+                    </h2>
+                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 180 14" fill="none">
+                      <path d="M3 10 C 55 3, 125 3, 177 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-white/85' : 'text-[#233D4D]'}`}>
+                    {getLocalized(profile, 'bio')}
+                  </p>
+
+                  {/* Interactive Stat Pills */}
+                  <div className="grid grid-cols-3 gap-3 pt-1">
+                    {[
+                      { val: `${projects.length}+`, label: 'Projects' },
+                      { val: `${experience.length}+`, label: 'Experiences' },
+                      { val: '5.0★', label: 'Client Rating' }
+                    ].map((stat, sIdx) => (
+                      <div
+                        key={sIdx}
+                        className={`p-3 rounded-2xl border text-center transition-all duration-300 hover:-translate-y-1 ${
+                          isDark
+                            ? 'bg-[#211832]/80 border-white/10 hover:border-[#FFC300]'
+                            : 'bg-[#EAECF0]/60 border-[#D0D5DD] hover:border-[#5C3E94]'
+                        }`}
+                      >
+                        <div className={`font-marker text-xl sm:text-2xl ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>
+                          {stat.val}
+                        </div>
+                        <div className={`text-[10px] sm:text-xs font-bold mt-0.5 ${isDark ? 'text-white/70' : 'text-[#233D4D]'}`}>
+                          {stat.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <a
+                    href="#pengalaman"
+                    className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 group ${
+                      isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
+                    }`}
+                  >
+                    <span className="group-hover:underline">EXPERIENCE</span>
+                    <span className={`w-6 h-6 rounded-full border flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1.5 ${
+                      isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]'
+                    }`}>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </a>
+                </div>
               </div>
-            </div>
+            </Reveal>
           </section>
 
           {/* =================================================================
-              EXPERIENCE SECTION (EXPERIENCE & EDUCATION)
+              EXPERIENCE SECTION (GLOWING TIMELINE + STAGGERED SLIDE MOTION)
              ================================================================= */}
           <section id="pengalaman" className={`py-14 md:py-16 border-y relative overflow-hidden ${
-            isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'
+            isDark ? 'bg-[#211832] border-white/10 bg-dot-grid-dark' : 'bg-white border-[#D0D5DD] bg-dot-grid-light'
           }`}>
-            {/* Doodle: Dotted Circle & Sparkles */}
             <svg className={`pointer-events-none absolute top-40 left-[2%] w-16 h-16 opacity-30 animate-float-reverse hidden xl:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                <circle cx="20" cy="20" r="14" strokeDasharray="4 4" />
                <circle cx="20" cy="20" r="4" fill="currentColor" />
@@ -2734,30 +3208,32 @@ export default function App() {
             </svg>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-10 md:space-y-12 relative z-10">
-              <div className="text-center max-w-2xl mx-auto">
+              <Reveal preset="zoom-in" className="text-center max-w-2xl mx-auto">
                 <div className="inline-block">
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">EXPERIENCE</h2>
                   <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 220 14" fill="none">
                     <path d="M4 10 C 65 3, 155 3, 216 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                   </svg>
                 </div>
-              </div>
+              </Reveal>
 
               <div className="grid md:grid-cols-12 gap-8 lg:gap-10">
                 <div className="md:col-span-7 space-y-5 md:space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
+                  <Reveal preset="slide-left" className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl shadow-md ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
                       <Briefcase className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.expTitle}</h3>
-                  </div>
+                  </Reveal>
 
-                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-[#5C3E94]/40">
-                    {experience.map((exp) => (
-                      <div key={exp.id} className="relative pl-9 md:pl-10">
-                        <div className={`w-3.5 h-3.5 rounded-full border-2 absolute left-[9px] top-5 ${isDark ? 'bg-[#FFC300] border-[#211832]' : 'bg-[#5C3E94] border-white'}`} />
+                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-gradient-to-b before:from-[#FFC300] before:via-[#5C3E94] before:to-transparent">
+                    {experience.map((exp, idx) => (
+                      <Reveal key={exp.id} preset="slide-left" delay={idx * 80} className="relative pl-9 md:pl-10 group">
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 absolute left-[9px] top-5 transition-transform duration-300 group-hover:scale-150 ${
+                          isDark ? 'bg-[#FFC300] border-[#211832] shadow-[0_0_12px_rgba(255,195,0,0.8)]' : 'bg-[#5C3E94] border-white shadow-[0_0_10px_rgba(92,62,148,0.6)]'
+                        }`} />
                         <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
-                          isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/50 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-md'
+                          isDark ? 'bg-[#412B6B]/95 border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30' : 'bg-[#EAECF0]/60 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-lg'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className={`text-xs font-extrabold ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{exp.period}</span>
@@ -2769,40 +3245,42 @@ export default function App() {
                           </div>
                           <h4 className="text-sm md:text-base font-bold mt-1">{getLocalized(exp, 'role')}</h4>
                           <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{exp.company}</div>
-                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/65' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
                         </div>
-                      </div>
+                      </Reveal>
                     ))}
                   </div>
                 </div>
 
                 <div className="md:col-span-5 space-y-5 md:space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
+                  <Reveal preset="slide-right" className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl shadow-md ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
                       <GraduationCap className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.eduTitle}</h3>
-                  </div>
+                  </Reveal>
 
                   <div className="space-y-4">
-                    {education.map((edu) => (
-                      <div key={edu.id} className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
-                        isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/50 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-md'
-                      }`}>
-                        <div className="flex items-center justify-between">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            edu.type === 'Formal'
-                              ? (isDark ? 'bg-white/15 text-white border border-white/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border border-[#5C3E94]/30')
-                              : (isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border border-[#FFC300]/30' : 'bg-[#FFC300]/20 text-[#211832] border border-[#FFC300]/40')
-                          }`}>
-                            {t.eduPrefix} {edu.type}
-                          </span>
-                          <span className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{edu.period}</span>
+                    {education.map((edu, idx) => (
+                      <Reveal key={edu.id} preset="slide-right" delay={idx * 85}>
+                        <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
+                          isDark ? 'bg-[#412B6B]/95 border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30' : 'bg-[#EAECF0]/60 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-lg'
+                        }`}>
+                          <div className="flex items-center justify-between">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              edu.type === 'Formal'
+                                ? (isDark ? 'bg-white/15 text-white border border-white/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border border-[#5C3E94]/30')
+                                : (isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border border-[#FFC300]/30' : 'bg-[#FFC300]/20 text-[#211832] border border-[#FFC300]/40')
+                            }`}>
+                              {t.eduPrefix} {edu.type}
+                            </span>
+                            <span className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{edu.period}</span>
+                          </div>
+                          <h4 className="text-sm md:text-base font-bold mt-2">{edu.institution}</h4>
+                          <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{getLocalized(edu, 'major')}</div>
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/65' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
                         </div>
-                        <h4 className="text-sm md:text-base font-bold mt-2">{edu.institution}</h4>
-                        <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{getLocalized(edu, 'major')}</div>
-                        <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
-                      </div>
+                      </Reveal>
                     ))}
                   </div>
                 </div>
@@ -2811,117 +3289,118 @@ export default function App() {
           </section>
 
           {/* =================================================================
-              MY LITTLE NOTES (BLOG SECTION)
+              MY LITTLE NOTES (BLOG SECTION WITH 3D TILT & STAGGERED MOTION)
              ================================================================= */}
           <section id="blog" className="py-14 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 relative">
-            {/* Doodle: Small Lightning */}
             <svg className={`pointer-events-none absolute top-12 right-[12%] w-8 h-8 opacity-70 animate-float-slow hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
 
-            <div>
+            <Reveal preset="fade-up">
               <div className="inline-block">
                 <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">MY LITTLE NOTES</h2>
                 <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 260 14" fill="none">
                   <path d="M4 10 C 80 3, 180 3, 256 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                 </svg>
               </div>
-            </div>
+            </Reveal>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-              {blogs.map((blog) => (
-                <article
-                  key={blog.id}
-                  onClick={() => setActiveBlogModal(blog)}
-                  className={`rounded-3xl border overflow-hidden flex flex-col justify-between card-hover-3d cursor-pointer group ${
-                    isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300]' : 'bg-white border-[#D0D5DD] hover:border-[#5C3E94] shadow-sm'
-                  }`}
-                >
-                  <div>
-                    {(blog.image || blog.translations?._coverImage) && (
-                      <div className="h-44 w-full overflow-hidden relative bg-[#211832]">
-                        <img
-                          src={blog.image || blog.translations?._coverImage}
-                          alt={getLocalized(blog, 'title')}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
-                    <div className="p-5 md:p-6 space-y-4">
-                      <div className={`flex items-center justify-between text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
-                        <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
-                          isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
+              {blogs.map((blog, idx) => (
+                <Reveal key={blog.id} preset="fade-up" delay={idx * 90}>
+                  <TiltCard
+                    maxTilt={6}
+                    glareColor={isDark ? 'rgba(255, 195, 0, 0.14)' : 'rgba(92, 62, 148, 0.12)'}
+                    onClick={() => setActiveBlogModal(blog)}
+                    className={`h-full rounded-3xl border overflow-hidden flex flex-col justify-between cursor-pointer group transition-all duration-300 ${
+                      isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300] hover:shadow-2xl hover:shadow-black/35' : 'bg-white border-[#D0D5DD] hover:border-[#5C3E94] shadow-sm hover:shadow-xl'
+                    }`}
+                  >
+                    <div>
+                      {(blog.image || blog.translations?._coverImage) && (
+                        <div className="h-44 w-full overflow-hidden relative bg-[#211832]">
+                          <img
+                            src={blog.image || blog.translations?._coverImage}
+                            alt={getLocalized(blog, 'title')}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                          />
+                        </div>
+                      )}
+                      <div className="p-5 md:p-6 space-y-4">
+                        <div className={`flex items-center justify-between text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                          <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
+                            isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
+                          }`}>
+                            {blog.category}
+                          </span>
+                          <span className="flex items-center gap-1 font-medium">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {blog.date}
+                          </span>
+                        </div>
+
+                        <h3 className={`text-lg md:text-xl font-bold leading-snug transition-colors ${
+                          isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
                         }`}>
-                          {blog.category}
-                        </span>
-                        <span className="flex items-center gap-1 font-medium">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {blog.date}
-                        </span>
+                          {getLocalized(blog, 'title')}
+                        </h3>
+                        <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/65' : 'text-[#233D4D]'}`}>
+                          {getLocalized(blog, 'excerpt')}
+                        </p>
                       </div>
-
-                      <h3 className={`text-lg md:text-xl font-bold leading-snug transition-colors ${
-                        isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
-                      }`}>
-                        {getLocalized(blog, 'title')}
-                      </h3>
-                      <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
-                        {getLocalized(blog, 'excerpt')}
-                      </p>
                     </div>
-                  </div>
 
-                  <div className={`px-5 md:px-6 py-4 border-t flex items-center justify-between ${
-                    isDark ? 'border-white/10' : 'border-[#E4E7EC]'
-                  }`}>
-                    <span className={`text-[11px] font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
-                      {t.readTimeLabel} {blog.readTime}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
-                      className={`text-xs font-extrabold hover:underline flex items-center gap-1 ${
-                        isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
-                      }`}
-                    >
-                      <span>{t.readMore}</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </article>
+                    <div className={`px-5 md:px-6 py-4 border-t flex items-center justify-between ${
+                      isDark ? 'border-white/10' : 'border-[#E4E7EC]'
+                    }`}>
+                      <span className={`text-[11px] font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                        {t.readTimeLabel} {blog.readTime}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
+                        className={`text-xs font-extrabold flex items-center gap-1 transition-transform duration-300 group-hover:translate-x-1 ${
+                          isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
+                        }`}
+                      >
+                        <span>{t.readMore}</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </TiltCard>
+                </Reveal>
               ))}
             </div>
           </section>
 
           {/* =================================================================
-              FOOTER ("LET'S MAKE SOMETHING DOPE!" STYLE WITH CORNER BLOB)
+              FOOTER ("LET'S MAKE SOMETHING DOPE!" + INTERACTIVE WIGGLE)
              ================================================================= */}
-          <footer id="kontak" className={`relative overflow-hidden border-t py-12 md:py-14 ${
+          <footer id="kontak" className={`relative overflow-hidden border-t py-12 md:py-16 ${
             isDark ? 'border-white/10 bg-[#211832]' : 'border-[#D0D5DD] bg-white'
           }`}>
-            {/* Cute Blue Corner Character Blob */}
-            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#5C3E94] opacity-90" viewBox="0 0 160 160" fill="currentColor">
+            {/* Cute Purple Corner Character Blob */}
+            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#5C3E94] opacity-90 animate-float-slow" viewBox="0 0 160 160" fill="currentColor">
               <path d="M45,160 C25,115 45,55 95,40 C130,30 155,45 160,75 L160,160 Z" />
               <circle cx="95" cy="92" r="5" fill={isDark ? "#211832" : "#FFFFFF"} />
               <circle cx="122" cy="86" r="5" fill={isDark ? "#211832" : "#FFFFFF"} />
               <path d="M98,108 Q112,122 124,104" stroke={isDark ? "#211832" : "#FFFFFF"} strokeWidth="4" fill="none" strokeLinecap="round" />
             </svg>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10 text-center md:text-left">
+            <Reveal preset="fade-up" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10 text-center md:text-left">
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-8">
                 {/* Left Brush Headline */}
                 <div className="relative flex flex-col items-center md:items-start w-full md:w-auto">
-                  {/* Doodle: Spark near Title */}
                   <svg className={`pointer-events-none absolute -top-6 md:-top-8 -left-2 md:-left-4 w-6 h-6 md:w-7 md:h-7 opacity-80 animate-float-reverse ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
                   </svg>
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase leading-tight">
                     LET&apos;S MAKE <br className="hidden md:block" />
                     <span className="md:hidden"> </span>SOMETHING{' '}
-                    <span className={`font-marker inline-block px-3.5 py-0.5 mt-2 md:mt-0 rounded-full border-2 -rotate-2 ${
+                    <span className={`font-marker inline-block px-3.5 py-0.5 mt-2 md:mt-0 rounded-full border-2 -rotate-2 hover-wiggle cursor-default transition-shadow ${
                       isDark
-                        ? 'border-[#FFC300]/50 text-[#FFC300] bg-[#FFC300]/15'
-                        : 'border-[#5C3E94] text-[#211832] bg-[#FFC300]'
+                        ? 'border-[#FFC300]/60 text-[#FFC300] bg-[#FFC300]/15 shadow-[0_0_24px_rgba(255,195,0,0.2)]'
+                        : 'border-[#5C3E94] text-[#211832] bg-[#FFC300] shadow-md'
                     }`}>
                       DOPE!
                     </span>
@@ -2930,11 +3409,11 @@ export default function App() {
 
                 {/* Middle Contact Details */}
                 <div className="space-y-2.5 text-xs sm:text-sm flex flex-col items-center md:items-start w-full md:w-auto">
-                  <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 font-bold transition-colors ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
+                  <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 font-bold transition-all hover:translate-x-1 ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
                     <Mail className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>{profile.email}</span>
                   </a>
-                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`flex items-center gap-3 font-bold transition-colors ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
+                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`flex items-center gap-3 font-bold transition-all hover:translate-x-1 ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
                     <Phone className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
                     <span>{profile.phone}</span>
                   </a>
@@ -2946,39 +3425,26 @@ export default function App() {
 
                 {/* Right Social Circles */}
                 <div className="flex items-center justify-center gap-3 w-full md:w-auto">
-                  <a
-                    href={`https://instagram.com/${profile.socials.instagram}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Instagram"
-                    className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D]'
-                    }`}
-                  >
-                    IG
-                  </a>
-                  <a
-                    href={`https://linkedin.com/in/${profile.socials.linkedin}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="LinkedIn"
-                    className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D]'
-                    }`}
-                  >
-                    IN
-                  </a>
-                  <a
-                    href={`https://wa.me/${profile.whatsapp}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="WhatsApp"
-                    className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 ${
-                      isDark ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832]' : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D]'
-                    }`}
-                  >
-                    WA
-                  </a>
+                  {[
+                    { label: 'IG', aria: 'Instagram', href: `https://instagram.com/${profile.socials.instagram}` },
+                    { label: 'IN', aria: 'LinkedIn', href: `https://linkedin.com/in/${profile.socials.linkedin}` },
+                    { label: 'WA', aria: 'WhatsApp', href: `https://wa.me/${profile.whatsapp}` }
+                  ].map((soc) => (
+                    <a
+                      key={soc.label}
+                      href={soc.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={soc.aria}
+                      className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all duration-300 hover:scale-115 hover:-translate-y-1 hover:rotate-6 ${
+                        isDark
+                          ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832] hover:shadow-[0_8px_20px_rgba(255,195,0,0.35)]'
+                          : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D] hover:shadow-lg'
+                      }`}
+                    >
+                      {soc.label}
+                    </a>
+                  ))}
                 </div>
               </div>
 
@@ -2997,8 +3463,48 @@ export default function App() {
                   </button>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </footer>
+
+          {/* FLOATING BACK-TO-TOP BUTTON WITH CIRCULAR SCROLL PROGRESS RING */}
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Kembali ke atas"
+            className={`fixed bottom-6 right-5 sm:right-7 z-40 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 ${
+              scrollProgress > 12
+                ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+                : 'opacity-0 translate-y-8 scale-75 pointer-events-none'
+            } ${
+              isDark
+                ? 'bg-[#412B6B]/95 text-[#FFC300] hover:bg-[#FFC300] hover:text-[#211832]'
+                : 'bg-white text-[#5C3E94] hover:bg-[#5C3E94] hover:text-white'
+            }`}
+          >
+            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
+              <circle
+                cx="24"
+                cy="24"
+                r="21"
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity="0.18"
+                strokeWidth="3"
+              />
+              <circle
+                cx="24"
+                cy="24"
+                r="21"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray={131.95}
+                strokeDashoffset={131.95 - (131.95 * scrollProgress) / 100}
+              />
+            </svg>
+            <ArrowUp className="w-4 h-4 relative z-10" />
+          </button>
         </div>
       )}
 
@@ -3966,10 +4472,16 @@ export default function App() {
 
       {/* MODAL DETAIL PROYEK */}
       {activeProjectModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-          <div className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-up ${
-            isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
-          }`}>
+        <div
+          onClick={() => setActiveProjectModal(null)}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-modal-spring ${
+              isDark ? 'bg-[#211832] border-white/15 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+            }`}
+          >
             <div className={`h-48 sm:h-52 bg-gradient-to-br ${activeProjectModal.accentColor} p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden`}>
               {activeProjectModal.image && (
                 <img
@@ -4048,10 +4560,16 @@ export default function App() {
 
       {/* MODAL BACA ARTIKEL BLOG */}
       {activeBlogModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-fade-up ${
-            isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
-          }`}>
+        <div
+          onClick={() => setActiveBlogModal(null)}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-modal-spring ${
+              isDark ? 'bg-[#211832] border-white/15 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
                 isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
