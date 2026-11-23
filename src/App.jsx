@@ -19,17 +19,17 @@ const DEFAULT_SUPABASE_URL = 'https://juxhrebslwfcsidfppaa.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_7xCDMG1gLSTcnZbX0q-rPg_S6Jw8qF0';
 
 // ============================================================================
-// BRAND COLOR TOKENS (LIGHT MODE PALETTE: #000000, #233D4D, #FFC300, #EAECF0)
+// BRAND COLOR TOKENS (BOTANICAL GREEN PALETTE: #25671E, #48A111, #F2B50B, #F7F0F0)
 // ============================================================================
 const BRAND_LIGHT = {
-  bg: '#EAECF0',
+  bg: '#F7F0F0',
   surface: '#FFFFFF',
-  textPrimary: '#211832',
-  textSecondary: '#412B6B',
-  accent: '#FFC300',
-  accentHover: '#E6B000',
-  border: '#D0D5DD',
-  borderSubtle: '#E4E7EC'
+  textPrimary: '#132B10',
+  textSecondary: '#25671E',
+  accent: '#F2B50B',
+  accentHover: '#D9A108',
+  border: '#D5DDD2',
+  borderSubtle: '#E6E2E2'
 };
 
 // ============================================================================
@@ -1127,8 +1127,8 @@ function KineticMarquee({ items, isDark }) {
       <div
         className={`-mx-4 py-3.5 sm:py-4 -rotate-1 border-y-2 shadow-xl marquee-wrapper ${
           isDark
-            ? 'bg-[#FFC300] text-[#211832] border-[#211832]'
-            : 'bg-[#5C3E94] text-white border-[#211832]'
+            ? 'bg-[#F2B50B] text-[#132B10] border-[#132B10]'
+            : 'bg-[#25671E] text-[#F7F0F0] border-[#132B10]'
         }`}
       >
         <div className="marquee-track flex items-center gap-6 sm:gap-10 whitespace-nowrap w-max">
@@ -1139,7 +1139,7 @@ function KineticMarquee({ items, isDark }) {
               </span>
               <Star
                 className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 fill-current ${
-                  isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'
+                  isDark ? 'text-[#25671E]' : 'text-[#F2B50B]'
                 }`}
               />
             </div>
@@ -1516,7 +1516,7 @@ export default function App() {
     const defaultSvgFavicon =
       "data:image/svg+xml," +
       encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#211832"/><circle cx="17" cy="42" r="5" fill="#FFC300"/><text x="24" y="45" font-family="Arial Black, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF">g</text></svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#25671E"/><circle cx="17" cy="42" r="5" fill="#F2B50B"/><text x="24" y="45" font-family="Arial Black, sans-serif" font-weight="900" font-size="34" fill="#F7F0F0">g</text></svg>`
       );
 
     const applyFavicon = (href) => {
@@ -2278,7 +2278,7 @@ export default function App() {
   return (
     <div 
       className={`min-h-screen transition-colors duration-300 ${
-        isDark ? 'bg-[#211832] text-slate-100' : 'text-[#000000]'
+        isDark ? 'bg-[#132B10] text-[#F7F0F0]' : 'text-[#132B10]'
       }`}
       style={{
         fontFamily: "'Poppins', sans-serif",
@@ -2308,11 +2308,11 @@ export default function App() {
         }
         /* Subtle Editorial Dot Grid Background */
         .bg-dot-grid-dark {
-          background-image: radial-gradient(rgba(255, 195, 0, 0.12) 1px, transparent 1px);
+          background-image: radial-gradient(rgba(242, 181, 11, 0.14) 1px, transparent 1px);
           background-size: 28px 28px;
         }
         .bg-dot-grid-light {
-          background-image: radial-gradient(rgba(92, 62, 148, 0.14) 1px, transparent 1px);
+          background-image: radial-gradient(rgba(37, 103, 30, 0.14) 1px, transparent 1px);
           background-size: 28px 28px;
         }
         /* Hide scrollbar for clean horizontal pills */
@@ -2405,7 +2405,7 @@ export default function App() {
         }
         .letter-jelly:hover {
           animation: rubberBand 0.7s ease-in-out;
-          color: #FFFFFF;
+          color: #F7F0F0;
         }
         .animate-blob-morph {
           animation: blobMorph 10s ease-in-out infinite;
@@ -2472,11 +2472,11 @@ export default function App() {
 
       {/* TOAST NOTIFICATION */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-[#412B6B]/95 border-white/10 text-white animate-modal-spring">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 bg-[#25671E]/95 border-white/15 text-[#F7F0F0] animate-modal-spring">
           {toast.type === 'error' ? (
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-red-300 shrink-0" />
           ) : (
-            <CheckCircle2 className="w-5 h-5 text-[#FFC300] shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-[#F2B50B] shrink-0" />
           )}
           <span className="text-sm font-medium">{toast.message}</span>
         </div>
@@ -2498,7 +2498,7 @@ export default function App() {
       />
 
       {/* =====================================================================
-          LANDINGPAGE.HTML (REDESIGNED MOTION & INTERACTIVE CREATIVE PORTFOLIO)
+          LANDINGPAGE.HTML (BOTANICAL GREEN & GOLD CREATIVE PORTFOLIO)
          ===================================================================== */}
       {currentRoute === 'landingpage.html' && (
         <div 
@@ -2506,8 +2506,8 @@ export default function App() {
           style={{ fontFamily: "'Poppins', sans-serif" }}
           className={`overflow-x-clip-safe relative ${
             isDark
-              ? 'bg-[#211832] text-white selection:bg-[#FFC300] selection:text-[#211832]'
-              : 'bg-[#EAECF0] text-[#000000] selection:bg-[#5C3E94] selection:text-white'
+              ? 'bg-[#132B10] text-[#F7F0F0] selection:bg-[#F2B50B] selection:text-[#132B10]'
+              : 'bg-[#F7F0F0] text-[#132B10] selection:bg-[#25671E] selection:text-[#F7F0F0]'
           }`}
         >
           {/* TOP SCROLL READING PROGRESS BAR */}
@@ -2515,8 +2515,8 @@ export default function App() {
             <div
               className={`h-full transition-all duration-150 ease-out ${
                 isDark
-                  ? 'bg-gradient-to-r from-[#5C3E94] via-[#FFC300] to-[#FFC300] shadow-[0_0_12px_rgba(255,195,0,0.85)]'
-                  : 'bg-gradient-to-r from-[#5C3E94] via-[#412B6B] to-[#FFC300]'
+                  ? 'bg-gradient-to-r from-[#48A111] via-[#F2B50B] to-[#F2B50B] shadow-[0_0_12px_rgba(242,181,11,0.85)]'
+                  : 'bg-gradient-to-r from-[#25671E] via-[#48A111] to-[#F2B50B]'
               }`}
               style={{ width: `${scrollProgress}%` }}
             />
@@ -2526,27 +2526,27 @@ export default function App() {
           <header className={`sticky top-0 z-40 transition-all duration-300 ${
             isScrolled
               ? (isDark
-                  ? 'bg-[#211832]/85 backdrop-blur-2xl border-b border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.35)] py-0'
-                  : 'bg-white/90 backdrop-blur-2xl border-b border-[#D0D5DD] shadow-md py-0')
+                  ? 'bg-[#132B10]/85 backdrop-blur-2xl border-b border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.35)] py-0'
+                  : 'bg-white/90 backdrop-blur-2xl border-b border-[#D5DDD2] shadow-md py-0')
               : (isDark
-                  ? 'bg-[#211832]/60 backdrop-blur-md border-b border-white/5 py-1'
-                  : 'bg-white/75 backdrop-blur-md border-b border-[#D0D5DD]/60 py-1')
+                  ? 'bg-[#132B10]/65 backdrop-blur-md border-b border-white/5 py-1'
+                  : 'bg-white/75 backdrop-blur-md border-b border-[#D5DDD2]/70 py-1')
           }`}>
             <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 relative z-10 transition-all duration-300 ${
               isScrolled ? 'h-16 sm:h-[70px]' : 'h-20'
             }`}>
               <a href="#" onClick={() => setActiveSection('home')} className="flex items-center gap-2.5 group min-w-0">
                 <span className={`font-marker text-2xl sm:text-3xl tracking-wider lowercase drop-shadow transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2 ${
-                  isDark ? 'text-white' : 'text-[#000000]'
+                  isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'
                 }`}>
-                  <span className={`inline-block transition-transform duration-300 group-hover:scale-150 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>.</span>gudelz
+                  <span className={`inline-block transition-transform duration-300 group-hover:scale-150 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>.</span>gudelz
                 </span>
               </a>
 
               <nav className={`hidden lg:flex items-center gap-1.5 p-1.5 rounded-full border text-xs font-bold transition-all ${
                 isDark
-                  ? 'bg-[#412B6B]/60 border-white/10 text-slate-300'
-                  : 'bg-[#EAECF0]/80 border-[#D0D5DD] text-[#233D4D]'
+                  ? 'bg-[#25671E]/75 border-white/15 text-[#F7F0F0]/80'
+                  : 'bg-[#F7F0F0] border-[#D5DDD2] text-[#25671E]'
               }`}>
                 {[
                   { id: 'home', label: 'Home', href: '#' },
@@ -2564,8 +2564,8 @@ export default function App() {
                       onClick={() => setActiveSection(navItem.id)}
                       className={`relative px-4 py-2 rounded-full transition-all duration-300 ${
                         isActive
-                          ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-md shadow-[#FFC300]/25' : 'bg-[#5C3E94] text-white shadow-md shadow-[#5C3E94]/25')
-                          : (isDark ? 'hover:text-white hover:bg-white/10' : 'hover:text-[#5C3E94] hover:bg-white')
+                          ? (isDark ? 'bg-[#F2B50B] text-[#132B10] shadow-md shadow-[#F2B50B]/25' : 'bg-[#25671E] text-[#F7F0F0] shadow-md shadow-[#25671E]/25')
+                          : (isDark ? 'hover:text-white hover:bg-white/10' : 'hover:text-[#48A111] hover:bg-white')
                       }`}
                     >
                       {navItem.label}
@@ -2582,11 +2582,11 @@ export default function App() {
                     onClick={() => setLangDropdownOpen(!langDropdownOpen)}
                     className={`px-3 py-2 rounded-full border text-xs font-extrabold transition-all flex items-center gap-1.5 hover:scale-105 ${
                       isDark
-                        ? 'bg-[#412B6B] border-white/10 text-slate-200 hover:border-[#FFC300]'
-                        : 'bg-white border-[#D0D5DD] text-[#233D4D] hover:bg-[#EAECF0]'
+                        ? 'bg-[#25671E] border-white/15 text-[#F7F0F0] hover:border-[#F2B50B]'
+                        : 'bg-white border-[#D5DDD2] text-[#25671E] hover:bg-[#F7F0F0]'
                     }`}
                   >
-                    <Languages className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
+                    <Languages className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                     <span>{activeLangObj.label}</span>
                     <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -2595,7 +2595,7 @@ export default function App() {
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setLangDropdownOpen(false)} />
                       <div className={`absolute right-0 mt-2 w-44 rounded-2xl border p-1.5 shadow-2xl z-50 backdrop-blur-xl animate-modal-spring ${
-                        isDark ? 'bg-[#412B6B]/95 border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                        isDark ? 'bg-[#25671E]/95 border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'
                       }`}>
                         {SUPPORTED_LANGUAGES.map((l) => {
                           const isSelected = lang === l.code;
@@ -2606,10 +2606,10 @@ export default function App() {
                               onClick={() => { setLang(l.code); setLangDropdownOpen(false); }}
                               className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
                                 isSelected
-                                  ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-sm' : 'bg-[#5C3E94] text-white shadow-sm')
+                                  ? (isDark ? 'bg-[#F2B50B] text-[#132B10] shadow-sm' : 'bg-[#25671E] text-[#F7F0F0] shadow-sm')
                                   : isDark
-                                    ? 'text-slate-300 hover:bg-white/10 hover:text-white'
-                                    : 'text-[#233D4D] hover:bg-[#EAECF0] hover:text-[#000000]'
+                                    ? 'text-[#F7F0F0]/80 hover:bg-white/10 hover:text-white'
+                                    : 'text-[#25671E] hover:bg-[#F7F0F0] hover:text-[#132B10]'
                               }`}
                             >
                               <span className="flex items-center gap-2">
@@ -2617,7 +2617,7 @@ export default function App() {
                                 <span>{l.name}</span>
                               </span>
                               <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
-                                isSelected ? (isDark ? 'bg-black/15 text-[#211832]' : 'bg-white/20 text-white') : 'opacity-60'
+                                isSelected ? (isDark ? 'bg-black/15 text-[#132B10]' : 'bg-white/20 text-[#F7F0F0]') : 'opacity-60'
                               }`}>
                                 {l.label}
                               </span>
@@ -2635,8 +2635,8 @@ export default function App() {
                   title={isDark ? t.dayMode : t.nightMode}
                   className={`p-2.5 rounded-full border transition-all duration-300 hover:scale-110 hover:rotate-12 flex items-center gap-1.5 text-xs font-bold ${
                     isDark 
-                      ? 'bg-[#412B6B] border-white/10 text-[#FFC300] hover:border-[#FFC300]' 
-                      : 'bg-white border-[#D0D5DD] text-[#5C3E94] hover:bg-[#EAECF0]'
+                      ? 'bg-[#25671E] border-white/15 text-[#F2B50B] hover:border-[#F2B50B]' 
+                      : 'bg-white border-[#D5DDD2] text-[#25671E] hover:bg-[#F7F0F0]'
                   }`}
                 >
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -2651,11 +2651,11 @@ export default function App() {
                   className={`p-2.5 rounded-full border transition-all duration-300 hover:scale-110 flex items-center justify-center gap-1.5 text-xs font-bold ${
                     isMusicPlaying
                       ? (isDark
-                          ? 'bg-[#FFC300] border-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/30'
-                          : 'bg-[#5C3E94] border-[#5C3E94] text-white shadow-lg shadow-[#5C3E94]/30')
+                          ? 'bg-[#F2B50B] border-[#F2B50B] text-[#132B10] shadow-lg shadow-[#F2B50B]/30'
+                          : 'bg-[#48A111] border-[#48A111] text-white shadow-lg shadow-[#48A111]/30')
                       : (isDark
-                          ? 'bg-[#412B6B] border-white/10 text-slate-200 hover:border-[#FFC300] hover:text-[#FFC300]'
-                          : 'bg-white border-[#D0D5DD] text-[#5C3E94] hover:bg-[#EAECF0]')
+                          ? 'bg-[#25671E] border-white/15 text-[#F7F0F0] hover:border-[#F2B50B] hover:text-[#F2B50B]'
+                          : 'bg-white border-[#D5DDD2] text-[#25671E] hover:bg-[#F7F0F0]')
                   }`}
                 >
                   {isMusicPlaying ? (
@@ -2675,7 +2675,7 @@ export default function App() {
                   target="_blank"
                   rel="noreferrer"
                   className={`btn-shimmer hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-extrabold text-xs shadow-lg transition-all hover:scale-105 hover:-translate-y-0.5 ${
-                    isDark ? 'bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] shadow-[#FFC300]/25' : 'bg-[#5C3E94] hover:bg-[#412B6B] text-white shadow-[#5C3E94]/25'
+                    isDark ? 'bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] shadow-[#F2B50B]/25' : 'bg-[#25671E] hover:bg-[#48A111] text-[#F7F0F0] shadow-[#25671E]/25'
                   }`}
                 >
                   <span>{t.hireMe}</span>
@@ -2686,7 +2686,7 @@ export default function App() {
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   aria-label="Menu"
-                  className="lg:hidden w-10 h-10 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white flex items-center justify-center shadow-lg shadow-[#5C3E94]/30 transition-transform hover:scale-105 active:scale-95"
+                  className="lg:hidden w-10 h-10 rounded-full bg-[#48A111] hover:bg-[#25671E] text-white flex items-center justify-center shadow-lg shadow-[#48A111]/30 transition-transform hover:scale-105 active:scale-95"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
@@ -2696,20 +2696,20 @@ export default function App() {
             {/* Mobile & Tablet Drawer Menu */}
             {mobileMenuOpen && (
               <div className={`lg:hidden border-b px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-modal-spring backdrop-blur-xl ${
-                isDark ? 'bg-[#211832]/95 border-white/10 text-slate-200' : 'bg-white/95 border-[#D0D5DD] text-[#233D4D]'
+                isDark ? 'bg-[#132B10]/95 border-white/10 text-[#F7F0F0]' : 'bg-white/95 border-[#D5DDD2] text-[#25671E]'
               }`}>
                 <div className="max-w-7xl mx-auto grid sm:grid-cols-2 gap-2">
-                  <a href="#" onClick={() => { setMobileMenuOpen(false); setActiveSection('home'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'home' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>Home</a>
-                  <a href="#karya" onClick={() => { setMobileMenuOpen(false); setActiveSection('karya'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'karya' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navWorks}</a>
-                  <a href="#tentang" onClick={() => { setMobileMenuOpen(false); setActiveSection('tentang'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'tentang' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navAbout}</a>
-                  <a href="#pengalaman" onClick={() => { setMobileMenuOpen(false); setActiveSection('pengalaman'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'pengalaman' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navResume}</a>
-                  <a href="#blog" onClick={() => { setMobileMenuOpen(false); setActiveSection('blog'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'blog' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navBlog}</a>
-                  <a href="#kontak" onClick={() => { setMobileMenuOpen(false); setActiveSection('kontak'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'kontak' ? (isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white') : (isDark ? 'hover:bg-[#FFC300] hover:text-[#211832]' : 'hover:bg-[#5C3E94] hover:text-white')}`}>{t.navContact}</a>
+                  <a href="#" onClick={() => { setMobileMenuOpen(false); setActiveSection('home'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'home' ? (isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]') : (isDark ? 'hover:bg-[#F2B50B] hover:text-[#132B10]' : 'hover:bg-[#25671E] hover:text-[#F7F0F0]')}`}>Home</a>
+                  <a href="#karya" onClick={() => { setMobileMenuOpen(false); setActiveSection('karya'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'karya' ? (isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]') : (isDark ? 'hover:bg-[#F2B50B] hover:text-[#132B10]' : 'hover:bg-[#25671E] hover:text-[#F7F0F0]')}`}>{t.navWorks}</a>
+                  <a href="#tentang" onClick={() => { setMobileMenuOpen(false); setActiveSection('tentang'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'tentang' ? (isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]') : (isDark ? 'hover:bg-[#F2B50B] hover:text-[#132B10]' : 'hover:bg-[#25671E] hover:text-[#F7F0F0]')}`}>{t.navAbout}</a>
+                  <a href="#pengalaman" onClick={() => { setMobileMenuOpen(false); setActiveSection('pengalaman'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'pengalaman' ? (isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]') : (isDark ? 'hover:bg-[#F2B50B] hover:text-[#132B10]' : 'hover:bg-[#25671E] hover:text-[#F7F0F0]')}`}>{t.navResume}</a>
+                  <a href="#blog" onClick={() => { setMobileMenuOpen(false); setActiveSection('blog'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'blog' ? (isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]') : (isDark ? 'hover:bg-[#F2B50B] hover:text-[#132B10]' : 'hover:bg-[#25671E] hover:text-[#F7F0F0]')}`}>{t.navBlog}</a>
+                  <a href="#kontak" onClick={() => { setMobileMenuOpen(false); setActiveSection('kontak'); }} className={`px-4 py-2.5 rounded-xl font-bold transition-colors ${activeSection === 'kontak' ? (isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]') : (isDark ? 'hover:bg-[#F2B50B] hover:text-[#132B10]' : 'hover:bg-[#25671E] hover:text-[#F7F0F0]')}`}>{t.navContact}</a>
                   <a
                     href={`https://wa.me/${profile.whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`sm:col-span-2 px-4 py-3 rounded-xl font-extrabold flex items-center justify-center gap-1.5 shadow-md ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}
+                    className={`sm:col-span-2 px-4 py-3 rounded-xl font-extrabold flex items-center justify-center gap-1.5 shadow-md ${isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]'}`}
                   >
                     <span>{t.hireMe}</span>
                     <ArrowUpRight className="w-4 h-4" />
@@ -2731,16 +2731,16 @@ export default function App() {
           >
             {/* Ambient Radial Glow Aura */}
             <div
-              className="pointer-events-none absolute -top-24 left-1/4 w-[480px] h-[480px] rounded-full blur-[120px] opacity-30 transition-transform duration-700 ease-out"
+              className="pointer-events-none absolute -top-24 left-1/4 w-[480px] h-[480px] rounded-full blur-[120px] opacity-25 transition-transform duration-700 ease-out"
               style={{
-                background: isDark ? '#5C3E94' : '#5C3E94',
+                background: '#48A111',
                 transform: `translate3d(${heroParallax.x * -24}px, ${heroParallax.y * -24}px, 0)`
               }}
             />
             <div
               className="pointer-events-none absolute bottom-0 right-1/4 w-[380px] h-[380px] rounded-full blur-[110px] opacity-20 transition-transform duration-700 ease-out hidden md:block"
               style={{
-                background: '#FFC300',
+                background: '#F2B50B',
                 transform: `translate3d(${heroParallax.x * 28}px, ${heroParallax.y * 28}px, 0)`
               }}
             />
@@ -2750,7 +2750,7 @@ export default function App() {
               className="pointer-events-none absolute bottom-4 -left-4 md:left-4 transition-transform duration-500 ease-out"
               style={{ transform: `translate3d(${heroParallax.x * -18}px, ${heroParallax.y * -18}px, 0)` }}
             >
-              <svg className="w-20 h-20 md:w-24 md:h-24 text-[#5C3E94] opacity-75 -rotate-12 animate-float-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-20 h-20 md:w-24 md:h-24 text-[#48A111] opacity-75 -rotate-12 animate-float-slow" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="50" cy="50" r="35" />
                 <path d="M 35 45 Q 40 38 45 45 M 55 45 Q 60 38 65 45" />
                 <path d="M 38 60 C 45 70 55 70 62 60" />
@@ -2762,14 +2762,14 @@ export default function App() {
               className="pointer-events-none absolute top-10 -right-24 hidden md:block transition-transform duration-700 ease-out"
               style={{ transform: `translate3d(${heroParallax.x * 26}px, ${heroParallax.y * 18}px, 0)` }}
             >
-              <svg className="w-72 h-72 md:w-96 md:h-96 text-[#FFC300] opacity-85 animate-float-reverse" viewBox="0 0 200 200" fill="currentColor">
+              <svg className="w-72 h-72 md:w-96 md:h-96 text-[#F2B50B] opacity-85 animate-float-reverse" viewBox="0 0 200 200" fill="currentColor">
                 <path d="M44,-66C57,-57,68,-44,74,-29C80,-14,81,3,76,19C71,35,60,50,46,60C32,70,15,75,-2,77C-19,79,-36,78,-49,69C-62,60,-71,43,-75,25C-79,7,-78,-12,-70,-28C-62,-44,-47,-57,-32,-66C-17,-75,-2,-80,13,-79C28,-78,31,-75,44,-66Z" transform="translate(105 95)" />
               </svg>
             </div>
 
             {/* Floating Hand-drawn Parallax Doodles */}
             <svg
-              className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#5C3E94] animate-float-slow hidden sm:block transition-transform duration-500"
+              className="pointer-events-none absolute top-14 right-[10%] w-9 h-9 md:w-10 md:h-10 text-[#48A111] animate-float-slow hidden sm:block transition-transform duration-500"
               style={{ transform: `translate3d(${heroParallax.x * 22}px, ${heroParallax.y * -22}px, 0)` }}
               viewBox="0 0 24 24"
               fill="currentColor"
@@ -2777,7 +2777,7 @@ export default function App() {
               <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
             </svg>
             <svg
-              className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#FFC300] animate-float-reverse hidden md:block transition-transform duration-500"
+              className="pointer-events-none absolute bottom-24 left-[54%] w-8 h-8 md:w-9 md:h-9 text-[#F2B50B] animate-float-reverse hidden md:block transition-transform duration-500"
               style={{ transform: `translate3d(${heroParallax.x * -16}px, ${heroParallax.y * 20}px, 0)` }}
               viewBox="0 0 24 24"
               fill="currentColor"
@@ -2793,34 +2793,34 @@ export default function App() {
                   {/* Live Availability Pulse Pill */}
                   <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[11px] font-bold backdrop-blur-md shadow-sm ${
                     isDark
-                      ? 'bg-[#412B6B]/80 border-[#FFC300]/30 text-slate-100'
-                      : 'bg-white/90 border-[#5C3E94]/25 text-[#233D4D]'
+                      ? 'bg-[#25671E]/85 border-[#F2B50B]/35 text-[#F7F0F0]'
+                      : 'bg-white/95 border-[#25671E]/25 text-[#25671E]'
                   }`}>
                     <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#48A111] opacity-80"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#48A111]"></span>
                     </span>
                     <span>Open for Brand &amp; Creative Projects</span>
-                    <Zap className={`w-3.5 h-3.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
+                    <Zap className={`w-3.5 h-3.5 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                   </div>
 
                   {/* "Hey, I'm" + Hand-drawn arrow + Crown Doodle */}
                   <div className="relative inline-flex items-end justify-center md:justify-start gap-2.5 md:gap-3">
                     <div className="flex flex-col items-start">
-                      <span className={`font-marker text-lg sm:text-xl md:text-2xl -rotate-6 ${isDark ? 'text-slate-200' : 'text-[#233D4D]'}`}>
+                      <span className={`font-marker text-lg sm:text-xl md:text-2xl -rotate-6 ${isDark ? 'text-[#F7F0F0]/85' : 'text-[#25671E]'}`}>
                         Hey,
                       </span>
-                      <svg className={`w-6 h-6 md:w-7 md:h-7 ml-3 md:ml-4 -mt-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <svg className={`w-6 h-6 md:w-7 md:h-7 ml-3 md:ml-4 -mt-1 ${isDark ? 'text-[#F7F0F0]/60' : 'text-[#25671E]'}`} viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                         <path d="M6 6 C 6 20, 16 26, 28 24 M23 19 L29 24 L23 29" />
                       </svg>
                     </div>
 
-                    <span className={`font-marker text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-wide ${isDark ? 'text-white' : 'text-[#000000]'}`}>
+                    <span className={`font-marker text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-wide ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>
                       I&apos;m
                     </span>
 
                     {/* Little Interactive Crown Doodle */}
-                    <svg className={`w-8 h-8 md:w-10 md:h-10 -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow hover-wiggle cursor-pointer ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className={`w-8 h-8 md:w-10 md:h-10 -mt-3 md:-mt-4 ml-1 md:ml-2 rotate-12 animate-float-slow hover-wiggle cursor-pointer ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 48 36" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 28 L8 10 L18 20 L24 6 L30 20 L40 10 L44 28 Z" />
                       <line x1="6" y1="33" x2="42" y2="33" />
                     </svg>
@@ -2829,7 +2829,7 @@ export default function App() {
                   {/* GIANT ELASTIC BRUSH NAME (Pop-In + Rubber-Band Hover per Letter) */}
                   <div className="relative flex justify-center md:justify-start w-full">
                     <h1 className={`font-marker text-5xl sm:text-6xl md:text-[72px] lg:text-[96px] leading-[0.95] uppercase tracking-tight flex flex-wrap justify-center md:justify-start gap-x-3 sm:gap-x-4 lg:gap-x-6 select-none ${
-                      isDark ? 'text-[#FFC300] drop-shadow-[0_8px_24px_rgba(255,195,0,0.22)]' : 'text-[#5C3E94] drop-shadow-[0_6px_18px_rgba(92,62,148,0.18)]'
+                      isDark ? 'text-[#F2B50B] drop-shadow-[0_8px_24px_rgba(242,181,11,0.22)]' : 'text-[#25671E] drop-shadow-[0_6px_18px_rgba(37,103,30,0.18)]'
                     }`}>
                       {profile.name.split(' ').map((word, wordIdx) => (
                         <span key={wordIdx} className="inline-flex font-marker">
@@ -2857,11 +2857,11 @@ export default function App() {
                         key={i}
                         className={`px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold border backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 cursor-default flex items-center gap-1.5 ${
                           isDark
-                            ? 'bg-[#412B6B]/70 border-white/10 text-slate-100 hover:border-[#FFC300] hover:text-[#FFC300]'
-                            : 'bg-white/85 border-[#D0D5DD] text-[#233D4D] hover:border-[#5C3E94] hover:text-[#5C3E94] shadow-sm'
+                            ? 'bg-[#25671E]/80 border-white/15 text-[#F7F0F0] hover:border-[#F2B50B] hover:text-[#F2B50B]'
+                            : 'bg-white/90 border-[#D5DDD2] text-[#25671E] hover:border-[#48A111] hover:text-[#48A111] shadow-sm'
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#F2B50B]' : 'bg-[#48A111]'}`} />
                         <span>{role}</span>
                       </span>
                     ))}
@@ -2869,16 +2869,16 @@ export default function App() {
 
                   {/* Magnetic Shimmer Pill CTA Buttons */}
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 pt-2 relative">
-                    <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block animate-float-reverse ${isDark ? 'text-slate-300' : 'text-[#233D4D]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <svg className={`w-9 h-10 md:w-10 md:h-12 -ml-3 hidden md:block animate-float-reverse ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`} viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M18 4 C 4 16, 4 34, 28 38 M22 32 L30 38 L22 44" />
                     </svg>
 
                     <a
                       href="#karya"
-                      className="btn-shimmer px-6 py-3.5 md:px-7 md:py-3.5 rounded-full bg-[#5C3E94] hover:bg-[#412B6B] text-white font-extrabold text-xs md:text-sm shadow-xl shadow-[#5C3E94]/35 hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center gap-2.5 transition-all duration-300"
+                      className="btn-shimmer px-6 py-3.5 md:px-7 md:py-3.5 rounded-full bg-[#48A111] hover:bg-[#25671E] text-white font-extrabold text-xs md:text-sm shadow-xl shadow-[#48A111]/35 hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center gap-2.5 transition-all duration-300"
                     >
-                      <span className="w-6 h-6 rounded-full bg-[#FFC300] text-[#211832] flex items-center justify-center">
-                        <Play className="w-3 h-3 fill-[#211832] ml-0.5" />
+                      <span className="w-6 h-6 rounded-full bg-[#F2B50B] text-[#132B10] flex items-center justify-center">
+                        <Play className="w-3 h-3 fill-[#132B10] ml-0.5" />
                       </span>
                       <span>{t.exploreWorks}</span>
                     </a>
@@ -2889,8 +2889,8 @@ export default function App() {
                       rel="noreferrer"
                       className={`btn-shimmer px-6 py-3.5 md:px-7 md:py-3.5 rounded-full border-2 font-extrabold text-xs md:text-sm flex items-center gap-2 hover:scale-105 hover:-translate-y-1 active:scale-95 transition-all duration-300 ${
                         isDark 
-                          ? 'bg-[#412B6B]/40 border-white/25 text-white hover:border-[#FFC300] hover:text-[#FFC300] hover:bg-[#FFC300]/10' 
-                          : 'bg-white border-[#233D4D] text-[#000000] hover:bg-[#233D4D] hover:text-white shadow-sm'
+                          ? 'bg-[#25671E]/45 border-white/25 text-[#F7F0F0] hover:border-[#F2B50B] hover:text-[#F2B50B] hover:bg-[#F2B50B]/10' 
+                          : 'bg-white border-[#25671E] text-[#132B10] hover:bg-[#25671E] hover:text-[#F7F0F0] shadow-sm'
                       }`}
                     >
                       <span>{t.hireMe}</span>
@@ -2906,10 +2906,10 @@ export default function App() {
                     className="self-center md:self-start md:ml-0 lg:ml-4 -mb-4 sm:-mb-5 lg:-mb-7 relative z-30 animate-float-slow hover-wiggle cursor-pointer transition-transform duration-300"
                     style={{ transform: `translate3d(${heroParallax.x * -12}px, ${heroParallax.y * -10}px, 0)` }}
                   >
-                    <div className="bg-[#5C3E94] text-white font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-2xl border-2 border-[#FFC300] leading-tight text-center -rotate-6">
+                    <div className="bg-[#48A111] text-white font-marker text-[11px] sm:text-xs lg:text-sm uppercase px-4 py-2 lg:px-5 lg:py-2.5 rounded-[22px] lg:rounded-[26px] shadow-2xl border-2 border-[#F2B50B] leading-tight text-center -rotate-6">
                       LET&apos;S CREATE <br /> SOMETHING <br /> AWESOME!
                     </div>
-                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#5C3E94] border-r-2 border-b-2 border-[#FFC300] rotate-45 mx-auto -mt-2" />
+                    <div className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-[#48A111] border-r-2 border-b-2 border-[#F2B50B] rotate-45 mx-auto -mt-2" />
                   </div>
 
                   {/* Interactive Character Stage with Orbiting Tool Badges */}
@@ -2918,11 +2918,11 @@ export default function App() {
                     style={{ transform: `translate3d(${heroParallax.x * 14}px, ${heroParallax.y * 14}px, 0)` }}
                   >
                     {/* Dashed Orbiting Ring with Floating Creative Badges */}
-                    <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-full border-2 border-dashed border-[#FFC300]/30 animate-orbit z-20 hidden sm:block">
+                    <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-full border-2 border-dashed border-[#F2B50B]/35 animate-orbit z-20 hidden sm:block">
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-xl bg-[#330000] border-2 border-[#FF9A00] text-[#FF9A00] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
                         Ai
                       </div>
-                      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-xl bg-[#1E1E1E] border-2 border-[#A259FF] text-[#0ACF83] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
+                      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-xl bg-[#1E1E1E] border-2 border-[#48A111] text-[#0ACF83] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
                         Fig
                       </div>
                       <div className="absolute top-1/2 -right-4 -translate-y-1/2 w-9 h-9 rounded-xl bg-[#001E36] border-2 border-[#31A8FF] text-[#31A8FF] font-black text-xs flex items-center justify-center shadow-lg animate-orbit-counter">
@@ -2931,20 +2931,20 @@ export default function App() {
                     </div>
 
                     {/* Living Morphing Organic Blobs Behind Character */}
-                    <div className="pointer-events-none absolute inset-6 bg-[#5C3E94] opacity-90 animate-blob-morph shadow-[0_0_60px_rgba(92,62,148,0.5)] z-0" />
+                    <div className="pointer-events-none absolute inset-6 bg-[#48A111] opacity-90 animate-blob-morph shadow-[0_0_60px_rgba(72,161,17,0.45)] z-0" />
                     <div
-                      className="pointer-events-none absolute inset-10 bg-[#FFC300] opacity-35 animate-blob-morph z-0"
+                      className="pointer-events-none absolute inset-10 bg-[#F2B50B] opacity-40 animate-blob-morph z-0"
                       style={{ animationDelay: '-4s', animationDuration: '12s' }}
                     />
 
                     <CleanCharacterAvatar
                       src={profile.avatar || "/avatar.png"}
                       alt={profile.name}
-                      className="relative z-10 w-full h-full object-contain scale-105 drop-shadow-[0_24px_34px_rgba(0,0,0,0.5)] hover:scale-110 transition-transform duration-500"
+                      className="relative z-10 w-full h-full object-contain scale-105 drop-shadow-[0_24px_34px_rgba(0,0,0,0.45)] hover:scale-110 transition-transform duration-500"
                     />
 
                     {/* Smiley Doodle */}
-                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#FFC300] animate-float-reverse z-20 drop-shadow" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+                    <svg className="absolute -left-2 md:-left-3 bottom-6 md:bottom-8 w-8 h-8 md:w-10 md:h-10 text-[#F2B50B] animate-float-reverse z-20 drop-shadow" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                       <circle cx="20" cy="20" r="16" />
                       <circle cx="14" cy="15" r="1.5" fill="currentColor" />
                       <circle cx="26" cy="15" r="1.5" fill="currentColor" />
@@ -2957,9 +2957,9 @@ export default function App() {
               {/* Scroll Down Indicator */}
               <a href="#karya" className="flex flex-col items-center justify-center gap-1 pt-6 pb-2 opacity-80 hover:opacity-100 transition-opacity group">
                 <div className={`w-7 h-11 rounded-full border-2 flex justify-center pt-2 ${
-                  isDark ? 'border-white/30 group-hover:border-[#FFC300]' : 'border-[#233D4D]/40 group-hover:border-[#5C3E94]'
+                  isDark ? 'border-white/30 group-hover:border-[#F2B50B]' : 'border-[#25671E]/40 group-hover:border-[#48A111]'
                 }`}>
-                  <div className={`w-1.5 h-2.5 rounded-full animate-bounce ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`} />
+                  <div className={`w-1.5 h-2.5 rounded-full animate-bounce ${isDark ? 'bg-[#F2B50B]' : 'bg-[#48A111]'}`} />
                 </div>
                 <span className="text-[11px] font-bold tracking-widest uppercase mt-1">Scroll Down</span>
               </a>
@@ -2991,17 +2991,17 @@ export default function App() {
                 return (
                   <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center relative overflow-hidden ${
                     isDark
-                      ? 'bg-gradient-to-br from-[#412B6B] via-[#342158] to-[#291A45] border-white/15 shadow-2xl shadow-black/30'
-                      : 'bg-white border-[#D0D5DD] shadow-xl'
+                      ? 'bg-gradient-to-br from-[#25671E] via-[#1E5318] to-[#173E13] border-white/15 shadow-2xl shadow-black/30'
+                      : 'bg-white border-[#D5DDD2] shadow-xl'
                   }`}>
                     {/* Decorative Corner Glow */}
-                    <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FFC300]/10 blur-3xl" />
+                    <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#F2B50B]/15 blur-3xl" />
 
                     {/* LEFT COLUMN: ★ SHOWREEL + DESCRIPTION + WATCH NOW + LIVE PROGRESS CAROUSEL */}
                     <div className="md:col-span-5 lg:col-span-4 space-y-4 flex flex-col justify-between relative z-10">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2.5">
-                          <div className={`p-1.5 rounded-xl ${isDark ? 'bg-[#FFC300]/15 text-[#FFC300]' : 'bg-[#5C3E94]/15 text-[#5C3E94]'}`}>
+                          <div className={`p-1.5 rounded-xl ${isDark ? 'bg-[#F2B50B]/20 text-[#F2B50B]' : 'bg-[#48A111]/15 text-[#25671E]'}`}>
                             <Star className="w-5 h-5 fill-current animate-spin" style={{ animationDuration: '12s' }} />
                           </div>
                           <h2 className="font-marker text-2xl sm:text-3xl uppercase tracking-wide">
@@ -3009,7 +3009,7 @@ export default function App() {
                           </h2>
                         </div>
 
-                        <p key={`desc-${currentSlide?.id || showcaseIndex}`} className={`text-xs sm:text-sm leading-relaxed animate-fade-up ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
+                        <p key={`desc-${currentSlide?.id || showcaseIndex}`} className={`text-xs sm:text-sm leading-relaxed animate-fade-up ${isDark ? 'text-[#F7F0F0]/85' : 'text-[#25671E]'}`}>
                           {currentSlide
                             ? getLocalized(currentSlide, 'subtitle') || getLocalized(currentSlide, 'description')
                             : 'Sekilas karya terbaik dan dedikasi saya dalam membangun identitas visual & cerita brand.'}
@@ -3020,12 +3020,12 @@ export default function App() {
                             type="button"
                             onClick={() => setActiveProjectModal(currentSlide)}
                             className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 transition-all group ${
-                              isDark ? 'text-[#FFC300] hover:opacity-90' : 'text-[#5C3E94] hover:opacity-90'
+                              isDark ? 'text-[#F2B50B] hover:opacity-90' : 'text-[#25671E] hover:text-[#48A111]'
                             }`}
                           >
                             <span>Watch Now</span>
                             <span className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:translate-x-1 ${
-                              isDark ? 'border-[#FFC300] group-hover:bg-[#FFC300] group-hover:text-[#211832]' : 'border-[#5C3E94] group-hover:bg-[#5C3E94] group-hover:text-white'
+                              isDark ? 'border-[#F2B50B] group-hover:bg-[#F2B50B] group-hover:text-[#132B10]' : 'border-[#25671E] group-hover:bg-[#25671E] group-hover:text-[#F7F0F0]'
                             }`}>
                               <Play className="w-3 h-3 fill-current ml-0.5" />
                             </span>
@@ -3037,10 +3037,10 @@ export default function App() {
                       {showcaseItems.length > 1 && (
                         <div className="pt-4 border-t border-white/10 space-y-3">
                           {/* Live 10s Timer Bar */}
-                          <div className={`w-full h-1 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-[#EAECF0]'}`}>
+                          <div className={`w-full h-1 rounded-full overflow-hidden ${isDark ? 'bg-white/15' : 'bg-[#F7F0F0]'}`}>
                             <div
                               key={`timer-${showcaseIndex}`}
-                              className={`h-full rounded-full animate-showreel-timer ${isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'}`}
+                              className={`h-full rounded-full animate-showreel-timer ${isDark ? 'bg-[#F2B50B]' : 'bg-[#48A111]'}`}
                             />
                           </div>
 
@@ -3056,8 +3056,8 @@ export default function App() {
                                     title={getLocalized(item, 'title')}
                                     className={`h-2 rounded-full transition-all duration-300 ${
                                       isActive
-                                        ? (isDark ? 'w-7 bg-[#FFC300]' : 'w-7 bg-[#5C3E94]')
-                                        : (isDark ? 'w-2 bg-white/25 hover:bg-white/50' : 'w-2 bg-[#233D4D]/30 hover:bg-[#233D4D]/60')
+                                        ? (isDark ? 'w-7 bg-[#F2B50B]' : 'w-7 bg-[#25671E]')
+                                        : (isDark ? 'w-2 bg-white/25 hover:bg-white/50' : 'w-2 bg-[#25671E]/30 hover:bg-[#25671E]/60')
                                     }`}
                                   />
                                 );
@@ -3070,7 +3070,7 @@ export default function App() {
                                 onClick={() => setShowcaseIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length)}
                                 aria-label="Sebelumnya"
                                 className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
-                                  isDark ? 'border-white/15 hover:border-[#FFC300] hover:text-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] hover:text-[#5C3E94] text-[#233D4D]'
+                                  isDark ? 'border-white/15 hover:border-[#F2B50B] hover:text-[#F2B50B] text-[#F7F0F0]/80' : 'border-[#D5DDD2] hover:border-[#25671E] hover:text-[#25671E] text-[#25671E]'
                                 }`}
                               >
                                 <ChevronLeft className="w-4 h-4" />
@@ -3080,7 +3080,7 @@ export default function App() {
                                 onClick={() => setShowcaseIndex((prev) => (prev + 1) % showcaseItems.length)}
                                 aria-label="Berikutnya"
                                 className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
-                                  isDark ? 'border-white/15 hover:border-[#FFC300] hover:text-[#FFC300] text-slate-300' : 'border-[#D0D5DD] hover:border-[#5C3E94] hover:text-[#5C3E94] text-[#233D4D]'
+                                  isDark ? 'border-white/15 hover:border-[#F2B50B] hover:text-[#F2B50B] text-[#F7F0F0]/80' : 'border-[#D5DDD2] hover:border-[#25671E] hover:text-[#25671E] text-[#25671E]'
                                 }`}
                               >
                                 <ChevronRight className="w-4 h-4" />
@@ -3094,7 +3094,7 @@ export default function App() {
                     {/* RIGHT COLUMN: 3D TILT FEATURED BANNER WITH KEN BURNS & SONAR PLAY */}
                     <TiltCard
                       maxTilt={5}
-                      glareColor={isDark ? 'rgba(255, 195, 0, 0.2)' : 'rgba(92, 62, 148, 0.16)'}
+                      glareColor={isDark ? 'rgba(242, 181, 11, 0.2)' : 'rgba(72, 161, 17, 0.16)'}
                       onClick={() => currentSlide && setActiveProjectModal(currentSlide)}
                       className="md:col-span-7 lg:col-span-8 relative h-52 sm:h-60 md:h-64 lg:h-72 rounded-2xl overflow-hidden group cursor-pointer border border-white/15 shadow-2xl"
                     >
@@ -3104,14 +3104,14 @@ export default function App() {
                         alt={currentSlide?.title || "Showreel Preview"}
                         className="w-full h-full object-cover animate-ken-burns transition-opacity duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-[#211832]/85 via-[#412B6B]/30 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-[#132B10]/85 via-[#25671E]/35 to-transparent" />
 
                       {/* Sonar Pulsing Play Button */}
                       <div className="absolute inset-0 flex items-center justify-center z-10">
                         <div className="relative flex items-center justify-center">
-                          <span className={`absolute w-14 h-14 md:w-16 md:h-16 rounded-full animate-sonar ${isDark ? 'bg-[#FFC300]' : 'bg-white'}`} />
-                          <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-full text-[#211832] flex items-center justify-center shadow-2xl group-hover:scale-115 transition-transform duration-300 ${isDark ? 'bg-[#FFC300]' : 'bg-white'}`}>
-                            <Play className="w-6 h-6 md:w-7 md:h-7 fill-[#211832] ml-0.5" />
+                          <span className={`absolute w-14 h-14 md:w-16 md:h-16 rounded-full animate-sonar ${isDark ? 'bg-[#F2B50B]' : 'bg-[#F7F0F0]'}`} />
+                          <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-full text-[#132B10] flex items-center justify-center shadow-2xl group-hover:scale-115 transition-transform duration-300 ${isDark ? 'bg-[#F2B50B]' : 'bg-[#F7F0F0]'}`}>
+                            <Play className="w-6 h-6 md:w-7 md:h-7 fill-[#132B10] ml-0.5" />
                           </div>
                         </div>
                       </div>
@@ -3119,14 +3119,14 @@ export default function App() {
                       {currentSlide && (
                         <div key={`cap-${currentSlide.id}`} className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white z-10 animate-fade-up">
                           <div className="min-w-0">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-[#211832]/75 border border-white/15 backdrop-blur-md inline-block">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-[#132B10]/80 border border-white/15 backdrop-blur-md inline-block">
                               {currentSlide.category} • {currentSlide.year}
                             </span>
                             <h3 className="font-card-title font-extrabold text-sm sm:text-base lg:text-xl mt-1.5 drop-shadow truncate">
                               {getLocalized(currentSlide, 'title')}
                             </h3>
                           </div>
-                          <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-[11px] font-bold border border-white/20 group-hover:bg-[#FFC300] group-hover:text-[#211832] transition-colors shrink-0">
+                          <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-[11px] font-bold border border-white/20 group-hover:bg-[#F2B50B] group-hover:text-[#132B10] transition-colors shrink-0">
                             <span>{t.projectDetail}</span>
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </span>
@@ -3143,13 +3143,13 @@ export default function App() {
               FEATURED PROJECT SECTION (3D TILT CARDS + STAGGERED REVEAL)
              ================================================================= */}
           <section id="karya" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-14 relative">
-            <svg className={`pointer-events-none absolute top-20 -right-2 w-10 h-10 opacity-70 animate-float-slow hidden xl:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="currentColor">
+            <svg className={`pointer-events-none absolute top-20 -right-2 w-10 h-10 opacity-75 animate-float-slow hidden xl:block ${isDark ? 'text-[#48A111]' : 'text-[#F2B50B]'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
 
             <Reveal preset="fade-up">
               <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border relative space-y-6 ${
-                isDark ? 'bg-[#412B6B]/95 border-white/10 shadow-2xl shadow-black/20' : 'bg-white border-[#D0D5DD] shadow-xl'
+                isDark ? 'bg-[#25671E]/95 border-white/15 shadow-2xl shadow-black/25' : 'bg-white border-[#D5DDD2] shadow-xl'
               }`}>
                 {/* Header: FEATURED PROJECT + Brush Underline + Search Bar */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -3158,11 +3158,11 @@ export default function App() {
                       <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase tracking-wide">
                         FEATURED PROJECT
                       </h2>
-                      <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 280 14" fill="none">
+                      <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 280 14" fill="none">
                         <path d="M4 10 C 85 3, 195 3, 276 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                       </svg>
                     </div>
-                    <svg className="w-10 h-5 text-[#5C3E94] hidden sm:block animate-float-slow" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
+                    <svg className="w-10 h-5 text-[#48A111] hidden sm:block animate-float-slow" viewBox="0 0 48 20" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round">
                       <path d="M2 12 Q 12 2, 22 12 T 42 12" />
                     </svg>
                   </div>
@@ -3170,7 +3170,7 @@ export default function App() {
                   {/* Search Box */}
                   <div className="relative w-full md:w-72 group">
                     <Search className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-                      isDark ? 'text-white/60 group-focus-within:text-[#FFC300]' : 'text-[#233D4D] group-focus-within:text-[#5C3E94]'
+                      isDark ? 'text-[#F7F0F0]/60 group-focus-within:text-[#F2B50B]' : 'text-[#25671E] group-focus-within:text-[#48A111]'
                     }`} />
                     <input
                       type="text"
@@ -3179,8 +3179,8 @@ export default function App() {
                       placeholder={t.searchPlaceholder}
                       className={`w-full pl-10 pr-4 py-2.5 rounded-full border text-xs font-medium focus:outline-none transition-all duration-300 ${
                         isDark
-                          ? 'bg-[#211832] border-white/15 text-white placeholder:text-white/60 focus:border-[#FFC300] focus:ring-2 focus:ring-[#FFC300]/20'
-                          : 'bg-[#EAECF0]/60 border-[#D0D5DD] text-[#000000] placeholder:text-[#233D4D]/60 focus:border-[#5C3E94] focus:bg-white focus:ring-2 focus:ring-[#5C3E94]/15'
+                          ? 'bg-[#132B10] border-white/15 text-[#F7F0F0] placeholder:text-[#F7F0F0]/55 focus:border-[#F2B50B] focus:ring-2 focus:ring-[#F2B50B]/20'
+                          : 'bg-[#F7F0F0]/80 border-[#D5DDD2] text-[#132B10] placeholder:text-[#25671E]/60 focus:border-[#25671E] focus:bg-white focus:ring-2 focus:ring-[#48A111]/20'
                       }`}
                     />
                   </div>
@@ -3197,8 +3197,8 @@ export default function App() {
                         onClick={() => setSelectedCategory(cat)}
                         className={`px-4 py-2 rounded-full text-xs font-extrabold whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 hover:scale-105 active:scale-95 ${
                           isActive
-                            ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/25' : 'bg-[#5C3E94] text-white shadow-md shadow-[#5C3E94]/25')
-                            : (isDark ? 'bg-[#211832] text-slate-300 border border-white/10 hover:border-[#FFC300]' : 'bg-[#EAECF0]/70 text-[#233D4D] border border-[#D0D5DD] hover:border-[#5C3E94]')
+                            ? (isDark ? 'bg-[#F2B50B] text-[#132B10] shadow-lg shadow-[#F2B50B]/25' : 'bg-[#25671E] text-[#F7F0F0] shadow-md shadow-[#25671E]/25')
+                            : (isDark ? 'bg-[#132B10] text-[#F7F0F0]/85 border border-white/15 hover:border-[#F2B50B]' : 'bg-[#F7F0F0] text-[#25671E] border border-[#D5DDD2] hover:border-[#48A111]')
                         }`}
                       >
                         {cat !== 'Semua' && getCategoryIcon(cat)}
@@ -3215,12 +3215,12 @@ export default function App() {
                       <Reveal key={`${proj.id}-${selectedCategory}`} preset="fade-up" delay={Math.min(idx * 65, 320)}>
                         <TiltCard
                           maxTilt={8}
-                          glareColor={isDark ? 'rgba(255, 195, 0, 0.18)' : 'rgba(92, 62, 148, 0.14)'}
+                          glareColor={isDark ? 'rgba(242, 181, 11, 0.18)' : 'rgba(72, 161, 17, 0.14)'}
                           onClick={() => setActiveProjectModal(proj)}
                           className={`h-full rounded-2xl border overflow-hidden cursor-pointer group flex flex-col justify-between transition-all duration-300 ${
                             isDark
-                              ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-2xl hover:shadow-black/40'
-                              : 'bg-[#EAECF0]/40 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
+                              ? 'bg-[#132B10] border-white/10 hover:border-[#F2B50B] hover:shadow-2xl hover:shadow-black/40'
+                              : 'bg-[#F7F0F0]/70 border-[#D5DDD2] hover:border-[#48A111] hover:bg-white hover:shadow-xl'
                           }`}
                         >
                           {/* Thumbnail Image with Hover Reveal Action */}
@@ -3232,13 +3232,13 @@ export default function App() {
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                               />
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#211832]/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFC300] text-[#211832] text-[10px] font-black uppercase tracking-wider transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#132B10]/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F2B50B] text-[#132B10] text-[10px] font-black uppercase tracking-wider transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
                                 <span>{t.projectDetail}</span>
                                 <ArrowUpRight className="w-3 h-3" />
                               </span>
                             </div>
-                            <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#211832]/75 backdrop-blur-md text-[10px] font-extrabold text-white border border-white/15">
+                            <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#132B10]/80 backdrop-blur-md text-[10px] font-extrabold text-[#F7F0F0] border border-white/15">
                               {proj.year}
                             </span>
                           </div>
@@ -3247,20 +3247,20 @@ export default function App() {
                           <div className="p-4 flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <h3 className={`font-card-title font-extrabold text-sm uppercase tracking-tight truncate transition-colors ${
-                                isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
+                                isDark ? 'text-[#F7F0F0] group-hover:text-[#F2B50B]' : 'text-[#132B10] group-hover:text-[#25671E]'
                               }`}>
                                 {getLocalized(proj, 'title')}
                               </h3>
                               <p className={`text-xs truncate mt-0.5 font-medium ${
-                                isDark ? 'text-white/60' : 'text-[#233D4D]'
+                                isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'
                               }`}>
                                 {proj.category}
                               </p>
                             </div>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110 ${
                               isDark
-                                ? 'bg-white/5 text-slate-300 group-hover:bg-[#FFC300] group-hover:text-[#211832]'
-                                : 'bg-[#EAECF0] text-[#233D4D] group-hover:bg-[#5C3E94] group-hover:text-white'
+                                ? 'bg-white/10 text-[#F7F0F0]/80 group-hover:bg-[#F2B50B] group-hover:text-[#132B10]'
+                                : 'bg-white text-[#25671E] border border-[#D5DDD2] group-hover:bg-[#48A111] group-hover:border-[#48A111] group-hover:text-white'
                             }`}>
                               <ArrowUpRight className="w-4 h-4" />
                             </div>
@@ -3271,7 +3271,7 @@ export default function App() {
                   </div>
                 ) : (
                   <div className={`py-14 px-6 rounded-2xl border border-dashed text-center space-y-3 animate-fade-up ${
-                    isDark ? 'bg-[#211832]/60 border-white/15 text-slate-300' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#233D4D]'
+                    isDark ? 'bg-[#132B10]/60 border-white/15 text-[#F7F0F0]/80' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#25671E]'
                   }`}>
                     <Search className="w-8 h-8 mx-auto opacity-50" />
                     <p className="text-sm font-bold">Karya tidak ditemukan untuk kata kunci &ldquo;{searchQuery}&rdquo;</p>
@@ -3279,7 +3279,7 @@ export default function App() {
                       type="button"
                       onClick={() => { setSearchQuery(''); setSelectedCategory('Semua'); }}
                       className={`px-4 py-2 rounded-full text-xs font-extrabold transition-transform hover:scale-105 ${
-                        isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'
+                        isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]'
                       }`}
                     >
                       Reset Pencarian
@@ -3294,13 +3294,13 @@ export default function App() {
               SKILL & PILLARS SECTION (DOCK-STYLE SPRING BADGES + TILT PILLARS)
              ================================================================= */}
           <section id="tentang" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-14 relative">
-            <svg className={`pointer-events-none absolute bottom-32 -left-6 w-14 h-14 opacity-50 animate-float-reverse hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round">
+            <svg className={`pointer-events-none absolute bottom-32 -left-6 w-14 h-14 opacity-50 animate-float-reverse hidden lg:block ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round">
               <path d="M10 50 Q 30 20, 50 50 T 90 50" />
             </svg>
 
             <Reveal preset="fade-up">
               <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border relative overflow-hidden space-y-8 ${
-                isDark ? 'bg-[#412B6B]/95 border-white/10 shadow-2xl shadow-black/20' : 'bg-white border-[#D0D5DD] shadow-xl'
+                isDark ? 'bg-[#25671E]/95 border-white/15 shadow-2xl shadow-black/25' : 'bg-white border-[#D5DDD2] shadow-xl'
               }`}>
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
                   <div className="shrink-0">
@@ -3308,11 +3308,11 @@ export default function App() {
                       <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
                         SKILL
                       </h2>
-                      <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 120 14" fill="none">
+                      <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 120 14" fill="none">
                         <path d="M3 10 C 35 3, 85 3, 117 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
                       </svg>
                     </div>
-                    <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                    <p className={`text-xs mt-1.5 font-medium ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>
                       {t.pillarsTitle}
                     </p>
                   </div>
@@ -3322,16 +3322,16 @@ export default function App() {
                     {[
                       { code: 'Ai', name: 'Adobe Illustrator', bg: 'bg-[#330000]', border: 'border-[#FF9A00]', text: 'text-[#FF9A00]', glow: 'hover:shadow-[0_12px_25px_rgba(255,154,0,0.35)]' },
                       { code: 'Ps', name: 'Adobe Photoshop', bg: 'bg-[#001E36]', border: 'border-[#31A8FF]', text: 'text-[#31A8FF]', glow: 'hover:shadow-[0_12px_25px_rgba(49,168,255,0.35)]' },
-                      { code: 'Fig', name: 'Figma UI/UX', bg: 'bg-[#1E1E1E]', border: 'border-[#A259FF]', text: 'text-[#0ACF83]', glow: 'hover:shadow-[0_12px_25px_rgba(162,89,255,0.35)]' },
+                      { code: 'Fig', name: 'Figma UI/UX', bg: 'bg-[#1E1E1E]', border: 'border-[#0ACF83]', text: 'text-[#0ACF83]', glow: 'hover:shadow-[0_12px_25px_rgba(10,207,131,0.35)]' },
                       { code: 'Id', name: 'Brand Guideline', bg: 'bg-[#49021F]', border: 'border-[#FF3366]', text: 'text-[#FF3366]', glow: 'hover:shadow-[0_12px_25px_rgba(255,51,102,0.35)]' },
-                      { code: 'Sm', name: 'Social Media', bg: 'bg-[#211832]', border: 'border-[#5C3E94]', text: 'text-[#A78BFA]', glow: 'hover:shadow-[0_12px_25px_rgba(92,62,148,0.45)]' },
-                      { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#211832]', border: isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]', text: isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]', glow: 'hover:shadow-[0_12px_25px_rgba(255,195,0,0.35)]' }
+                      { code: 'Sm', name: 'Social Media', bg: 'bg-[#132B10]', border: 'border-[#48A111]', text: 'text-[#7CE038]', glow: 'hover:shadow-[0_12px_25px_rgba(72,161,17,0.45)]' },
+                      { code: 'Br', name: 'Brand Strategy', bg: 'bg-[#132B10]', border: isDark ? 'border-[#F2B50B]' : 'border-[#25671E]', text: isDark ? 'text-[#F2B50B]' : 'text-[#F2B50B]', glow: 'hover:shadow-[0_12px_25px_rgba(242,181,11,0.35)]' }
                     ].map((app, i) => (
                       <Reveal key={i} preset="zoom-in" delay={i * 60} className="flex flex-col items-center text-center gap-2 group cursor-default">
                         <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${app.bg} border-2 ${app.border} ${app.glow} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:-translate-y-2.5 group-hover:scale-110 group-hover:rotate-3`}>
                           <span className={`font-black text-lg sm:text-xl ${app.text}`}>{app.code}</span>
                         </div>
-                        <span className={`text-[11px] font-bold leading-tight transition-colors ${isDark ? 'text-white/80 group-hover:text-[#FFC300]' : 'text-[#233D4D] group-hover:text-[#5C3E94]'}`}>
+                        <span className={`text-[11px] font-bold leading-tight transition-colors ${isDark ? 'text-[#F7F0F0]/85 group-hover:text-[#F2B50B]' : 'text-[#25671E] group-hover:text-[#48A111]'}`}>
                           {app.name}
                         </span>
                       </Reveal>
@@ -3345,38 +3345,38 @@ export default function App() {
                     <Reveal key={idx} preset="fade-up" delay={idx * 90}>
                       <TiltCard
                         maxTilt={7}
-                        glareColor={isDark ? 'rgba(255, 195, 0, 0.14)' : 'rgba(92, 62, 148, 0.12)'}
+                        glareColor={isDark ? 'rgba(242, 181, 11, 0.14)' : 'rgba(72, 161, 17, 0.12)'}
                         className={`h-full p-5 md:p-6 rounded-2xl border flex flex-col justify-between relative overflow-hidden group transition-all ${
                           isDark
-                            ? 'bg-[#211832] border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/40'
-                            : 'bg-[#EAECF0]/55 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-xl'
+                            ? 'bg-[#132B10] border-white/10 hover:border-[#F2B50B] hover:shadow-xl hover:shadow-black/40'
+                            : 'bg-[#F7F0F0]/75 border-[#D5DDD2] hover:border-[#48A111] hover:bg-white hover:shadow-xl'
                         }`}
                       >
                         {/* Animated Top Accent Bar */}
                         <div className={`absolute top-0 left-0 right-0 h-1 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ${
-                          isDark ? 'bg-[#FFC300]' : 'bg-[#5C3E94]'
+                          isDark ? 'bg-[#F2B50B]' : 'bg-[#48A111]'
                         }`} />
 
                         <div className="space-y-3">
                           <span className={`font-card-title text-3xl font-black block transition-all duration-300 group-hover:translate-x-1 ${
-                            isDark ? 'text-white/25 group-hover:text-[#FFC300]' : 'text-[#233D4D]/25 group-hover:text-[#5C3E94]'
+                            isDark ? 'text-white/25 group-hover:text-[#F2B50B]' : 'text-[#25671E]/25 group-hover:text-[#48A111]'
                           }`}>
                             {pillar.num}
                           </span>
                           <h3 className={`font-card-title font-extrabold text-base md:text-lg leading-snug ${
-                            isDark ? 'text-white' : 'text-[#000000]'
+                            isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'
                           }`}>
                             {pillar.title}
                           </h3>
                           <p className={`text-xs leading-relaxed ${
-                            isDark ? 'text-white/65' : 'text-[#233D4D]'
+                            isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'
                           }`}>
                             {pillar.desc}
                           </p>
                         </div>
 
                         <div className={`mt-5 pt-3.5 border-t text-[11px] font-extrabold ${
-                          isDark ? 'border-white/10 text-[#FFC300]' : 'border-[#D0D5DD] text-[#5C3E94]'
+                          isDark ? 'border-white/10 text-[#F2B50B]' : 'border-[#D5DDD2] text-[#48A111]'
                         }`}>
                           {pillar.tools}
                         </div>
@@ -3392,20 +3392,20 @@ export default function App() {
               ABOUT ME SECTION (3D TILT COVER + INTERACTIVE STATS + BIO)
              ================================================================= */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 pb-16 relative">
-            <svg className={`pointer-events-none absolute -top-4 right-8 w-10 h-10 opacity-60 animate-float-slow hidden md:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="currentColor">
+            <svg className={`pointer-events-none absolute -top-4 right-8 w-10 h-10 opacity-65 animate-float-slow hidden md:block ${isDark ? 'text-[#48A111]' : 'text-[#F2B50B]'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
             </svg>
 
             <Reveal preset="fade-up">
               <div className={`rounded-[28px] md:rounded-[34px] p-5 sm:p-7 md:p-8 lg:p-10 border grid md:grid-cols-12 gap-6 md:gap-8 items-center ${
-                isDark ? 'bg-[#412B6B]/95 border-white/10 shadow-2xl shadow-black/20' : 'bg-white border-[#D0D5DD] shadow-xl'
+                isDark ? 'bg-[#25671E]/95 border-white/15 shadow-2xl shadow-black/25' : 'bg-white border-[#D5DDD2] shadow-xl'
               }`}>
                 {/* Left Sketch Cover with 3D Tilt */}
                 <div className="md:col-span-5">
                   <TiltCard
                     maxTilt={7}
                     className={`relative rounded-3xl overflow-hidden flex items-center justify-center min-h-[240px] md:min-h-[270px] border-2 shadow-xl group ${
-                      isDark ? 'bg-[#5C3E94] border-[#FFC300]/40 text-white' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
+                      isDark ? 'bg-[#48A111] border-[#F2B50B]/50 text-white' : 'bg-[#F7F0F0] border-[#D5DDD2] text-[#25671E]'
                     }`}
                   >
                     {profile.aboutCover && !aboutCoverFailed ? (
@@ -3418,11 +3418,11 @@ export default function App() {
                     ) : (
                       <div className="p-6 text-center space-y-1">
                         <span className="font-marker text-2xl block tracking-wider">FOCUS • DISCIPLINE</span>
-                        <span className="font-marker text-2xl block text-[#FFC300] tracking-wider">CONSISTENCY</span>
+                        <span className="font-marker text-2xl block text-[#F2B50B] tracking-wider">CONSISTENCY</span>
                       </div>
                     )}
                     {/* Floating Sticker Badge */}
-                    <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-[#211832]/85 backdrop-blur-md border border-[#FFC300]/50 text-[#FFC300] text-[10px] font-black uppercase tracking-wider shadow-lg">
+                    <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-[#132B10]/85 backdrop-blur-md border border-[#F2B50B]/55 text-[#F2B50B] text-[10px] font-black uppercase tracking-wider shadow-lg">
                       ✦ Creative Designer
                     </div>
                   </TiltCard>
@@ -3434,11 +3434,11 @@ export default function App() {
                     <h2 className="font-marker text-xl sm:text-2xl lg:text-3xl uppercase tracking-wide">
                       ABOUT ME
                     </h2>
-                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 180 14" fill="none">
+                    <svg className={`w-full h-3.5 mt-0.5 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 180 14" fill="none">
                       <path d="M3 10 C 55 3, 125 3, 177 9" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
                     </svg>
                   </div>
-                  <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-white/85' : 'text-[#233D4D]'}`}>
+                  <p className={`text-xs sm:text-sm lg:text-base leading-relaxed ${isDark ? 'text-[#F7F0F0]/85' : 'text-[#25671E]'}`}>
                     {getLocalized(profile, 'bio')}
                   </p>
 
@@ -3453,14 +3453,14 @@ export default function App() {
                         key={sIdx}
                         className={`p-3 rounded-2xl border text-center transition-all duration-300 hover:-translate-y-1 ${
                           isDark
-                            ? 'bg-[#211832]/80 border-white/10 hover:border-[#FFC300]'
-                            : 'bg-[#EAECF0]/60 border-[#D0D5DD] hover:border-[#5C3E94]'
+                            ? 'bg-[#132B10]/80 border-white/10 hover:border-[#F2B50B]'
+                            : 'bg-[#F7F0F0]/75 border-[#D5DDD2] hover:border-[#48A111]'
                         }`}
                       >
-                        <div className={`font-marker text-xl sm:text-2xl ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>
+                        <div className={`font-marker text-xl sm:text-2xl ${isDark ? 'text-[#F2B50B]' : 'text-[#25671E]'}`}>
                           {stat.val}
                         </div>
-                        <div className={`text-[10px] sm:text-xs font-bold mt-0.5 ${isDark ? 'text-white/70' : 'text-[#233D4D]'}`}>
+                        <div className={`text-[10px] sm:text-xs font-bold mt-0.5 ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>
                           {stat.label}
                         </div>
                       </div>
@@ -3470,12 +3470,12 @@ export default function App() {
                   <a
                     href="#pengalaman"
                     className={`inline-flex items-center gap-2.5 text-xs sm:text-sm font-extrabold pt-1 group ${
-                      isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
+                      isDark ? 'text-[#F2B50B]' : 'text-[#25671E]'
                     }`}
                   >
                     <span className="group-hover:underline">EXPERIENCE</span>
                     <span className={`w-6 h-6 rounded-full border flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1.5 ${
-                      isDark ? 'border-[#FFC300]' : 'border-[#5C3E94]'
+                      isDark ? 'border-[#F2B50B]' : 'border-[#25671E]'
                     }`}>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </span>
@@ -3489,13 +3489,13 @@ export default function App() {
               EXPERIENCE SECTION (GLOWING TIMELINE + STAGGERED SLIDE MOTION)
              ================================================================= */}
           <section id="pengalaman" className={`py-14 md:py-16 border-y relative overflow-hidden ${
-            isDark ? 'bg-[#211832] border-white/10 bg-dot-grid-dark' : 'bg-white border-[#D0D5DD] bg-dot-grid-light'
+            isDark ? 'bg-[#132B10] border-white/10 bg-dot-grid-dark' : 'bg-white border-[#D5DDD2] bg-dot-grid-light'
           }`}>
-            <svg className={`pointer-events-none absolute top-40 left-[2%] w-16 h-16 opacity-30 animate-float-reverse hidden xl:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg className={`pointer-events-none absolute top-40 left-[2%] w-16 h-16 opacity-30 animate-float-reverse hidden xl:block ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                <circle cx="20" cy="20" r="14" strokeDasharray="4 4" />
                <circle cx="20" cy="20" r="4" fill="currentColor" />
             </svg>
-            <svg className={`pointer-events-none absolute bottom-20 right-[2%] w-12 h-12 opacity-30 animate-float-slow hidden xl:block ${isDark ? 'text-[#5C3E94]' : 'text-[#FFC300]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className={`pointer-events-none absolute bottom-20 right-[2%] w-12 h-12 opacity-30 animate-float-slow hidden xl:block ${isDark ? 'text-[#48A111]' : 'text-[#F2B50B]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
 
@@ -3503,7 +3503,7 @@ export default function App() {
               <Reveal preset="zoom-in" className="text-center max-w-2xl mx-auto">
                 <div className="inline-block">
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">EXPERIENCE</h2>
-                  <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 220 14" fill="none">
+                  <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 220 14" fill="none">
                     <path d="M4 10 C 65 3, 155 3, 216 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                   </svg>
                 </div>
@@ -3512,32 +3512,32 @@ export default function App() {
               <div className="grid md:grid-cols-12 gap-8 lg:gap-10">
                 <div className="md:col-span-7 space-y-5 md:space-y-6">
                   <Reveal preset="slide-left" className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl shadow-md ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
+                    <div className={`p-2.5 rounded-xl shadow-md ${isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]'}`}>
                       <Briefcase className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.expTitle}</h3>
                   </Reveal>
 
-                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-gradient-to-b before:from-[#FFC300] before:via-[#5C3E94] before:to-transparent">
+                  <div className="space-y-4 relative before:absolute before:top-3 before:bottom-3 before:left-4 before:w-0.5 before:bg-gradient-to-b before:from-[#F2B50B] before:via-[#48A111] before:to-transparent">
                     {experience.map((exp, idx) => (
                       <Reveal key={exp.id} preset="slide-left" delay={idx * 80} className="relative pl-9 md:pl-10 group">
                         <div className={`w-3.5 h-3.5 rounded-full border-2 absolute left-[9px] top-5 transition-transform duration-300 group-hover:scale-150 ${
-                          isDark ? 'bg-[#FFC300] border-[#211832] shadow-[0_0_12px_rgba(255,195,0,0.8)]' : 'bg-[#5C3E94] border-white shadow-[0_0_10px_rgba(92,62,148,0.6)]'
+                          isDark ? 'bg-[#F2B50B] border-[#132B10] shadow-[0_0_12px_rgba(242,181,11,0.8)]' : 'bg-[#48A111] border-white shadow-[0_0_10px_rgba(72,161,17,0.6)]'
                         }`} />
                         <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
-                          isDark ? 'bg-[#412B6B]/95 border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30' : 'bg-[#EAECF0]/60 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-lg'
+                          isDark ? 'bg-[#25671E]/95 border-white/15 hover:border-[#F2B50B] hover:shadow-xl hover:shadow-black/30' : 'bg-[#F7F0F0]/75 border-[#D5DDD2] hover:border-[#48A111] hover:bg-white hover:shadow-lg'
                         }`}>
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className={`text-xs font-extrabold ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{exp.period}</span>
+                            <span className={`text-xs font-extrabold ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>{exp.period}</span>
                             <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${
-                              isDark ? 'bg-[#211832] border-white/10 text-white/80' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                              isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]/85' : 'bg-white border-[#D5DDD2] text-[#25671E]'
                             }`}>
                               {getLocalized(exp, 'type')}
                             </span>
                           </div>
                           <h4 className="text-sm md:text-base font-bold mt-1">{getLocalized(exp, 'role')}</h4>
-                          <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{exp.company}</div>
-                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/65' : 'text-[#233D4D]'}`}>{getLocalized(exp, 'description')}</p>
+                          <div className={`text-xs font-semibold mt-0.5 ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>{exp.company}</div>
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>{getLocalized(exp, 'description')}</p>
                         </div>
                       </Reveal>
                     ))}
@@ -3546,7 +3546,7 @@ export default function App() {
 
                 <div className="md:col-span-5 space-y-5 md:space-y-6">
                   <Reveal preset="slide-right" className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl shadow-md ${isDark ? 'bg-[#FFC300] text-[#211832]' : 'bg-[#5C3E94] text-white'}`}>
+                    <div className={`p-2.5 rounded-xl shadow-md ${isDark ? 'bg-[#F2B50B] text-[#132B10]' : 'bg-[#25671E] text-[#F7F0F0]'}`}>
                       <GraduationCap className="w-5 h-5" />
                     </div>
                     <h3 className="text-lg md:text-xl font-black">{t.eduTitle}</h3>
@@ -3556,21 +3556,21 @@ export default function App() {
                     {education.map((edu, idx) => (
                       <Reveal key={edu.id} preset="slide-right" delay={idx * 85}>
                         <div className={`p-4 md:p-5 rounded-2xl border card-hover-3d transition-all ${
-                          isDark ? 'bg-[#412B6B]/95 border-white/10 hover:border-[#FFC300] hover:shadow-xl hover:shadow-black/30' : 'bg-[#EAECF0]/60 border-[#D0D5DD] hover:border-[#5C3E94] hover:bg-white hover:shadow-lg'
+                          isDark ? 'bg-[#25671E]/95 border-white/15 hover:border-[#F2B50B] hover:shadow-xl hover:shadow-black/30' : 'bg-[#F7F0F0]/75 border-[#D5DDD2] hover:border-[#48A111] hover:bg-white hover:shadow-lg'
                         }`}>
                           <div className="flex items-center justify-between">
                             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                               edu.type === 'Formal'
-                                ? (isDark ? 'bg-white/15 text-white border border-white/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border border-[#5C3E94]/30')
-                                : (isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border border-[#FFC300]/30' : 'bg-[#FFC300]/20 text-[#211832] border border-[#FFC300]/40')
+                                ? (isDark ? 'bg-white/15 text-[#F7F0F0] border border-white/30' : 'bg-[#25671E]/15 text-[#25671E] border border-[#25671E]/30')
+                                : (isDark ? 'bg-[#F2B50B]/20 text-[#F2B50B] border border-[#F2B50B]/35' : 'bg-[#F2B50B]/25 text-[#132B10] border border-[#F2B50B]/50')
                             }`}>
                               {t.eduPrefix} {edu.type}
                             </span>
-                            <span className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{edu.period}</span>
+                            <span className={`text-xs font-semibold ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>{edu.period}</span>
                           </div>
                           <h4 className="text-sm md:text-base font-bold mt-2">{edu.institution}</h4>
-                          <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>{getLocalized(edu, 'major')}</div>
-                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-white/65' : 'text-[#233D4D]'}`}>{getLocalized(edu, 'description')}</p>
+                          <div className={`text-xs font-bold mt-0.5 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>{getLocalized(edu, 'major')}</div>
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>{getLocalized(edu, 'description')}</p>
                         </div>
                       </Reveal>
                     ))}
@@ -3584,14 +3584,14 @@ export default function App() {
               MY LITTLE NOTES (BLOG SECTION WITH 3D TILT & STAGGERED MOTION)
              ================================================================= */}
           <section id="blog" className="py-14 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 relative">
-            <svg className={`pointer-events-none absolute top-12 right-[12%] w-8 h-8 opacity-70 animate-float-slow hidden lg:block ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="currentColor">
+            <svg className={`pointer-events-none absolute top-12 right-[12%] w-8 h-8 opacity-75 animate-float-slow hidden lg:block ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
 
             <Reveal preset="fade-up">
               <div className="inline-block">
                 <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase">MY LITTLE NOTES</h2>
-                <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 260 14" fill="none">
+                <svg className={`w-full h-3.5 mt-1 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 260 14" fill="none">
                   <path d="M4 10 C 80 3, 180 3, 256 9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
                 </svg>
               </div>
@@ -3602,15 +3602,15 @@ export default function App() {
                 <Reveal key={blog.id} preset="fade-up" delay={idx * 90}>
                   <TiltCard
                     maxTilt={6}
-                    glareColor={isDark ? 'rgba(255, 195, 0, 0.14)' : 'rgba(92, 62, 148, 0.12)'}
+                    glareColor={isDark ? 'rgba(242, 181, 11, 0.14)' : 'rgba(72, 161, 17, 0.12)'}
                     onClick={() => setActiveBlogModal(blog)}
                     className={`h-full rounded-3xl border overflow-hidden flex flex-col justify-between cursor-pointer group transition-all duration-300 ${
-                      isDark ? 'bg-[#412B6B] border-white/10 hover:border-[#FFC300] hover:shadow-2xl hover:shadow-black/35' : 'bg-white border-[#D0D5DD] hover:border-[#5C3E94] shadow-sm hover:shadow-xl'
+                      isDark ? 'bg-[#25671E] border-white/15 hover:border-[#F2B50B] hover:shadow-2xl hover:shadow-black/35' : 'bg-white border-[#D5DDD2] hover:border-[#48A111] shadow-sm hover:shadow-xl'
                     }`}
                   >
                     <div>
                       {(blog.image || blog.translations?._coverImage) && (
-                        <div className="h-44 w-full overflow-hidden relative bg-[#211832]">
+                        <div className="h-44 w-full overflow-hidden relative bg-[#132B10]">
                           <img
                             src={blog.image || blog.translations?._coverImage}
                             alt={getLocalized(blog, 'title')}
@@ -3619,9 +3619,9 @@ export default function App() {
                         </div>
                       )}
                       <div className="p-5 md:p-6 space-y-4">
-                        <div className={`flex items-center justify-between text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                        <div className={`flex items-center justify-between text-xs ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>
                           <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
-                            isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
+                            isDark ? 'bg-[#F2B50B]/20 text-[#F2B50B] border-[#F2B50B]/35' : 'bg-[#48A111]/15 text-[#25671E] border-[#48A111]/30'
                           }`}>
                             {blog.category}
                           </span>
@@ -3632,27 +3632,27 @@ export default function App() {
                         </div>
 
                         <h3 className={`text-lg md:text-xl font-bold leading-snug transition-colors ${
-                          isDark ? 'text-white group-hover:text-[#FFC300]' : 'text-[#000000] group-hover:text-[#5C3E94]'
+                          isDark ? 'text-[#F7F0F0] group-hover:text-[#F2B50B]' : 'text-[#132B10] group-hover:text-[#25671E]'
                         }`}>
                           {getLocalized(blog, 'title')}
                         </h3>
-                        <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-white/65' : 'text-[#233D4D]'}`}>
+                        <p className={`text-xs leading-relaxed line-clamp-3 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>
                           {getLocalized(blog, 'excerpt')}
                         </p>
                       </div>
                     </div>
 
                     <div className={`px-5 md:px-6 py-4 border-t flex items-center justify-between ${
-                      isDark ? 'border-white/10' : 'border-[#E4E7EC]'
+                      isDark ? 'border-white/10' : 'border-[#E6E2E2]'
                     }`}>
-                      <span className={`text-[11px] font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                      <span className={`text-[11px] font-medium ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>
                         {t.readTimeLabel} {blog.readTime}
                       </span>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setActiveBlogModal(blog); }}
                         className={`text-xs font-extrabold flex items-center gap-1 transition-transform duration-300 group-hover:translate-x-1 ${
-                          isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'
+                          isDark ? 'text-[#F2B50B]' : 'text-[#25671E]'
                         }`}
                       >
                         <span>{t.readMore}</span>
@@ -3669,21 +3669,21 @@ export default function App() {
               FOOTER ("LET'S MAKE SOMETHING DOPE!" + INTERACTIVE WIGGLE)
              ================================================================= */}
           <footer id="kontak" className={`relative overflow-hidden border-t py-12 md:py-16 ${
-            isDark ? 'border-white/10 bg-[#211832]' : 'border-[#D0D5DD] bg-white'
+            isDark ? 'border-white/10 bg-[#132B10]' : 'border-[#D5DDD2] bg-white'
           }`}>
-            {/* Cute Purple Corner Character Blob */}
-            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#5C3E94] opacity-90 animate-float-slow" viewBox="0 0 160 160" fill="currentColor">
+            {/* Cute Green Corner Character Blob */}
+            <svg className="pointer-events-none absolute -bottom-4 -right-4 w-28 h-28 md:w-36 md:h-36 text-[#48A111] opacity-90 animate-float-slow" viewBox="0 0 160 160" fill="currentColor">
               <path d="M45,160 C25,115 45,55 95,40 C130,30 155,45 160,75 L160,160 Z" />
-              <circle cx="95" cy="92" r="5" fill={isDark ? "#211832" : "#FFFFFF"} />
-              <circle cx="122" cy="86" r="5" fill={isDark ? "#211832" : "#FFFFFF"} />
-              <path d="M98,108 Q112,122 124,104" stroke={isDark ? "#211832" : "#FFFFFF"} strokeWidth="4" fill="none" strokeLinecap="round" />
+              <circle cx="95" cy="92" r="5" fill={isDark ? "#132B10" : "#F7F0F0"} />
+              <circle cx="122" cy="86" r="5" fill={isDark ? "#132B10" : "#F7F0F0"} />
+              <path d="M98,108 Q112,122 124,104" stroke={isDark ? "#132B10" : "#F7F0F0"} strokeWidth="4" fill="none" strokeLinecap="round" />
             </svg>
 
             <Reveal preset="fade-up" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-8 space-y-8 md:space-y-10 relative z-10 text-center md:text-left">
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-8">
                 {/* Left Brush Headline */}
                 <div className="relative flex flex-col items-center md:items-start w-full md:w-auto">
-                  <svg className={`pointer-events-none absolute -top-6 md:-top-8 -left-2 md:-left-4 w-6 h-6 md:w-7 md:h-7 opacity-80 animate-float-reverse ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} viewBox="0 0 24 24" fill="currentColor">
+                  <svg className={`pointer-events-none absolute -top-6 md:-top-8 -left-2 md:-left-4 w-6 h-6 md:w-7 md:h-7 opacity-85 animate-float-reverse ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
                   </svg>
                   <h2 className="font-marker text-2xl sm:text-3xl lg:text-4xl uppercase leading-tight">
@@ -3691,8 +3691,8 @@ export default function App() {
                     <span className="md:hidden"> </span>SOMETHING{' '}
                     <span className={`font-marker inline-block px-3.5 py-0.5 mt-2 md:mt-0 rounded-full border-2 -rotate-2 hover-wiggle cursor-default transition-shadow ${
                       isDark
-                        ? 'border-[#FFC300]/60 text-[#FFC300] bg-[#FFC300]/15 shadow-[0_0_24px_rgba(255,195,0,0.2)]'
-                        : 'border-[#5C3E94] text-[#211832] bg-[#FFC300] shadow-md'
+                        ? 'border-[#F2B50B]/65 text-[#F2B50B] bg-[#F2B50B]/15 shadow-[0_0_24px_rgba(242,181,11,0.2)]'
+                        : 'border-[#25671E] text-[#132B10] bg-[#F2B50B] shadow-md'
                     }`}>
                       DOPE!
                     </span>
@@ -3701,16 +3701,16 @@ export default function App() {
 
                 {/* Middle Contact Details */}
                 <div className="space-y-2.5 text-xs sm:text-sm flex flex-col items-center md:items-start w-full md:w-auto">
-                  <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 font-bold transition-all hover:translate-x-1 ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
-                    <Mail className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
+                  <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 font-bold transition-all hover:translate-x-1 ${isDark ? 'hover:text-[#F2B50B]' : 'hover:text-[#48A111]'}`}>
+                    <Mail className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                     <span>{profile.email}</span>
                   </a>
-                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`flex items-center gap-3 font-bold transition-all hover:translate-x-1 ${isDark ? 'hover:text-[#FFC300]' : 'hover:text-[#5C3E94]'}`}>
-                    <Phone className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
+                  <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noreferrer" className={`flex items-center gap-3 font-bold transition-all hover:translate-x-1 ${isDark ? 'hover:text-[#F2B50B]' : 'hover:text-[#48A111]'}`}>
+                    <Phone className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                     <span>{profile.phone}</span>
                   </a>
                   <div className="flex items-center gap-3 font-medium opacity-80">
-                    <MapPin className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`} />
+                    <MapPin className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                     <span>{profile.address || 'Prigen, Pasuruan, Jawa Timur'}</span>
                   </div>
                 </div>
@@ -3730,8 +3730,8 @@ export default function App() {
                       aria-label={soc.aria}
                       className={`w-11 h-11 rounded-full border flex items-center justify-center text-xs font-black transition-all duration-300 hover:scale-115 hover:-translate-y-1 hover:rotate-6 ${
                         isDark
-                          ? 'border-white/20 hover:bg-[#FFC300] hover:border-[#FFC300] hover:text-[#211832] hover:shadow-[0_8px_20px_rgba(255,195,0,0.35)]'
-                          : 'border-[#D0D5DD] hover:bg-[#5C3E94] hover:border-[#5C3E94] hover:text-white text-[#233D4D] hover:shadow-lg'
+                          ? 'border-white/20 hover:bg-[#F2B50B] hover:border-[#F2B50B] hover:text-[#132B10] hover:shadow-[0_8px_20px_rgba(242,181,11,0.35)]'
+                          : 'border-[#D5DDD2] hover:bg-[#25671E] hover:border-[#25671E] hover:text-[#F7F0F0] text-[#25671E] hover:shadow-lg'
                       }`}
                     >
                       {soc.label}
@@ -3741,7 +3741,7 @@ export default function App() {
               </div>
 
               <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t text-xs font-medium text-center sm:text-left ${
-                isDark ? 'border-white/10 text-white/60' : 'border-[#D0D5DD] text-[#233D4D]'
+                isDark ? 'border-white/10 text-[#F7F0F0]/65' : 'border-[#D5DDD2] text-[#25671E]'
               }`}>
                 <div>© {new Date().getFullYear()} {profile.name}. All Rights Reserved.</div>
                 <div className="flex items-center justify-center gap-4">
@@ -3763,8 +3763,8 @@ export default function App() {
             <div
               className={`flex items-center gap-2.5 p-1.5 pr-3 rounded-full border shadow-2xl backdrop-blur-xl transition-all duration-300 ${
                 isDark
-                  ? 'bg-[#211832]/90 border-white/15 text-white shadow-black/40'
-                  : 'bg-white/95 border-[#D0D5DD] text-[#211832] shadow-slate-400/30'
+                  ? 'bg-[#132B10]/90 border-white/15 text-[#F7F0F0] shadow-black/40'
+                  : 'bg-white/95 border-[#D5DDD2] text-[#132B10] shadow-slate-400/30'
               }`}
             >
               <button
@@ -3773,8 +3773,8 @@ export default function App() {
                 aria-label={isMusicPlaying ? 'Jeda Musik' : 'Putar Musik'}
                 className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-105 active:scale-95 ${
                   isMusicPlaying
-                    ? (isDark ? 'bg-[#FFC300] text-[#211832] shadow-md shadow-[#FFC300]/30' : 'bg-[#5C3E94] text-white shadow-md shadow-[#5C3E94]/30')
-                    : (isDark ? 'bg-[#412B6B] text-[#FFC300]' : 'bg-[#EAECF0] text-[#5C3E94]')
+                    ? (isDark ? 'bg-[#F2B50B] text-[#132B10] shadow-md shadow-[#F2B50B]/30' : 'bg-[#48A111] text-white shadow-md shadow-[#48A111]/30')
+                    : (isDark ? 'bg-[#25671E] text-[#F2B50B]' : 'bg-[#F7F0F0] text-[#25671E]')
                 }`}
               >
                 {isMusicPlaying ? (
@@ -3790,7 +3790,7 @@ export default function App() {
                 className="flex items-center gap-2 text-left min-w-0 pr-1"
               >
                 <svg
-                  className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'} ${
+                  className={`w-4 h-4 shrink-0 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'} ${
                     isMusicPlaying ? 'animate-spin' : 'opacity-70'
                   }`}
                   style={{ animationDuration: '4s' }}
@@ -3811,7 +3811,7 @@ export default function App() {
                     {profile.bgMusicTitle || 'Canvas Bloom'}
                   </div>
                   <div className={`text-[9px] font-bold uppercase tracking-wider leading-tight ${
-                    isDark ? 'text-white/60' : 'text-[#233D4D]/75'
+                    isDark ? 'text-[#F7F0F0]/60' : 'text-[#25671E]/75'
                   }`}>
                     {isMusicPlaying
                       ? (musicSourceMode === 'file' ? 'Playing Audio' : 'Live Synth')
@@ -3823,13 +3823,13 @@ export default function App() {
               {/* Volume Controls (Expandable) */}
               {musicPanelExpanded && (
                 <div className={`flex items-center gap-2 pl-2 border-l animate-fade-up ${
-                  isDark ? 'border-white/15' : 'border-[#D0D5DD]'
+                  isDark ? 'border-white/15' : 'border-[#D5DDD2]'
                 }`}>
                   <button
                     type="button"
                     onClick={() => setMusicVolume(musicVolume > 0 ? 0 : 0.35)}
                     className={`p-1 rounded-full transition-colors ${
-                      isDark ? 'text-white/80 hover:text-[#FFC300]' : 'text-[#233D4D] hover:text-[#5C3E94]'
+                      isDark ? 'text-[#F7F0F0]/80 hover:text-[#F2B50B]' : 'text-[#25671E] hover:text-[#48A111]'
                     }`}
                     aria-label="Mute / Unmute"
                   >
@@ -3843,7 +3843,7 @@ export default function App() {
                     value={musicVolume}
                     onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
                     aria-label="Volume Musik"
-                    className="w-16 sm:w-20 h-1.5 rounded-full accent-[#FFC300] cursor-pointer"
+                    className="w-16 sm:w-20 h-1.5 rounded-full accent-[#F2B50B] cursor-pointer"
                   />
                 </div>
               )}
@@ -3861,8 +3861,8 @@ export default function App() {
                 : 'opacity-0 translate-y-8 scale-75 pointer-events-none'
             } ${
               isDark
-                ? 'bg-[#412B6B]/95 text-[#FFC300] hover:bg-[#FFC300] hover:text-[#211832]'
-                : 'bg-white text-[#5C3E94] hover:bg-[#5C3E94] hover:text-white'
+                ? 'bg-[#25671E]/95 text-[#F2B50B] hover:bg-[#F2B50B] hover:text-[#132B10]'
+                : 'bg-white text-[#25671E] hover:bg-[#25671E] hover:text-[#F7F0F0]'
             }`}
           >
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
@@ -3899,15 +3899,15 @@ export default function App() {
         <>
           {!isAuthenticated ? (
             <div className={`min-h-[calc(100vh-42px)] flex items-center justify-center p-4 ${
-              isDark ? 'bg-[#211832]' : 'bg-[#EAECF0]'
+              isDark ? 'bg-[#132B10]' : 'bg-[#F7F0F0]'
             }`}>
               <div className={`w-full max-w-md rounded-3xl p-8 shadow-2xl border space-y-6 animate-fade-up ${
-                isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-2xl overflow-hidden border shadow shrink-0 flex items-center justify-center ${
-                      isDark ? 'border-white/20 bg-[#211832]' : 'border-[#D0D5DD] bg-[#EAECF0]'
+                      isDark ? 'border-white/20 bg-[#132B10]' : 'border-[#D5DDD2] bg-[#F7F0F0]'
                     }`}>
                       <CleanCharacterAvatar
                         src={profile.avatar || "/avatar.png"}
@@ -3917,12 +3917,12 @@ export default function App() {
                     </div>
                     <div>
                       <h2 className="text-lg font-black">CMS Login Portal</h2>
-                      <p className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>dashboard.html</p>
+                      <p className={`text-xs font-mono ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>dashboard.html</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setCurrentRoute('landingpage.html')}
-                    className="text-xs text-[#233D4D] hover:text-[#FFC300] flex items-center gap-1 font-bold"
+                    className={`text-xs hover:text-[#F2B50B] flex items-center gap-1 font-bold ${isDark ? 'text-[#F7F0F0]/80' : 'text-[#25671E]'}`}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Kembali</span>
@@ -3930,7 +3930,7 @@ export default function App() {
                 </div>
 
                 {loginError && (
-                  <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold flex items-center gap-2">
+                  <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{loginError}</span>
                   </div>
@@ -3938,34 +3938,34 @@ export default function App() {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Username</label>
+                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Username</label>
                     <input
                       type="text"
                       required
                       value={loginInput.username}
                       onChange={(e) => setLoginInput({ ...loginInput, username: e.target.value })}
                       placeholder="Masukkan username..."
-                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FFC300] ${
-                        isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
+                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#F2B50B] ${
+                        isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/70 border-[#D5DDD2] text-[#132B10]'
                       }`}
                     />
                   </div>
                   <div>
-                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Password</label>
+                    <label className={`block text-xs font-bold mb-1.5 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Password</label>
                     <input
                       type="password"
                       required
                       value={loginInput.password}
                       onChange={(e) => setLoginInput({ ...loginInput, password: e.target.value })}
                       placeholder="••••••••"
-                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#FFC300] ${
-                        isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-[#EAECF0]/50 border-[#D0D5DD] text-[#000000]'
+                      className={`w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:border-[#F2B50B] ${
+                        isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/70 border-[#D5DDD2] text-[#132B10]'
                       }`}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-2xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-sm shadow-lg shadow-[#FFC300]/20 transition-all"
+                    className="w-full py-3.5 rounded-2xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-black text-sm shadow-lg shadow-[#F2B50B]/20 transition-all"
                   >
                     Masuk ke Dashboard CMS
                   </button>
@@ -3974,22 +3974,22 @@ export default function App() {
             </div>
           ) : (
             <div className={`min-h-[calc(100vh-42px)] p-2 sm:p-4 lg:p-6 transition-colors ${
-              isDark ? 'bg-[#211832]' : 'bg-[#EAECF0]'
+              isDark ? 'bg-[#132B10]' : 'bg-[#F7F0F0]'
             }`}>
               <div className={`max-w-[1440px] mx-auto rounded-[24px] sm:rounded-[34px] shadow-2xl border overflow-hidden flex flex-col lg:flex-row min-h-[820px] relative ${
-                isDark ? 'bg-[#412B6B] border-white/10 text-slate-100' : 'bg-white border-[#D0D5DD] text-[#000000]'
+                isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'
               }`}>
                 {/* SIDEBAR */}
-                <aside className="w-full lg:w-64 bg-[#211832] text-white p-5 flex flex-col justify-between shrink-0">
+                <aside className="w-full lg:w-64 bg-[#132B10] text-[#F7F0F0] p-5 flex flex-col justify-between shrink-0">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#FFC300] flex items-center justify-center text-[#211832] font-black text-base">
+                        <div className="w-9 h-9 rounded-xl bg-[#F2B50B] flex items-center justify-center text-[#132B10] font-black text-base">
                           <Sparkles className="w-5 h-5" />
                         </div>
                         <div>
                           <span className="font-extrabold text-lg tracking-tight">AldiCMS</span>
-                          <span className="block text-[10px] text-emerald-400 font-mono">
+                          <span className="block text-[10px] text-[#7CE038] font-mono">
                             {isSupabaseConnected ? '● Cloud Active' : '○ Local Mode'}
                           </span>
                         </div>
@@ -4012,8 +4012,8 @@ export default function App() {
                             onClick={() => setCmsMenu(item.id)}
                             className={`px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-all whitespace-nowrap ${
                               active
-                                ? 'bg-[#FFC300] text-[#211832] shadow-lg shadow-[#FFC300]/20'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-[#F2B50B] text-[#132B10] shadow-lg shadow-[#F2B50B]/20'
+                                : 'text-[#F7F0F0]/70 hover:text-white hover:bg-white/10'
                             }`}
                           >
                             <div className="flex items-center gap-3">
@@ -4022,7 +4022,7 @@ export default function App() {
                             </div>
                             {item.badge !== undefined && (
                               <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                                active ? 'bg-[#211832] text-white' : 'bg-[#FFC300]/20 text-[#FFC300]'
+                                active ? 'bg-[#132B10] text-[#F7F0F0]' : 'bg-[#F2B50B]/20 text-[#F2B50B]'
                               }`}>
                                 {item.badge}
                               </span>
@@ -4036,14 +4036,14 @@ export default function App() {
                   <div className="pt-6 space-y-3 hidden lg:block">
                     <button
                       onClick={() => setCurrentRoute('landingpage.html')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 flex items-center justify-center gap-2"
+                      className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-[#F7F0F0] flex items-center justify-center gap-2"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Lihat Landing Page</span>
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="w-full py-2.5 px-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold flex items-center justify-center gap-2"
+                      className="w-full py-2.5 px-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-bold flex items-center justify-center gap-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Keluar (Logout)</span>
@@ -4059,7 +4059,7 @@ export default function App() {
                       <h1 className="text-xl sm:text-2xl font-black tracking-tight">
                         Welcome back {profile.name.split(' ')[1] || profile.name} 👋
                       </h1>
-                      <p className={`text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                      <p className={`text-xs ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>
                         Setiap perubahan karya, blog, dan resume otomatis tersimpan ke Cloud Supabase.
                       </p>
                     </div>
@@ -4068,7 +4068,7 @@ export default function App() {
                       <button
                         onClick={() => setTheme(isDark ? 'light' : 'dark')}
                         className={`p-2.5 rounded-2xl border ${
-                          isDark ? 'bg-[#211832] border-white/10 text-[#FFC300]' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                          isDark ? 'bg-[#132B10] border-white/15 text-[#F2B50B]' : 'bg-white border-[#D5DDD2] text-[#25671E]'
                         }`}
                       >
                         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -4077,14 +4077,14 @@ export default function App() {
                         onClick={() => fetchFromSupabase()}
                         title="Muat Ulang dari Cloud"
                         className={`p-2.5 rounded-2xl border ${
-                          isDark ? 'bg-[#211832] border-white/10 text-slate-200' : 'bg-white border-[#D0D5DD] text-[#233D4D]'
+                          isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#25671E]'
                         }`}
                       >
                         <RefreshCw className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => pushAllToSupabase()}
-                        className="px-4 py-2.5 rounded-2xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-extrabold text-xs flex items-center gap-2 shadow"
+                        className="px-4 py-2.5 rounded-2xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-extrabold text-xs flex items-center gap-2 shadow"
                       >
                         <UploadCloud className="w-4 h-4" />
                         <span>Sync Cloud</span>
@@ -4095,10 +4095,10 @@ export default function App() {
                   {syncStatus && (
                     <div className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between gap-2 ${
                       syncStatus.type === 'error'
-                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
                         : syncStatus.type === 'success'
-                          ? 'bg-[#5C3E94]/20 border-[#5C3E94]/30 text-[#5C3E94]'
-                          : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600'
+                          ? (isDark ? 'bg-[#48A111]/25 border-[#48A111]/40 text-[#B7F28B]' : 'bg-[#48A111]/15 border-[#48A111]/30 text-[#25671E]')
+                          : 'bg-[#F2B50B]/15 border-[#F2B50B]/30 text-[#F2B50B]'
                     }`}>
                       <div className="flex items-center gap-2">
                         {syncStatus.type === 'loading' ? (
@@ -4120,40 +4120,40 @@ export default function App() {
                   {cmsMenu === 'overview' && (
                     <div className="space-y-6 animate-fade-up">
                       <div className="grid sm:grid-cols-3 gap-4">
-                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#211832] border-white/10' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
-                          <div className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Total Karya Portofolio</div>
-                          <div className="text-3xl font-black mt-2 text-[#FFC300]">{projects.length}</div>
-                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Klik untuk kelola karya →</div>
+                        <div onClick={() => setCmsMenu('projects')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-[#F7F0F0]/75 border-[#D5DDD2]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>Total Karya Portofolio</div>
+                          <div className="text-3xl font-black mt-2 text-[#F2B50B]">{projects.length}</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>Klik untuk kelola karya →</div>
                         </div>
-                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#211832] border-white/10' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
-                          <div className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Total Artikel Blog</div>
-                          <div className="text-3xl font-black mt-2 text-[#5C3E94]">{blogs.length}</div>
-                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Klik untuk tulis artikel →</div>
+                        <div onClick={() => setCmsMenu('blogs')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-[#F7F0F0]/75 border-[#D5DDD2]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>Total Artikel Blog</div>
+                          <div className="text-3xl font-black mt-2 text-[#48A111]">{blogs.length}</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>Klik untuk tulis artikel →</div>
                         </div>
-                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#211832] border-white/10' : 'bg-[#EAECF0]/60 border-[#D0D5DD]'}`}>
-                          <div className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Pengalaman & Pendidikan</div>
-                          <div className="text-3xl font-black mt-2 text-[#FFC300]">
+                        <div onClick={() => setCmsMenu('resume')} className={`p-6 rounded-3xl border cursor-pointer card-hover-3d ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-[#F7F0F0]/75 border-[#D5DDD2]'}`}>
+                          <div className={`text-xs font-bold ${isDark ? 'text-[#F7F0F0]/70' : 'text-[#25671E]'}`}>Pengalaman & Pendidikan</div>
+                          <div className="text-3xl font-black mt-2 text-[#F2B50B]">
                             {experience.length + education.length}
                           </div>
-                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Klik untuk edit resume →</div>
+                          <div className={`text-[11px] mt-1 font-medium ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>Klik untuk edit resume →</div>
                         </div>
                       </div>
 
-                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
+                      <div className={`p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
                         <div className="flex items-center justify-between">
-                          <h3 className={`font-black text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>Karya Terbaru</h3>
-                          <button onClick={() => setCmsMenu('projects')} className="text-xs font-bold text-[#FFC300] hover:underline">
+                          <h3 className={`font-black text-sm ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>Karya Terbaru</h3>
+                          <button onClick={() => setCmsMenu('projects')} className={`text-xs font-bold hover:underline ${isDark ? 'text-[#F2B50B]' : 'text-[#25671E]'}`}>
                              + Tambah Karya
                           </button>
                         </div>
                         <div className="grid sm:grid-cols-2 gap-3">
                           {projects.slice(0, 4).map((p) => (
-                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-[#412B6B] border-white/10' : 'bg-[#EAECF0]/50 border-[#D0D5DD]'}`}>
+                            <div key={p.id} className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${isDark ? 'bg-[#25671E] border-white/15' : 'bg-[#F7F0F0]/70 border-[#D5DDD2]'}`}>
                               <div className="min-w-0">
-                                <div className="text-[11px] font-bold text-[#FFC300] truncate">{p.category}</div>
-                                <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{p.title}</div>
+                                <div className={`text-[11px] font-bold truncate ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>{p.category}</div>
+                                <div className={`text-xs font-bold truncate ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{p.title}</div>
                               </div>
-                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-[#211832] text-slate-200 shrink-0">
+                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-[#132B10] text-[#F7F0F0] shrink-0">
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -4166,18 +4166,17 @@ export default function App() {
                   {/* TAB 2: PROJECTS CRUD */}
                   {cmsMenu === 'projects' && (
                     <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
-                      <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
-                        <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingProject ? 'Edit Karya' : 'Tambah Karya Baru'}</h3>
+                      <form onSubmit={handleSaveProject} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
+                        <h3 className={`font-black text-base ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{editingProject ? 'Edit Karya' : 'Tambah Karya Baru'}</h3>
                         <input
                           type="text"
                           required
                           placeholder="Judul Karya"
                           value={projectForm.title}
                           onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
-                          {/* Kategori Fleksibel: Dropdown + Opsi Kustom */}
                           <div>
                             {!isCustomCategory ? (
                               <select
@@ -4190,12 +4189,12 @@ export default function App() {
                                     setProjectForm({ ...projectForm, category: e.target.value });
                                   }
                                 }}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                               >
                                 {cmsProjectCategories.map(cat => (
                                   <option key={cat} value={cat}>{cat}</option>
                                 ))}
-                                <option value="__NEW__" className="font-bold text-[#FFC300]">+ Tambah Kategori Baru...</option>
+                                <option value="__NEW__" className="font-bold text-[#F2B50B]">+ Tambah Kategori Baru...</option>
                               </select>
                             ) : (
                               <div className="flex items-center gap-1.5">
@@ -4206,7 +4205,7 @@ export default function App() {
                                   placeholder="Ketik Kategori Baru..."
                                   value={customCategoryInput}
                                   onChange={(e) => setCustomCategoryInput(e.target.value)}
-                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FFC300] ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#F2B50B] ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                                 />
                                 <button
                                   type="button"
@@ -4215,7 +4214,7 @@ export default function App() {
                                     setCustomCategoryInput('');
                                   }}
                                   title="Kembali ke pilihan"
-                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] text-slate-300 border-white/10' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
+                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] text-[#F7F0F0] border-white/15' : 'bg-white border-[#D5DDD2] text-[#25671E]'}`}
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -4228,7 +4227,7 @@ export default function App() {
                             placeholder="Tahun (misal: 2026)"
                             value={projectForm.year}
                             onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
                         <input
@@ -4236,26 +4235,26 @@ export default function App() {
                           placeholder="Subjudul Singkat"
                           value={projectForm.subtitle}
                           onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
                         <textarea
                           rows={3}
                           placeholder="Deskripsi Karya"
                           value={projectForm.description}
                           onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
 
                         {/* Upload Gambar */}
                         <div className="space-y-2">
-                          <label className={`block text-[11px] font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                          <label className={`block text-[11px] font-bold ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>
                             Gambar Preview Karya
                           </label>
                           {projectForm.image ? (
-                            <div className="relative rounded-2xl overflow-hidden border border-[#D0D5DD] h-36 bg-[#EAECF0] group">
+                            <div className="relative rounded-2xl overflow-hidden border border-[#D5DDD2] h-36 bg-[#F7F0F0] group">
                               <img src={projectForm.image} alt="Preview Karya" className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <label className="px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#F2B50B] text-[#132B10] text-xs font-bold cursor-pointer">
                                   Ganti Gambar
                                   <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
                                 </label>
@@ -4270,13 +4269,13 @@ export default function App() {
                             </div>
                           ) : (
                             <label className={`flex flex-col items-center justify-center h-28 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
-                              isDark ? 'border-white/10 hover:border-[#FFC300] bg-[#412B6B]' : 'border-[#D0D5DD] hover:border-[#FFC300] bg-[#EAECF0]/40'
+                              isDark ? 'border-white/15 hover:border-[#F2B50B] bg-[#25671E]' : 'border-[#D5DDD2] hover:border-[#48A111] bg-[#F7F0F0]/60'
                             }`}>
-                              <UploadCloud className="w-6 h-6 text-[#FFC300] mb-1" />
+                              <UploadCloud className={`w-6 h-6 mb-1 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                               <span className="text-xs font-bold">
                                 {isUploadingImage ? 'Mengoptimalkan Gambar...' : 'Klik untuk Upload Gambar Karya'}
                               </span>
-                              <span className={`text-[10px] ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>PNG, JPG, WEBP (Otomatis dikompres)</span>
+                              <span className={`text-[10px] ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>PNG, JPG, WEBP (Otomatis dikompres)</span>
                               <input type="file" accept="image/*" onChange={handleProjectImageUpload} className="hidden" />
                             </label>
                           )}
@@ -4287,14 +4286,14 @@ export default function App() {
                           placeholder="Tools (pisahkan koma: Adobe Illustrator, Figma)"
                           value={projectForm.tools}
                           onChange={(e) => setProjectForm({ ...projectForm, tools: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
                         <input
                           type="url"
                           placeholder="Link Proyek (https://s.id/...)"
                           value={projectForm.link}
                           onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
                         <div className="flex gap-2">
                           {editingProject && (
@@ -4309,7 +4308,7 @@ export default function App() {
                                   tools: '', link: '', image: '', featured: true, accentColor: 'from-orange-500 to-amber-500', year: '2026', rate: '5.0'
                                 });
                               }}
-                              className={`px-4 py-3 rounded-xl font-bold text-xs ${isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]'}`}
+                              className={`px-4 py-3 rounded-xl font-bold text-xs ${isDark ? 'bg-[#25671E] text-[#F7F0F0]/80' : 'bg-[#F7F0F0] text-[#25671E]'}`}
                             >
                               Batal
                             </button>
@@ -4317,7 +4316,7 @@ export default function App() {
                           <button
                             type="submit"
                             disabled={isTranslating}
-                            className="flex-1 py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs"
+                            className="flex-1 py-3 rounded-xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-black text-xs"
                           >
                             {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingProject ? 'Update Karya' : 'Simpan Karya ke Cloud')}
                           </button>
@@ -4326,15 +4325,15 @@ export default function App() {
 
                       <div className="lg:col-span-7 space-y-3">
                         {projects.map((p) => (
-                          <div key={p.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
+                          <div key={p.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
                             <div>
-                              <div className="text-xs font-bold text-[#FFC300]">{p.category} • {p.year}</div>
-                              <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{p.title}</div>
-                              <div className={`text-xs line-clamp-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{p.subtitle}</div>
+                              <div className={`text-xs font-bold ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>{p.category} • {p.year}</div>
+                              <div className={`font-bold text-sm ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{p.title}</div>
+                              <div className={`text-xs line-clamp-1 ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>{p.subtitle}</div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleEditProject(p)} className="p-2 rounded-lg bg-[#25671E] text-[#F7F0F0] hover:bg-[#48A111]"><Edit3 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteProject(p.id)} className="p-2 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -4345,18 +4344,17 @@ export default function App() {
                   {/* TAB 3: BLOGS CRUD */}
                   {cmsMenu === 'blogs' && (
                     <div className="grid lg:grid-cols-12 gap-6 animate-fade-up">
-                      <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
-                        <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingBlog ? 'Edit Artikel Blog' : 'Tulis Artikel Blog'}</h3>
+                      <form onSubmit={handleSaveBlog} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
+                        <h3 className={`font-black text-base ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{editingBlog ? 'Edit Artikel Blog' : 'Tulis Artikel Blog'}</h3>
                         <input
                           type="text"
                           required
                           placeholder="Judul Artikel"
                           value={blogForm.title}
                           onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
                         <div className="grid grid-cols-2 gap-2.5">
-                          {/* Kategori Fleksibel Blog */}
                           <div>
                             {!isBlogCustomCategory ? (
                               <select
@@ -4369,12 +4367,12 @@ export default function App() {
                                     setBlogForm({ ...blogForm, category: e.target.value });
                                   }
                                 }}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                               >
                                 {blogCategories.map(cat => (
                                   <option key={cat} value={cat}>{cat}</option>
                                 ))}
-                                <option value="__NEW__" className="font-bold text-[#FFC300]">+ Tambah Kategori Baru...</option>
+                                <option value="__NEW__" className="font-bold text-[#F2B50B]">+ Tambah Kategori Baru...</option>
                               </select>
                             ) : (
                               <div className="flex items-center gap-1.5">
@@ -4385,7 +4383,7 @@ export default function App() {
                                   placeholder="Ketik Kategori Baru..."
                                   value={blogCustomCategoryInput}
                                   onChange={(e) => setBlogCustomCategoryInput(e.target.value)}
-                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#FFC300] ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:border-[#F2B50B] ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                                 />
                                 <button
                                   type="button"
@@ -4394,7 +4392,7 @@ export default function App() {
                                     setBlogCustomCategoryInput('');
                                   }}
                                   title="Kembali ke pilihan"
-                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] text-slate-300 border-white/10' : 'bg-white border-[#D0D5DD] text-[#233D4D]'}`}
+                                  className={`p-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] text-[#F7F0F0] border-white/15' : 'bg-white border-[#D5DDD2] text-[#25671E]'}`}
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -4407,20 +4405,20 @@ export default function App() {
                             placeholder="Waktu Baca (5 Menit)"
                             value={blogForm.readTime}
                             onChange={(e) => setBlogForm({ ...blogForm, readTime: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
 
                         {/* Upload Cover Blog */}
                         <div className="space-y-1.5">
-                          <label className={`block text-[11px] font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                          <label className={`block text-[11px] font-bold ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>
                             Gambar Sampul Blog (Cover)
                           </label>
                           {blogForm.image ? (
-                            <div className="relative rounded-2xl overflow-hidden border border-[#D0D5DD] h-32 bg-[#EAECF0] group">
+                            <div className="relative rounded-2xl overflow-hidden border border-[#D5DDD2] h-32 bg-[#F7F0F0] group">
                               <img src={blogForm.image} alt="Cover Blog" className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <label className="px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer">
+                                <label className="px-3 py-1.5 rounded-xl bg-[#F2B50B] text-[#132B10] text-xs font-bold cursor-pointer">
                                   Ganti Sampul
                                   <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
                                 </label>
@@ -4435,9 +4433,9 @@ export default function App() {
                             </div>
                           ) : (
                             <label className={`flex flex-col items-center justify-center h-24 rounded-2xl border-2 border-dashed cursor-pointer transition-colors ${
-                              isDark ? 'border-white/10 hover:border-[#FFC300] bg-[#412B6B]' : 'border-[#D0D5DD] hover:border-[#FFC300] bg-[#EAECF0]/40'
+                              isDark ? 'border-white/15 hover:border-[#F2B50B] bg-[#25671E]' : 'border-[#D5DDD2] hover:border-[#48A111] bg-[#F7F0F0]/60'
                             }`}>
-                              <UploadCloud className="w-5 h-5 text-[#FFC300] mb-1" />
+                              <UploadCloud className={`w-5 h-5 mb-1 ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`} />
                               <span className="text-xs font-bold">Upload Gambar Sampul Blog</span>
                               <input type="file" accept="image/*" onChange={handleBlogCoverUpload} className="hidden" />
                             </label>
@@ -4449,14 +4447,14 @@ export default function App() {
                           placeholder="Ringkasan (Excerpt)"
                           value={blogForm.excerpt}
                           onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
 
                         {/* Isi Artikel */}
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
-                            <label className={`text-[11px] font-bold ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Isi Lengkap Artikel</label>
-                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FFC300]/15 text-[#FFC300] hover:bg-[#FFC300]/25 text-[11px] font-bold cursor-pointer transition-colors">
+                            <label className={`text-[11px] font-bold ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Isi Lengkap Artikel</label>
+                            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F2B50B]/20 text-[#F2B50B] hover:bg-[#F2B50B]/30 text-[11px] font-bold cursor-pointer transition-colors">
                               <ImageIcon className="w-3.5 h-3.5" />
                               <span>+ Sisipkan Gambar di Isi</span>
                               <input type="file" accept="image/*" onChange={handleBlogInlineImageUpload} className="hidden" />
@@ -4467,7 +4465,7 @@ export default function App() {
                             placeholder="Tulis isi artikel di sini..."
                             value={blogForm.content}
                             onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
 
@@ -4484,35 +4482,35 @@ export default function App() {
                                   readTime: '5 Menit', status: 'Completed', image: '', excerpt: '', content: ''
                                 });
                               }}
-                              className={`px-4 py-3 rounded-xl font-bold text-xs ${isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]'}`}
+                              className={`px-4 py-3 rounded-xl font-bold text-xs ${isDark ? 'bg-[#25671E] text-[#F7F0F0]/80' : 'bg-[#F7F0F0] text-[#25671E]'}`}
                             >
                               Batal
                             </button>
                           )}
-                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs">
+                          <button type="submit" disabled={isTranslating} className="flex-1 py-3 rounded-xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-black text-xs">
                             {isTranslating ? 'Menerjemahkan & Menyimpan...' : (editingBlog ? 'Update Artikel' : 'Terbitkan ke Cloud')}
                           </button>
                         </div>
                       </form>
                       <div className="lg:col-span-7 space-y-3">
                         {blogs.map((b) => (
-                          <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
+                          <div key={b.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
                             <div className="flex items-center gap-3 min-w-0">
                               {(b.image || b.translations?._coverImage) && (
                                 <img
                                   src={b.image || b.translations?._coverImage}
                                   alt={b.title}
-                                  className="w-12 h-12 rounded-xl object-cover shrink-0 border border-[#D0D5DD]"
+                                  className="w-12 h-12 rounded-xl object-cover shrink-0 border border-[#D5DDD2]"
                                 />
                               )}
                               <div className="min-w-0">
-                                <div className="text-xs text-[#5C3E94] font-bold">{b.category} • {b.date}</div>
-                                <div className={`font-bold text-sm truncate ${isDark ? 'text-white' : 'text-[#000000]'}`}>{b.title}</div>
+                                <div className="text-xs text-[#48A111] font-bold">{b.category} • {b.date}</div>
+                                <div className={`font-bold text-sm truncate ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{b.title}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleEditBlog(b)} className="p-2 rounded-lg bg-[#25671E] text-[#F7F0F0] hover:bg-[#48A111]"><Edit3 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteBlog(b.id)} className="p-2 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -4527,7 +4525,7 @@ export default function App() {
                         <button
                           onClick={() => setResumeSubTab('experience')}
                           className={`px-4 py-2 rounded-xl text-xs font-black ${
-                            resumeSubTab === 'experience' ? 'bg-[#FFC300] text-[#211832]' : (isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]')
+                            resumeSubTab === 'experience' ? 'bg-[#F2B50B] text-[#132B10]' : (isDark ? 'bg-[#132B10] text-[#F7F0F0]/80' : 'bg-[#F7F0F0] text-[#25671E]')
                           }`}
                         >
                           Pengalaman Kerja ({experience.length})
@@ -4535,7 +4533,7 @@ export default function App() {
                         <button
                           onClick={() => setResumeSubTab('education')}
                           className={`px-4 py-2 rounded-xl text-xs font-black ${
-                            resumeSubTab === 'education' ? 'bg-[#FFC300] text-[#211832]' : (isDark ? 'bg-[#412B6B] text-white/80' : 'bg-slate-200 text-[#233D4D]')
+                            resumeSubTab === 'education' ? 'bg-[#F2B50B] text-[#132B10]' : (isDark ? 'bg-[#132B10] text-[#F7F0F0]/80' : 'bg-[#F7F0F0] text-[#25671E]')
                           }`}
                         >
                           Pendidikan ({education.length})
@@ -4544,15 +4542,15 @@ export default function App() {
 
                       {resumeSubTab === 'experience' ? (
                         <div className="grid lg:grid-cols-12 gap-6">
-                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
-                            <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
+                          <form onSubmit={handleSaveExperience} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
+                            <h3 className={`font-black text-base ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{editingExp ? 'Edit Pengalaman' : 'Tambah Pengalaman'}</h3>
                             <input
                               type="text"
                               required
                               placeholder="Posisi / Jabatan"
                               value={expForm.role}
                               onChange={(e) => setExpForm({ ...expForm, role: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
                             <input
                               type="text"
@@ -4560,7 +4558,7 @@ export default function App() {
                               placeholder="Nama Instansi / Perusahaan"
                               value={expForm.company}
                               onChange={(e) => setExpForm({ ...expForm, company: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
                             <div className="grid grid-cols-2 gap-2.5">
                               <input
@@ -4568,14 +4566,14 @@ export default function App() {
                                 placeholder="Jenis (Penuh Waktu / Magang)"
                                 value={expForm.type}
                                 onChange={(e) => setExpForm({ ...expForm, type: e.target.value })}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                               />
                               <input
                                 type="text"
                                 placeholder="Periode (2022 - 2023)"
                                 value={expForm.period}
                                 onChange={(e) => setExpForm({ ...expForm, period: e.target.value })}
-                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                               />
                             </div>
                             <textarea
@@ -4583,22 +4581,22 @@ export default function App() {
                               placeholder="Deskripsi Tugas"
                               value={expForm.description}
                               onChange={(e) => setExpForm({ ...expForm, description: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
-                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs">
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-black text-xs">
                               Simpan Pengalaman ke Cloud
                             </button>
                           </form>
                           <div className="lg:col-span-7 space-y-3">
                             {experience.map((exp) => (
-                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
+                              <div key={exp.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
                                 <div>
-                                  <div className="text-xs text-[#FFC300] font-bold">{exp.period} • {exp.company}</div>
-                                  <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{exp.role}</div>
+                                  <div className={`text-xs font-bold ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>{exp.period} • {exp.company}</div>
+                                  <div className={`font-bold text-sm ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{exp.role}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleEditExperience(exp)} className="p-2 rounded-lg bg-[#25671E] text-[#F7F0F0] hover:bg-[#48A111]"><Edit3 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteExperience(exp.id)} className="p-2 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
                             ))}
@@ -4606,12 +4604,12 @@ export default function App() {
                         </div>
                       ) : (
                         <div className="grid lg:grid-cols-12 gap-6">
-                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
-                            <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>{editingEdu ? 'Edit Pendidikan' : 'Tambah Pendidikan'}</h3>
+                          <form onSubmit={handleSaveEducation} className={`lg:col-span-5 p-6 rounded-3xl border space-y-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
+                            <h3 className={`font-black text-base ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{editingEdu ? 'Edit Pendidikan' : 'Tambah Pendidikan'}</h3>
                             <select
                               value={eduForm.type}
                               onChange={(e) => setEduForm({ ...eduForm, type: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             >
                               <option value="Formal">Formal</option>
                               <option value="Non-Formal">Non-Formal</option>
@@ -4622,7 +4620,7 @@ export default function App() {
                               placeholder="Nama Institusi / Kampus"
                               value={eduForm.institution}
                               onChange={(e) => setEduForm({ ...eduForm, institution: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
                             <input
                               type="text"
@@ -4630,37 +4628,37 @@ export default function App() {
                               placeholder="Jurusan / Program"
                               value={eduForm.major}
                               onChange={(e) => setEduForm({ ...eduForm, major: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
                             <input
                               type="text"
                               placeholder="Periode (2020 - 2024)"
                               value={eduForm.period}
                               onChange={(e) => setEduForm({ ...eduForm, period: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
                             <textarea
                               rows={3}
                               placeholder="Deskripsi"
                               value={eduForm.description}
                               onChange={(e) => setEduForm({ ...eduForm, description: e.target.value })}
-                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                             />
-                            <button type="submit" className="w-full py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs">
+                            <button type="submit" className="w-full py-3 rounded-xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-black text-xs">
                               Simpan Pendidikan ke Cloud
                             </button>
                           </form>
                           <div className="lg:col-span-7 space-y-3">
                             {education.map((edu) => (
-                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
+                              <div key={edu.id} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
                                 <div>
-                                  <div className="text-xs text-[#5C3E94] font-bold">{edu.type} • {edu.period}</div>
-                                  <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-[#000000]'}`}>{edu.institution}</div>
-                                  <div className={`text-xs ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{edu.major}</div>
+                                  <div className="text-xs text-[#48A111] font-bold">{edu.type} • {edu.period}</div>
+                                  <div className={`font-bold text-sm ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>{edu.institution}</div>
+                                  <div className={`text-xs ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>{edu.major}</div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <button onClick={() => handleEditEducation(edu)} className="p-2 rounded-lg bg-[#412B6B] text-slate-200 hover:bg-[#5C3E94]"><Edit3 className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleEditEducation(edu)} className="p-2 rounded-lg bg-[#25671E] text-[#F7F0F0] hover:bg-[#48A111]"><Edit3 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteEducation(edu.id)} className="p-2 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </div>
                             ))}
@@ -4672,12 +4670,12 @@ export default function App() {
 
                   {/* TAB 5: PROFILE INFO */}
                   {cmsMenu === 'profile' && (
-                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#211832] border-white/10' : 'bg-white border-[#D0D5DD]'}`}>
-                      <h3 className={`font-black text-base ${isDark ? 'text-white' : 'text-[#000000]'}`}>Profil, Avatar Hero, Sampul & Favicon Tab Browser</h3>
+                    <form onSubmit={handleSaveProfileInfo} className={`p-6 rounded-3xl border space-y-4 animate-fade-up ${isDark ? 'bg-[#132B10] border-white/15' : 'bg-white border-[#D5DDD2]'}`}>
+                      <h3 className={`font-black text-base ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>Profil, Avatar Hero, Sampul & Favicon Tab Browser</h3>
                       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Avatar Hero Upload */}
-                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-white/20 bg-[#211832]' : 'border-[#D0D5DD] bg-white'}`}>
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/15 bg-[#25671E]' : 'border-[#D5DDD2] bg-[#F7F0F0]/60'}`}>
+                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center ${isDark ? 'border-white/20 bg-[#132B10]' : 'border-[#D5DDD2] bg-white'}`}>
                             <CleanCharacterAvatar
                               src={profile.avatar || "/avatar.png"}
                               alt="Preview Avatar Hero"
@@ -4685,8 +4683,8 @@ export default function App() {
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Karakter Hero (Utama)</span>
-                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
+                            <span className={`text-xs font-bold block ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>Karakter Hero (Utama)</span>
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2B50B] text-[#132B10] text-xs font-bold cursor-pointer hover:bg-[#D9A108] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
                               <span>{isUploadingImage ? 'Memproses...' : 'Upload Karakter Hero'}</span>
                               <input
@@ -4704,8 +4702,8 @@ export default function App() {
                         </div>
 
                         {/* About Me Cover Upload */}
-                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                          <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#5C3E94] ${isDark ? 'border-white/20' : 'border-[#D0D5DD]'}`}>
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/15 bg-[#25671E]' : 'border-[#D5DDD2] bg-[#F7F0F0]/60'}`}>
+                          <div className={`w-24 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#48A111] ${isDark ? 'border-white/20' : 'border-[#D5DDD2]'}`}>
                             {profile.aboutCover && !aboutCoverFailed ? (
                               <img
                                 src={profile.aboutCover}
@@ -4718,7 +4716,7 @@ export default function App() {
                             )}
                           </div>
                           <div className="space-y-1.5">
-                            <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Sampul About Me</span>
+                            <span className={`text-xs font-bold block ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>Sampul About Me</span>
                             <div className="flex flex-wrap items-center gap-1.5">
                               <input
                                 id="upload-about-cover-input"
@@ -4735,7 +4733,7 @@ export default function App() {
                               />
                               <label
                                 htmlFor="upload-about-cover-input"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2B50B] text-[#132B10] text-xs font-bold cursor-pointer hover:bg-[#D9A108] transition-colors"
                               >
                                 <UploadCloud className="w-3.5 h-3.5" />
                                 <span>{isUploadingImage ? 'Mengunggah...' : 'Upload Sampul'}</span>
@@ -4748,7 +4746,7 @@ export default function App() {
                                     setProfile(prev => ({ ...prev, aboutCover: '' }));
                                     showToast("Sampul About Me direset ke default.", "info");
                                   }}
-                                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 text-xs font-bold transition-colors"
+                                  className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 text-xs font-bold transition-colors"
                                 >
                                   Reset
                                 </button>
@@ -4758,17 +4756,17 @@ export default function App() {
                         </div>
 
                         {/* Favicon / Tab Icon Upload */}
-                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
-                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#211832] ${isDark ? 'border-white/20' : 'border-[#D0D5DD]'}`}>
+                        <div className={`flex items-center gap-4 p-4 rounded-2xl border ${isDark ? 'border-white/15 bg-[#25671E]' : 'border-[#D5DDD2] bg-[#F7F0F0]/60'}`}>
+                          <div className={`w-16 h-16 rounded-2xl overflow-hidden border shrink-0 flex items-center justify-center bg-[#132B10] ${isDark ? 'border-white/20' : 'border-[#D5DDD2]'}`}>
                             {profile.favicon && profile.favicon.startsWith('data:') ? (
                               <img src={profile.favicon} alt="Favicon Tab" className="w-10 h-10 object-contain" />
                             ) : (
-                              <span className="font-marker text-xl text-white"><span className="text-[#FFC300]">.</span>g</span>
+                              <span className="font-marker text-xl text-[#F7F0F0]"><span className="text-[#F2B50B]">.</span>g</span>
                             )}
                           </div>
                           <div className="space-y-1.5">
-                            <span className={`text-xs font-bold block ${isDark ? 'text-slate-200' : 'text-[#000000]'}`}>Ikon Tab Browser (Favicon)</span>
-                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
+                            <span className={`text-xs font-bold block ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>Ikon Tab Browser (Favicon)</span>
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2B50B] text-[#132B10] text-xs font-bold cursor-pointer hover:bg-[#D9A108] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
                               <span>Upload Ikon Tab</span>
                               <input
@@ -4787,17 +4785,17 @@ export default function App() {
                       </div>
 
                       {/* Background Music Manager in CMS */}
-                      <div className={`p-4 rounded-2xl border space-y-3 ${isDark ? 'border-white/10 bg-[#412B6B]' : 'border-[#D0D5DD] bg-[#EAECF0]/50'}`}>
+                      <div className={`p-4 rounded-2xl border space-y-3 ${isDark ? 'border-white/15 bg-[#25671E]' : 'border-[#D5DDD2] bg-[#F7F0F0]/60'}`}>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-xl bg-[#FFC300] text-[#211832] flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-xl bg-[#F2B50B] text-[#132B10] flex items-center justify-center shrink-0">
                               <Music className="w-4 h-4" />
                             </div>
                             <div>
-                              <span className={`text-xs font-bold block ${isDark ? 'text-white' : 'text-[#000000]'}`}>
+                              <span className={`text-xs font-bold block ${isDark ? 'text-[#F7F0F0]' : 'text-[#132B10]'}`}>
                                 Musik Latar Website (Background Audio)
                               </span>
-                              <span className={`text-[10px] ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>
+                              <span className={`text-[10px] ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>
                                 Unduh musik dari chat, lalu simpan sebagai <code className="font-mono font-bold">/music.mp3</code> di folder <code className="font-mono">public/</code> atau unggah langsung di sini.
                               </span>
                             </div>
@@ -4808,7 +4806,7 @@ export default function App() {
                             className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-colors ${
                               isMusicPlaying
                                 ? 'bg-rose-500 text-white'
-                                : 'bg-[#FFC300] text-[#211832] hover:bg-[#E6B000]'
+                                : 'bg-[#F2B50B] text-[#132B10] hover:bg-[#D9A108]'
                             }`}
                           >
                             {isMusicPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -4818,27 +4816,27 @@ export default function App() {
 
                         <div className="grid sm:grid-cols-3 gap-3 items-end">
                           <div>
-                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-white/70' : 'text-[#233D4D]'}`}>Judul Lagu</label>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Judul Lagu</label>
                             <input
                               type="text"
                               value={profile.bgMusicTitle || ''}
                               onChange={(e) => setProfile({ ...profile, bgMusicTitle: e.target.value })}
                               placeholder="Canvas Bloom — Theme"
-                              className={`w-full px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'}`}
                             />
                           </div>
                           <div>
-                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-white/70' : 'text-[#233D4D]'}`}>Path / URL Audio (.mp3 / .wav)</label>
+                            <label className={`block text-[11px] font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Path / URL Audio (.mp3 / .wav)</label>
                             <input
                               type="text"
                               value={profile.bgMusicUrl?.startsWith('data:') ? 'File Audio Terunggah (Embedded)' : (profile.bgMusicUrl || '')}
                               onChange={(e) => setProfile({ ...profile, bgMusicUrl: e.target.value })}
                               placeholder="/music.mp3 atau https://..."
-                              className={`w-full px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-[#211832] border-white/10 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'}`}
+                              className={`w-full px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'}`}
                             />
                           </div>
                           <div>
-                            <label className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#FFC300] text-[#211832] text-xs font-bold cursor-pointer hover:bg-[#E6B000] transition-colors">
+                            <label className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F2B50B] text-[#132B10] text-xs font-bold cursor-pointer hover:bg-[#D9A108] transition-colors">
                               <UploadCloud className="w-3.5 h-3.5" />
                               <span>Upload File Audio (MP3/WAV)</span>
                               <input
@@ -4854,62 +4852,62 @@ export default function App() {
 
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Judul Tab Browser (Title)</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Judul Tab Browser (Title)</label>
                           <input
                             type="text"
                             value={profile.siteTitle || ''}
                             onChange={(e) => setProfile({ ...profile, siteTitle: e.target.value })}
                             placeholder=".gudelz — Akhmad Aldi Portfolio"
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Nama Lengkap</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Nama Lengkap</label>
                           <input
                             type="text"
                             value={profile.name}
                             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Email Resmi</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Email Resmi</label>
                           <input
                             type="email"
                             value={profile.email}
                             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Nomor Telepon / WhatsApp</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Nomor Telepon / WhatsApp</label>
                           <input
                             type="text"
                             value={profile.phone}
                             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
                         <div>
-                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Alamat Domisili (Footer)</label>
+                          <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Alamat Domisili (Footer)</label>
                           <input
                             type="text"
                             value={profile.address}
                             onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                           />
                         </div>
                       </div>
                       <div>
-                        <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>Bio Singkat</label>
+                        <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-[#F7F0F0]/75' : 'text-[#25671E]'}`}>Bio Singkat</label>
                         <textarea
                           rows={4}
                           value={profile.bio}
                           onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#412B6B] border-white/10 text-white' : 'bg-[#EAECF0]/40 border-[#D0D5DD] text-[#000000]'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-xl border text-xs ${isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0]/60 border-[#D5DDD2] text-[#132B10]'}`}
                         />
                       </div>
-                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#FFC300] hover:bg-[#E6B000] text-[#211832] font-black text-xs shadow-md">
+                      <button type="submit" disabled={isTranslating} className="px-6 py-3 rounded-xl bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10] font-black text-xs shadow-md">
                         {isTranslating ? 'Menyimpan...' : 'Simpan Profil ke Cloud Supabase'}
                       </button>
                     </form>
@@ -4930,7 +4928,7 @@ export default function App() {
           <div
             onClick={(e) => e.stopPropagation()}
             className={`border rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-modal-spring ${
-              isDark ? 'bg-[#211832] border-white/15 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+              isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'
             }`}
           >
             <div className={`h-48 sm:h-52 bg-gradient-to-br ${activeProjectModal.accentColor} p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden`}>
@@ -4941,16 +4939,16 @@ export default function App() {
                   className="absolute inset-0 w-full h-full object-cover object-center opacity-75"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#211832]/95 via-[#211832]/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#132B10]/95 via-[#132B10]/40 to-transparent" />
               <button
                 onClick={() => setActiveProjectModal(null)}
-                className="relative z-10 self-end p-2 rounded-full bg-[#211832]/60 text-white hover:bg-black"
+                className="relative z-10 self-end p-2 rounded-full bg-[#132B10]/70 text-white hover:bg-black"
               >
                 <X className="w-4 h-4" />
               </button>
               <div className="relative z-10">
                 <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-                  isDark ? 'text-[#FFC300] bg-[#FFC300]/15 border-[#FFC300]/30' : 'text-white/90 bg-[#211832]/60 border-white/15'
+                  isDark ? 'text-[#F2B50B] bg-[#F2B50B]/20 border-[#F2B50B]/35' : 'text-[#F7F0F0] bg-[#132B10]/70 border-white/15'
                 }`}>
                   {activeProjectModal.category} • {activeProjectModal.year}
                 </span>
@@ -4961,19 +4959,19 @@ export default function App() {
             </div>
 
             <div className="p-5 sm:p-6 space-y-4">
-              <div className={`text-xs font-bold ${isDark ? 'text-[#FFC300]' : 'text-[#5C3E94]'}`}>
+              <div className={`text-xs font-bold ${isDark ? 'text-[#F2B50B]' : 'text-[#48A111]'}`}>
                 {getLocalized(activeProjectModal, 'subtitle')}
               </div>
-              <p className={`text-sm leading-relaxed ${isDark ? 'text-white/80' : 'text-[#233D4D]'}`}>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-[#F7F0F0]/85' : 'text-[#25671E]'}`}>
                 {getLocalized(activeProjectModal, 'description')}
               </p>
 
               <div>
-                <div className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-[#233D4D]'}`}>{t.toolsTech}</div>
+                <div className={`text-xs font-bold mb-2 ${isDark ? 'text-[#F7F0F0]/65' : 'text-[#25671E]'}`}>{t.toolsTech}</div>
                 <div className="flex flex-wrap gap-2">
                   {activeProjectModal.tools.map((tool, i) => (
                     <span key={i} className={`px-3 py-1 rounded-lg border text-xs font-semibold ${
-                      isDark ? 'bg-[#412B6B] border-white/10 text-slate-200' : 'bg-[#EAECF0] border-[#D0D5DD] text-[#233D4D]'
+                      isDark ? 'bg-[#25671E] border-white/15 text-[#F7F0F0]' : 'bg-[#F7F0F0] border-[#D5DDD2] text-[#25671E]'
                     }`}>
                       {tool}
                     </span>
@@ -4981,11 +4979,11 @@ export default function App() {
                 </div>
               </div>
 
-              <div className={`pt-4 border-t flex justify-end gap-3 ${isDark ? 'border-white/10' : 'border-[#D0D5DD]'}`}>
+              <div className={`pt-4 border-t flex justify-end gap-3 ${isDark ? 'border-white/10' : 'border-[#D5DDD2]'}`}>
                 <button
                   onClick={() => setActiveProjectModal(null)}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold ${
-                    isDark ? 'bg-[#412B6B] text-white' : 'bg-[#EAECF0] text-[#233D4D]'
+                    isDark ? 'bg-[#25671E] text-[#F7F0F0]' : 'bg-[#F7F0F0] text-[#25671E]'
                   }`}
                 >
                   {t.closeBtn}
@@ -4996,7 +4994,7 @@ export default function App() {
                     target="_blank"
                     rel="noreferrer"
                     className={`px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 text-xs transition-colors ${
-                      isDark ? 'bg-[#FFC300] hover:bg-[#E6B000] text-[#211832]' : 'bg-[#5C3E94] hover:bg-[#412B6B] text-white'
+                      isDark ? 'bg-[#F2B50B] hover:bg-[#D9A108] text-[#132B10]' : 'bg-[#25671E] hover:bg-[#48A111] text-[#F7F0F0]'
                     }`}
                   >
                     <span>{t.openProjectLink}</span>
@@ -5018,18 +5016,18 @@ export default function App() {
           <div
             onClick={(e) => e.stopPropagation()}
             className={`border rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto animate-modal-spring ${
-              isDark ? 'bg-[#211832] border-white/15 text-white' : 'bg-white border-[#D0D5DD] text-[#000000]'
+              isDark ? 'bg-[#132B10] border-white/15 text-[#F7F0F0]' : 'bg-white border-[#D5DDD2] text-[#132B10]'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border ${
-                isDark ? 'bg-[#FFC300]/15 text-[#FFC300] border-[#FFC300]/30' : 'bg-[#5C3E94]/15 text-[#5C3E94] border-[#5C3E94]/30'
+                isDark ? 'bg-[#F2B50B]/20 text-[#F2B50B] border-[#F2B50B]/35' : 'bg-[#48A111]/15 text-[#25671E] border-[#48A111]/30'
               }`}>
                 {activeBlogModal.category}
               </span>
               <button
                 onClick={() => setActiveBlogModal(null)}
-                className={`p-2 rounded-full ${isDark ? 'bg-[#412B6B] text-white' : 'bg-[#EAECF0] text-[#233D4D]'}`}
+                className={`p-2 rounded-full ${isDark ? 'bg-[#25671E] text-[#F7F0F0]' : 'bg-[#F7F0F0] text-[#25671E]'}`}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -5037,7 +5035,7 @@ export default function App() {
 
             <h2 className="text-2xl font-black leading-snug">{getLocalized(activeBlogModal, 'title')}</h2>
             <div className={`text-xs flex items-center gap-4 border-b pb-4 font-semibold ${
-              isDark ? 'border-white/10 text-white/60' : 'border-[#D0D5DD] text-[#233D4D]'
+              isDark ? 'border-white/10 text-[#F7F0F0]/65' : 'border-[#D5DDD2] text-[#25671E]'
             }`}>
               <span>{t.byAuthor} {profile.name}</span>
               <span>•</span>
@@ -5047,7 +5045,7 @@ export default function App() {
             </div>
 
             {(activeBlogModal.image || activeBlogModal.translations?._coverImage) && (
-              <div className="rounded-2xl overflow-hidden border border-[#D0D5DD] max-h-80">
+              <div className="rounded-2xl overflow-hidden border border-[#D5DDD2] max-h-80">
                 <img
                   src={activeBlogModal.image || activeBlogModal.translations?._coverImage}
                   alt={getLocalized(activeBlogModal, 'title')}
@@ -5057,7 +5055,7 @@ export default function App() {
             )}
 
             <div className={`text-sm sm:text-base leading-relaxed ${
-              isDark ? 'text-slate-200' : 'text-[#233D4D]'
+              isDark ? 'text-[#F7F0F0]/90' : 'text-[#25671E]'
             }`}>
               {renderRichBlogContent(getLocalized(activeBlogModal, 'content'))}
             </div>
